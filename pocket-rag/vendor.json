@@ -1,0 +1,45 @@
+{
+  "_note": "The four libraries this app is built on. Each entry pins an exact version, records the SHA-256 of the exact bytes this app was tested against, and gives the CDN URL those bytes came from. Run `python3 get-vendor.py` to pull them into vendor/ and the app will prefer the local copy over the CDN — that is what makes a genuinely air-gapped deployment possible.",
+  "libs": {
+    "pdf": {
+      "what": "pdf.js — reads PDFs, with per-item font sizes so headings can be inferred",
+      "file": "pdf.min.mjs",
+      "cdn": "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/pdf.min.mjs",
+      "sha256": "e0be3863c23c8af2305b16548febd58e7f8874a460253317d7771cddbc1c0f6d",
+      "bytes": 454669,
+      "precache": true
+    },
+    "pdfWorker": {
+      "what": "pdf.js worker — the actual page rasteriser and text extractor",
+      "file": "pdf.worker.min.mjs",
+      "cdn": "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/pdf.worker.min.mjs",
+      "sha256": "0613f41490dd6aaceed7a93fbbd38c85e6d6aa60474b6588c6e7709cfbe18cb3",
+      "bytes": 1262398,
+      "precache": true
+    },
+    "mammoth": {
+      "what": "mammoth — converts .docx to HTML, which preserves real heading levels",
+      "file": "mammoth.browser.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/mammoth@1.12.0/mammoth.browser.min.js",
+      "sha256": "5d4c0e7c9165d70b78f789c5274a2c7846d9e1c06ec19b69afa6ef45f789a3b9",
+      "bytes": 635882,
+      "precache": true
+    },
+    "transformers": {
+      "what": "transformers.js — runs the ONNX embedding model on WebGPU or WebAssembly",
+      "file": "transformers.min.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.min.js",
+      "sha256": "e74bd32ed4453369ebb0edcaa27f6bc6204004a949a0233cdb87b62dda8d6978",
+      "bytes": 558373,
+      "precache": true
+    },
+    "webllm": {
+      "what": "WebLLM — the optional on-device language model that writes the answer",
+      "file": "web-llm.js",
+      "cdn": "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/lib/index.js",
+      "sha256": "4917bf1b8969ca20a0b74b2773cbc9c14f77ce7427df491cd56c252f9a6070c7",
+      "bytes": 6560556,
+      "precache": false
+    }
+  }
+}

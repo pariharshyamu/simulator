@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1C2530">
+<meta name="description" content="Ask questions about your own PDF or Word document. The file never leaves your phone.">
+<title>Pocket RAG — ask your own document, privately</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<style>
+:root{
+  --ink:#1C2530; --ink2:#2A3644; --ink3:#3B4A5A;
+  --paper:#fff; --soft:#F1F4F7; --soft2:#E3EAF0; --line:#D3DDE5;
+  --ember:#D96A16; --ember-bg:#FCEDE0; --teal:#11707F; --teal-bg:#E1EFF1;
+  --red:#A8261E; --red-bg:#F9E7E5; --grn:#256B45; --grn-bg:#E4F0EA;
+  --amb:#9A6408; --amb-bg:#FBF0DC; --muted:#5C6B7A; --vio:#5B4A85; --vio-bg:#F4F1FA;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;background:#F7F9FB}
+body{font:15px/1.55 -apple-system,"Segoe UI",Roboto,Calibri,system-ui,sans-serif;color:var(--ink);
+  overscroll-behavior-y:none}
+h1,h2,h3{font-family:Cambria,Georgia,serif;margin:0}
+button,input,select,textarea{font-family:inherit}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:20;background:var(--ink);color:#C8D4DE;
+  border-bottom:2px solid var(--ember);padding:8px 12px calc(8px);
+  padding-top:calc(8px + env(safe-area-inset-top,0px))}
+.hrow{display:flex;align-items:center;gap:10px}
+header h1{font-size:16px;color:#fff;white-space:nowrap;flex:1}
+header h1 small{display:block;font:400 10px/1.3 inherit;color:#7E8E9C;font-family:inherit}
+.iconbtn{background:#22303E;border:1px solid #46586A;color:#C8D4DE;border-radius:9px;
+  width:38px;height:38px;font-size:17px;cursor:pointer;flex:0 0 auto}
+.iconbtn:active{background:#33455A}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.chip{background:#22303E;border:1px solid #46586A;border-radius:20px;padding:3px 10px;
+  font:600 10.5px/1.5 inherit;color:#9FB1C2;white-space:nowrap}
+.chip b{font-family:ui-monospace,Consolas,monospace;font-weight:700}
+.chip.ok{border-color:#2F7D50;background:rgba(37,107,69,.24);color:#8FD9AE}
+.chip.warn{border-color:#8A6420;background:rgba(154,100,8,.24);color:#EBBE6A}
+.chip.er{border-color:#8E3630;background:rgba(168,38,30,.26);color:#F09A92}
+
+/* ---------- layout ---------- */
+main{padding:12px 12px calc(96px + var(--safe-b));max-width:900px;margin:0 auto}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card>h3{font-size:15px;margin-bottom:9px}
+.note{background:var(--teal-bg);border:1px solid #C4DEE2;border-radius:10px;padding:11px 12px;font-size:13.5px;color:#1D5A64;margin-bottom:10px}
+.warn{background:var(--amb-bg);border:1px solid #EBD9B4;border-radius:10px;padding:11px 12px;font-size:13.5px;color:#6E4A0C;margin-bottom:10px}
+.bad{background:var(--red-bg);border:1px solid #EBCDCA;border-radius:10px;padding:11px 12px;font-size:13.5px;color:#7A1C16;margin-bottom:10px}
+.good{background:var(--grn-bg);border:1px solid #C9E0D3;border-radius:10px;padding:11px 12px;font-size:13.5px;color:#1B4E32;margin-bottom:10px}
+.small{font-size:12.5px;color:var(--muted)}
+.mono{font-family:ui-monospace,Consolas,monospace}
+
+/* ---------- drop zone ---------- */
+#drop{border:2px dashed var(--line);border-radius:14px;background:#fff;padding:26px 16px;text-align:center}
+#drop.over{border-color:var(--ember);background:var(--ember-bg)}
+#drop .big{font:700 19px/1.3 Cambria,Georgia,serif;margin-bottom:5px}
+#drop .sub{font-size:13px;color:var(--muted);margin-bottom:15px}
+.btn{background:var(--ember);color:#fff;border:0;border-radius:11px;padding:13px 20px;
+  font-size:15px;font-weight:600;cursor:pointer;min-height:46px}
+.btn:active{background:#C25E10}
+.btn.wide{display:block;width:100%}
+.btn.alt{background:var(--ink2)}
+.btn.gh{background:#fff;color:var(--ink2);border:1px solid var(--line)}
+.btn.sm{padding:9px 14px;font-size:13.5px;min-height:0;border-radius:9px}
+.btn:disabled{background:#B8C4CE;cursor:not-allowed}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btnrow .btn{flex:1;min-width:130px}
+
+/* ---------- progress ---------- */
+.bar{height:9px;background:var(--soft2);border-radius:6px;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;width:0%;background:var(--ember);transition:width .18s}
+.bar.tl i{background:var(--teal)}
+
+/* ---------- doc card ---------- */
+#docCard .fname{font:700 15px/1.35 Cambria,Georgia,serif;word-break:break-word}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:4px 0;border-bottom:1px dotted var(--line)}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--muted)} .kv .v{font-family:ui-monospace,Consolas,monospace;font-weight:700;text-align:right}
+
+/* ---------- ask ---------- */
+#askWrap{position:fixed;left:0;right:0;bottom:0;z-index:15;background:rgba(247,249,251,.96);
+  backdrop-filter:blur(8px);border-top:1px solid var(--line);
+  padding:9px 12px calc(9px + var(--safe-b))}
+#askRow{display:flex;gap:8px;max-width:900px;margin:0 auto}
+#q{flex:1;padding:13px 14px;border:2px solid var(--line);border-radius:12px;font-size:16px;
+  background:#fff;min-width:0}
+#q:focus{outline:none;border-color:var(--ember)}
+#ask{flex:0 0 auto;border-radius:12px;padding:0 18px}
+.sugg{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch}
+.sugg button{flex:0 0 auto;font-size:12.5px;padding:7px 13px;border-radius:18px;
+  border:1px solid var(--line);background:#fff;color:var(--ink3);white-space:nowrap}
+
+/* ---------- answer ---------- */
+.ans{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;margin-bottom:12px}
+.ans .h{padding:8px 13px;font:700 11px/1.5 inherit;letter-spacing:.6px;text-transform:uppercase;
+  display:flex;justify-content:space-between;gap:8px;align-items:center}
+.ans.ext .h{background:var(--teal-bg);color:var(--teal);border-bottom:1px solid #C4DEE2}
+.ans.gen .h{background:var(--grn-bg);color:var(--grn);border-bottom:1px solid #C9E0D3}
+.ans.raw .h{background:var(--red-bg);color:var(--red);border-bottom:1px solid #EBCDCA}
+.ans .b{padding:13px;font-size:15px;line-height:1.62;white-space:pre-wrap;word-wrap:break-word}
+.ans .f{padding:7px 13px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);
+  font-family:ui-monospace,Consolas,monospace;background:var(--soft)}
+.cite{background:var(--ember-bg);color:var(--ember);border-radius:5px;padding:1px 5px;
+  font-weight:700;font-size:12px;cursor:pointer}
+.cursor{display:inline-block;width:8px;height:16px;background:var(--ember);vertical-align:-2px;
+  animation:bl .9s steps(2) infinite}
+@keyframes bl{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+/* ---------- hits ---------- */
+.hit{border:1px solid var(--line);border-radius:11px;background:#fff;margin-bottom:8px;overflow:hidden}
+.hit .hh{display:flex;gap:9px;align-items:center;padding:10px 12px;background:var(--soft);cursor:pointer}
+.hit .hh .n{font:700 12px/1 ui-monospace,Consolas,monospace;color:#fff;background:var(--ember);
+  border-radius:6px;padding:5px 7px;flex:0 0 auto}
+.hit .hh .ti{flex:1;min-width:0;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.hit .hh .ti span{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+.hit .hh .sc{font:700 12px/1 ui-monospace,Consolas,monospace;color:var(--teal);flex:0 0 auto}
+.hit .hb{padding:11px 12px;font-size:13.5px;line-height:1.6;color:#33414F;white-space:pre-wrap;
+  border-top:1px solid var(--line);max-height:44vh;overflow:auto}
+.hit .hb mark{background:#FCE3C4;color:#6E3B08;border-radius:3px;padding:0 2px}
+
+/* ---------- sheet ---------- */
+#sheet{position:fixed;inset:0;z-index:40;background:rgba(12,18,25,.5);display:none}
+#sheet.on{display:block}
+#sheetIn{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow:auto;background:#F7F9FB;
+  border-radius:18px 18px 0 0;padding:8px 14px calc(24px + var(--safe-b))}
+#sheetIn .grab{width:40px;height:4px;background:var(--line);border-radius:3px;margin:6px auto 12px}
+#sheetIn h2{font-size:18px;margin-bottom:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--ink2);color:#fff;font-weight:600;font-size:11.5px}
+td.num{text-align:right;font-family:ui-monospace,Consolas,monospace}
+tbody tr:nth-child(even){background:#F7FAFC}
+select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15px}
+label.fld{display:block;font-size:13px;font-weight:600;margin:12px 0 5px}
+.tier{display:flex;gap:8px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.tier:last-child{border-bottom:0}
+.tier .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;margin-top:5px;background:#C3CDD6}
+.tier .dot.on{background:var(--grn)} .tier .dot.off{background:var(--red)}
+.tier b{display:block;font-size:13.5px} .tier span{font-size:12.3px;color:var(--muted)}
+ol,ul{margin:6px 0 6px 20px;padding:0} li{margin-bottom:5px}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+
+@media(min-width:760px){
+  main{padding:16px 16px 130px}
+  .cols{display:flex;gap:14px;align-items:flex-start}
+  .cols>*{flex:1;min-width:0}
+  #drop{padding:40px 24px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <h1>Pocket RAG<small>your document never leaves this device</small></h1>
+    <button class="iconbtn" id="btnSheet" aria-label="Settings and device report">⚙</button>
+  </div>
+  <div class="chips">
+    <span class="chip ok" id="chPriv">🔒 on-device</span>
+    <span class="chip" id="chGPU">compute …</span>
+    <span class="chip" id="chEmb">search off</span>
+    <span class="chip" id="chLLM">writer off</span>
+  </div>
+</header>
+
+<main>
+  <div id="empty">
+    <div id="drop">
+      <div class="big">Open a document</div>
+      <div class="sub">PDF, Word (.docx), text or Markdown.<br>It is read inside this browser and never uploaded.</div>
+      <button class="btn" id="btnPick">Choose a file</button>
+      <input type="file" id="file" accept=".pdf,.docx,.txt,.md,.markdown,application/pdf,text/plain" hidden>
+      <div style="margin-top:14px"><button class="btn gh sm" id="btnSample">or try a sample document</button></div>
+    </div>
+    <div class="note" style="margin-top:12px">
+      <b>How to check the claim.</b> Load this page, then turn on flight mode, then open your file.
+      Everything still works. Nothing was uploaded, because there is nowhere to upload it to — this is a
+      static page with no server behind it.
+    </div>
+  </div>
+
+  <div id="loading" style="display:none">
+    <div class="card">
+      <h3 id="loadTitle">Working…</h3>
+      <div class="bar"><i id="loadBar"></i></div>
+      <div class="small" id="loadMsg">…</div>
+    </div>
+  </div>
+
+  <div id="workspace" style="display:none">
+    <div class="card" id="docCard"></div>
+    <div id="answers"></div>
+    <div id="hitsWrap" style="display:none">
+      <h3 style="font-size:14px;margin:4px 2px 8px">Passages the answer came from</h3>
+      <div id="hits"></div>
+    </div>
+  </div>
+</main>
+
+<div id="askWrap" style="display:none">
+  <div class="sugg" id="sugg"></div>
+  <div id="askRow">
+    <input id="q" placeholder="Ask about this document…" autocomplete="off" enterkeyhint="search">
+    <button class="btn" id="ask">Ask</button>
+  </div>
+</div>
+
+<div id="sheet"><div id="sheetIn"><div class="grab"></div><div id="sheetBody"></div></div></div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
