@@ -1,5 +1,7 @@
 # AI for Power Plants — simulators, teaching artefacts and a local RAG bench
 
+### → **[pariharshyamu.github.io/simulator](https://pariharshyamu.github.io/simulator/)**
+
 Working software written for a one-day session at the **MAHAGENCO Training Centre,
 Nashik**, for engineers from Nashik (3×210 MW), Koradi (3×660 MW), Khaperkheda
 (2×500 and 4×210 MW), Bhusawal (2×660 MW) and Paras (2×250 MW).
@@ -20,26 +22,42 @@ Presenter and author: **S. H. Parihar** — 16 years in the power sector; author
 | **Predictive Maintenance Simulator** | The full pipeline from sensor to signed work order, in eight stages across five equipment cases, with a 3-D model of the machine that degrades as you scrub through 200 days. | `dist/MAHAGENCO_PdM_Simulator.html` |
 | **AI Simulation Lab** | Eight self-contained models built on the plant's own June 2026 figures — heat rate decomposition, auxiliary power, mill scheduling, anomaly detection and more. | `dist/MAHAGENCO_AI_Simulation_Lab.html` |
 | **Local RAG Bench** | A retrieval-augmented generation system with a **real** ONNX embedding model and an optional local language model, running entirely in the browser on WebGPU. Air-gapped after the first fetch. | `rag-bench/` — see its own README |
+| **Pocket RAG** | The same idea with no curated corpus and no server at all: **you** open a PDF or Word file on your phone, and it is parsed, chunked, embedded, searched and answered on the device. A static site for GitHub Pages or Vercel; installs as a PWA and works in flight mode. | `pocket-rag/` — see its own README |
 
 The first three are single HTML files. Double-click and they run — no server, no
 install, no network. The RAG bench is the exception: it loads WebAssembly and ES
 modules, so it has to be served over http, and it ships with a launcher that does that.
+
+Everything except the RAG bench is live at
+**[pariharshyamu.github.io/simulator](https://pariharshyamu.github.io/simulator/)**.
+The bench needs several hundred megabytes of model weights that are not in this
+repository, so it stays a clone-and-run affair.
+
+**On Android phones:** run the bench with `python serve.py --lan` and the retrieval
+side works over the local Wi-Fi — measured on 412 px and 320 px screens. Generation
+does not, and cannot: browsers only grant WebGPU on a secure origin, and a bare
+`http://` LAN address is not one. See `rag-bench/README.md` for the measurements.
 
 ---
 
 ## Layout
 
 ```
-dist/            the built artefacts — open these
-theatre/         source for the Algorithm Anatomy Theatre  (9 files)
-pdm-simulator/   source for the predictive-maintenance simulator
-lab/             source for the simulation lab
-rag-bench/       the local WebGPU RAG bench (its own README inside)
-deck/            slides.json and the pptxgenjs generator for the 117-slide deck
-course/          the 308-page course material, the handouts, and the June 2026 data
-docs/            screenshots
-tools/build.js   assembles dist/ from source
-vendor/          three.js, bundled as a global for inlining
+index.html            the landing page GitHub Pages serves
+dist/                 the built artefacts — open these
+theatre/              source for the Algorithm Anatomy Theatre  (9 files)
+pdm-simulator/        source for the predictive-maintenance simulator
+lab/                  source for the simulation lab
+rag-bench/            the local WebGPU RAG bench (its own README inside)
+pocket-rag/           the on-device PWA: open your own document on a phone
+deck/                 slides.json and the pptxgenjs generator for the 117-slide deck
+course/               the 308-page course material, the handouts, and the June 2026 data
+docs/                 screenshots
+vendor/               three.js, bundled as a global for inlining
+tools/build.js        assembles dist/ from source
+tools/prepublish.js   the gate — nothing is published until this exits 0
+tools/serve-subpath.py serves the repo under /simulator/, the way Pages does
+THIRD-PARTY.md        every library, version and licence
 ```
 
 ## Building
@@ -59,6 +77,33 @@ For the deck: `node deck/build_deck.js` (needs `npm i pptxgenjs`).
 QA scripts live beside each artefact — `node theatre/qa-screenshots.js` and friends
 drive the built file through Playwright, capture every state, and fail on any console
 error. They expect the built file in the working directory.
+
+## Before publishing
+
+```
+node tools/prepublish.js            # ~2 s
+node tools/prepublish.js --full     # ...and drive the deployed site in a browser
+```
+
+The gate is made of checks that have each already caught something real in this
+repository, so none of them is theatre:
+
+| | What it stops |
+|---|---|
+| **secrets** | GitHub push protection once rejected a push of this repo over a 32-character alphanumeric literal *inside a minified bundle*. A false positive still blocks a push, so the gate looks for what the scanner looks for — and that is why Pocket RAG's libraries are pinned in `vendor.json` and fetched, rather than committed. |
+| **weight** | model weights, logs, `node_modules`, anything over 25 MB, anything both gitignored and tracked. |
+| **subpath** | the site is served from `/simulator/`, not `/`. One root-absolute `src="/…"` works perfectly on localhost and 404s only once deployed. Also checks the web app manifest's `start_url` and `scope`. |
+| **assets** | every relative reference resolves to a file that exists. |
+| **worker** | the service worker's precache list must be true, or install fails silently and the PWA is quietly not offline-capable. |
+| **libraries** | every CDN URL pinned to an exact version, with a SHA-256 and a byte count. |
+| **privacy** | no container paths, no unreviewed addresses. Findings a human has looked at and accepted live in an allowlist that has to state *why*. |
+| **attribution** | `THIRD-PARTY.md` must name every library, and every version pinned in `vendor.json` must appear in it. |
+| **Pages** | `.nojekyll`, a root `index.html`, no filenames a static host will mangle, and nothing depending on cross-origin isolation — which Pages cannot provide. |
+| **reproducibility** | the three shipped artefacts must rebuild byte-identically from source. |
+
+`--full` additionally serves the repository under `/simulator/` and drives the landing
+page, all three artefacts and Pocket RAG — twice, once with self-hosted libraries and
+once resolved to the CDN — through Playwright.
 
 ---
 

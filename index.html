@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI for Power Plants — MAHAGENCO Training Centre, Nashik</title>
+<meta name="description" content="Six working browser artefacts from a one-day session on AI for thermal power plants. Everything runs on your own machine.">
+<meta name="theme-color" content="#1C2530">
+<style>
+:root{
+  --ink:#1C2530; --ink2:#3A4757; --mut:#6B7A8C; --line:#DDE4EC;
+  --bg:#F7F9FB; --card:#FFFFFF; --acc:#1F5C8B; --hot:#A8261E; --good:#256B45;
+  --shadow:0 1px 2px rgba(28,37,48,.06),0 8px 24px rgba(28,37,48,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header{background:var(--ink);color:#fff;padding:44px 0 40px}
+header .wrap{max-width:980px}
+h1{margin:0 0 8px;font-size:29px;line-height:1.2;letter-spacing:-.4px;font-weight:650}
+header p{margin:0;color:#B9C6D4;font-size:15px;max-width:62ch}
+header .who{margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);
+  color:#8FA2B5;font-size:13.5px;max-width:62ch}
+header .who b{color:#DCE6EF;font-weight:600}
+
+.claim{background:#12303F;color:#CFE3F0;font-size:14px;padding:14px 0}
+.claim .wrap{display:flex;gap:10px;align-items:flex-start}
+.claim b{color:#fff}
+
+section{padding:38px 0 6px}
+h2{font-size:13px;letter-spacing:.10em;text-transform:uppercase;color:var(--mut);
+   margin:0 0 16px;font-weight:700}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){ .grid{grid-template-columns:1fr} h1{font-size:24px} }
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.card h3{margin:0 0 6px;font-size:17.5px;font-weight:650;letter-spacing:-.2px}
+.card .sub{color:var(--acc);font-size:12.5px;font-weight:600;letter-spacing:.02em;margin:0 0 10px}
+.card p{margin:0 0 16px;color:var(--ink2);font-size:14.5px;flex:1}
+.card p em{color:var(--ink);font-style:italic;font-weight:600}
+.go{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
+  background:var(--ink);color:#fff;text-decoration:none;font-size:14px;font-weight:600;
+  padding:9px 16px;border-radius:9px;transition:background .15s}
+.go:hover{background:#2C3B4D}
+.go.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.go.alt:hover{background:#F2F5F8}
+.go .arr{opacity:.6}
+
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:3px 8px;border-radius:20px;margin-left:8px;vertical-align:2px}
+.tag.new{background:#E8F3EC;color:var(--good)}
+.tag.local{background:#FBEEEC;color:var(--hot)}
+
+ul.files{list-style:none;padding:0;margin:0;border:1px solid var(--line);
+  border-radius:14px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+ul.files li{display:flex;align-items:center;gap:12px;padding:13px 18px;border-top:1px solid var(--line);font-size:14.5px}
+ul.files li:first-child{border-top:0}
+ul.files a{color:var(--ink);text-decoration:none;font-weight:600}
+ul.files a:hover{color:var(--acc);text-decoration:underline}
+ul.files .sz{margin-left:auto;color:var(--mut);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+ul.files .kind{display:inline-block;min-width:44px;font-size:10.5px;font-weight:700;letter-spacing:.05em;
+  color:var(--mut);border:1px solid var(--line);border-radius:5px;padding:2px 5px;text-align:center}
+
+.finding{background:#FFF8E9;border:1px solid #EBDCB8;border-left:4px solid #C9962C;
+  border-radius:10px;padding:18px 20px;margin:6px 0 0}
+.finding p{margin:0 0 10px;font-size:14.5px;color:#4A3D22}
+.finding p:last-child{margin:0}
+.finding b{color:#7A5A12}
+
+.note{color:var(--mut);font-size:13.5px;margin:14px 0 0;max-width:70ch}
+.note code{background:#EDF1F5;border-radius:4px;padding:1px 5px;font-size:12.5px}
+
+footer{margin-top:44px;padding:26px 0 40px;border-top:1px solid var(--line);
+  color:var(--mut);font-size:13px}
+footer a{color:var(--acc)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>AI for Power Plants</h1>
+    <p>Working software from a one-day session at the MAHAGENCO Training Centre, Nashik, for
+       engineers from Nashik, Koradi, Khaperkheda, Bhusawal and Paras.</p>
+    <div class="who">
+      <b>S. H. Parihar</b> — 16 years in the power sector; author of <i>Lean AI</i>,
+      <i>Learn the English that AI Understands</i> and <i>AI for Busy Parents</i>.
+    </div>
+  </div>
+</header>
+
+<div class="claim"><div class="wrap">
+  <span>Everything on this page runs in <b>your</b> browser. No API key, no account, no server doing
+  the work. Every number on every screen is computed on the machine in front of you.</span>
+</div></div>
+
+<div class="wrap">
+
+<section>
+  <h2>Open in the browser</h2>
+  <div class="grid">
+
+    <div class="card">
+      <h3>Algorithm Anatomy Theatre</h3>
+      <div class="sub">Six 3-D modules · 924 KB</div>
+      <p>Opens up the machinery of k-nearest neighbours, PCA, gradient descent, a neural network,
+         retrieval and k-means. One real reading — an ID fan bearing at 74.2&nbsp;°C — is followed
+         through all six, so you watch the same number become a decision six different ways.</p>
+      <a class="go" href="dist/MAHAGENCO_Algorithm_Theatre.html">Open the Theatre <span class="arr">→</span></a>
+    </div>
+
+    <div class="card">
+      <h3>Predictive Maintenance Simulator</h3>
+      <div class="sub">Eight stages, five equipment cases · 820 KB</div>
+      <p>The whole path from a sensor reading to a signed work order, with a 3-D model of the machine
+         that visibly degrades as you scrub through 200 days. Shows where the money is, and where
+         the false alarms come from.</p>
+      <a class="go" href="dist/MAHAGENCO_PdM_Simulator.html">Open the simulator <span class="arr">→</span></a>
+    </div>
+
+    <div class="card">
+      <h3>AI Simulation Lab</h3>
+      <div class="sub">Eight models on real June 2026 figures · 144 KB</div>
+      <p>Heat rate decomposition, auxiliary power, mill scheduling, anomaly detection and more —
+         built on the stations' own numbers, not a textbook dataset. Change an input and the
+         crore-rupee consequence moves with it.</p>
+      <a class="go" href="dist/MAHAGENCO_AI_Simulation_Lab.html">Open the lab <span class="arr">→</span></a>
+    </div>
+
+    <div class="card">
+      <h3>Pocket RAG <span class="tag new">on your phone</span></h3>
+      <div class="sub">Bring your own document · installs as an app</div>
+      <p>Open a PDF or Word file <em>on your own phone</em>. It is parsed, split into passages,
+         embedded and searched on the device. The file is never uploaded — there is nowhere for it
+         to go. Add it to your home screen and it works in flight mode.</p>
+      <a class="go" href="pocket-rag/">Open Pocket RAG <span class="arr">→</span></a>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Run on your own machine</h2>
+  <div class="card">
+    <h3>Local RAG Bench <span class="tag local">needs a local server</span></h3>
+    <div class="sub">A real ONNX embedding model on WebGPU, over 1,302 chunks of plant material</div>
+    <p>Retrieval-augmented generation with a genuine embedding model and an optional local language
+       model, measured rather than asserted: 31 hand-marked questions, recall@5 of 84% dense, 84%
+       keyword, <b>90% hybrid</b>, median query 43–48&nbsp;ms. It is the one thing here that will not
+       run from this page — it loads several hundred megabytes of model weights from disk, so it ships
+       with a launcher instead.</p>
+    <a class="go alt" href="https://github.com/pariharshyamu/simulator/tree/main/rag-bench">Read how to run it <span class="arr">→</span></a>
+  </div>
+  <p class="note">Clone the repository, then <code>cd rag-bench &amp;&amp; python3 get-models.py small &amp;&amp;
+     python3 serve.py</code>. Add <code>--lan</code> and phones on the same Wi-Fi can use the retrieval
+     side; generation needs a secure origin, which a bare LAN address is not.</p>
+</section>
+
+<section>
+  <h2>Course material</h2>
+  <ul class="files">
+    <li><span class="kind">PDF</span><a href="dist/AI_in_Power_Plants_MAHAGENCO_Course_Material.pdf">Course material — 308 pages</a><span class="sz">4.4 MB</span></li>
+    <li><span class="kind">DOCX</span><a href="dist/AI_in_Power_Plants_MAHAGENCO_Course_Material.docx">Course material, editable</a><span class="sz">363 KB</span></li>
+    <li><span class="kind">PDF</span><a href="dist/AI_in_Power_Plants_MAHAGENCO_Deck.pdf">Slide deck — 117 slides</a><span class="sz">2.1 MB</span></li>
+    <li><span class="kind">PPTX</span><a href="dist/AI_in_Power_Plants_MAHAGENCO_Deck.pptx">Slide deck, editable</a><span class="sz">3.8 MB</span></li>
+    <li><span class="kind">XLSX</span><a href="dist/MAHAGENCO_June2026_Plant_Dataset.xlsx">June 2026 plant dataset</a><span class="sz">21 KB</span></li>
+  </ul>
+</section>
+
+<section>
+  <h2>The finding that runs through all of it</h2>
+  <div class="finding">
+    <p><b>Net heat rate already contains auxiliary power.</b> Decompose it and Nashik's boiler and
+       turbine are <i>beating</i> the norm — 2,440 against 2,458 kcal/kWh gross — while the entire
+       50 kcal/kWh penalty comes from auxiliary consumption at 12.96% against a norm of 10.75%.
+       Koradi 8-10 is the mirror image: a genuine 176 kcal/kWh thermodynamic gap.</p>
+    <p>The two effects overlap by construction, so the <b>₹56.35 crore heat-rate gap and the
+       ₹32.91 crore auxiliary excess must never be added together.</b> Getting this wrong is the
+       most expensive arithmetic error available in a station review.</p>
+  </div>
+  <p class="note">Figures from the MAHAGENCO June-2026 energy bill, the provisional Part-I FSA bill
+     including the F10 ECR calculation, and the MERC merit-order dispatch stack for July 2026.
+     The ID fan sensor data inside the Theatre and the simulator is synthetic — a teaching artefact
+     needs a fault whose true onset date is known exactly — and is labelled as such wherever it appears.</p>
+</section>
+
+<footer>
+  <div class="wrap" style="padding:0">
+    Source, build scripts, QA harnesses and the honest notes about what is measured and what is not:
+    <a href="https://github.com/pariharshyamu/simulator">github.com/pariharshyamu/simulator</a>.
+    Third-party code is listed in
+    <a href="https://github.com/pariharshyamu/simulator/blob/main/THIRD-PARTY.md">THIRD-PARTY.md</a>.
+  </div>
+</footer>
+
+</div>
+</body>
+</html>
