@@ -35,6 +35,50 @@ is missing, any static web server pointed at this folder will do.
 
 ---
 
+## On a phone
+
+Engineers will ask. The short answer: **retrieval works on Android, generation does not.**
+
+Start the server with `--lan` and it prints the address to type into the phone:
+
+```
+python serve.py --lan          # or  start-windows.bat --lan
+```
+
+Both devices must be on the same Wi-Fi. Without `--lan` the server listens on the
+loopback interface only and a phone cannot reach it at all.
+
+What works on the phone: the full retrieval side — real 384-dimension query
+embedding, hybrid dense + BM25 over all 1,302 chunks, the retrieved passages with
+citations, the retrieval-detail table, the embedding map and the acceptance bench.
+Tested on 412 px and 320 px viewports; the layout reflows and nothing overflows.
+
+What does not work, and why it is not the phone's fault:
+
+> A browser grants WebGPU, SharedArrayBuffer and the Cache API only on a **secure
+> origin**. `http://localhost` counts as secure. `http://192.168.1.42:8181` does
+> **not**. Measured at a bare LAN IP: `isSecureContext` false, `navigator.gpu`
+> undefined, `SharedArrayBuffer` undefined, `caches` undefined.
+
+So over plain HTTP on the LAN the phone gets single-threaded WASM, no GPU, and
+re-fetches the 34 MB embedding model on every page load. Retrieval still runs
+because the code falls back cleanly; generation is simply unavailable.
+
+Three further reasons not to plan on generation from a phone even with HTTPS:
+
+- All three offered models are `q4f16`, which needs the WebGPU `shader-f16` feature.
+  It depends on a Vulkan capability that Qualcomm/Adreno drivers do not expose — and
+  most Android handsets are Snapdragon.
+- 0.5 to 1.2 GB of weights in a mobile browser tab is beyond what Chrome on Android
+  will reliably hold, and mobile `maxStorageBufferBindingSize` is often 128–256 MB.
+- Even where it loads, decode is slow and the handset throttles within a minute.
+
+**Use the phone as a second screen for retrieval, and drive generation from the
+laptop.** That is a good split for a training room anyway: the projector shows the
+grounded-versus-ungrounded comparison while engineers search the library themselves.
+
+---
+
 ## Two tiers
 
 | | What it needs | What you get |

@@ -5,10 +5,27 @@ Serves this folder on http://localhost:8181 with the two headers ONNX Runtime
 needs to use multiple CPU threads (cross-origin isolation).  Nothing is sent
 anywhere: this only makes the browser willing to load local files as modules.
 """
-import http.server, socketserver, os, sys, webbrowser, threading
+import http.server, socketserver, os, sys, socket, webbrowser, threading
 
 PORT = int(os.environ.get("PORT", "8181"))
 ROOT = os.path.dirname(os.path.abspath(__file__))
+
+# By default we listen on the loopback interface only. Pass --lan (or set
+# HOST=0.0.0.0) to let phones and other machines on the same Wi-Fi reach it.
+LAN  = "--lan" in sys.argv or os.environ.get("HOST") == "0.0.0.0"
+HOST = "0.0.0.0" if LAN else "127.0.0.1"
+
+
+def lan_ip():
+    """Best guess at this machine's address on the local network."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("10.255.255.255", 1))   # no packets are sent
+        return s.getsockname()[0]
+    except Exception:
+        return None
+    finally:
+        s.close()
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -45,15 +62,26 @@ class Server(socketserver.ThreadingTCPServer):
 
 if __name__ == "__main__":
     url = f"http://localhost:{PORT}/"
-    print("=" * 62)
+    print("=" * 68)
     print("  MAHAGENCO — Local RAG Bench")
     print("  serving:", ROOT)
     print("  open   :", url)
+    if LAN:
+        ip = lan_ip()
+        print("  phones :", f"http://{ip}:{PORT}/" if ip else "(could not detect this machine's LAN address)")
+        print()
+        print("  Note: a browser only grants WebGPU, SharedArrayBuffer and the")
+        print("  model cache on a SECURE origin. localhost counts as secure; a")
+        print("  bare http:// IP address does not. So on a phone the retrieval")
+        print("  side works, but generation is unavailable and the embedding")
+        print("  model is re-fetched on every load.")
+    else:
+        print("  phones : not reachable — restart with  python serve.py --lan")
     print("  stop   : Ctrl-C")
-    print("=" * 62)
+    print("=" * 68)
     threading.Timer(1.2, lambda: webbrowser.open(url)).start()
     try:
-        with Server(("127.0.0.1", PORT), Handler) as httpd:
+        with Server((HOST, PORT), Handler) as httpd:
             httpd.serve_forever()
     except KeyboardInterrupt:
         print("\nstopped.")
