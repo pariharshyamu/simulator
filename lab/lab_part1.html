@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAHAGENCO AI Simulation Lab</title>
+<style>
+:root{
+  --ink:#1C2530; --ink2:#2A3644; --ink3:#3B4A5A;
+  --paper:#fff; --soft:#F1F4F7; --soft2:#E3EAF0; --line:#D3DDE5;
+  --ember:#D96A16; --ember-bg:#FCEDE0; --teal:#11707F; --teal-bg:#E1EFF1;
+  --red:#A8261E; --red-bg:#F9E7E5; --grn:#256B45; --grn-bg:#E4F0EA;
+  --amb:#9A6408; --amb-bg:#FBF0DC; --muted:#5C6B7A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{font:14px/1.5 Calibri,Carlito,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:#F7F9FB;display:flex}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;margin:0}
+button,input,select{font-family:inherit}
+
+/* ---------- sidebar ---------- */
+#side{width:250px;flex:0 0 250px;background:var(--ink);color:#C8D4DE;height:100vh;overflow-y:auto;position:sticky;top:0}
+#side .brand{padding:18px 16px 14px;border-bottom:1px solid #2E3C4B}
+#side .brand h1{font-size:18px;color:#fff;line-height:1.2}
+#side .brand p{margin:6px 0 0;font-size:11px;color:#7E8E9C;line-height:1.35}
+#side nav{padding:8px 0 24px}
+#side .grp{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:#61707E;padding:14px 16px 5px}
+#side a{display:block;padding:9px 16px 9px 14px;color:#C8D4DE;text-decoration:none;font-size:13px;border-left:3px solid transparent;cursor:pointer}
+#side a:hover{background:#22303E;color:#fff}
+#side a.on{background:#22303E;color:#fff;border-left-color:var(--ember)}
+#side a .c{display:inline-block;width:46px;font:700 10.5px/1 ui-monospace,Consolas,monospace;color:var(--ember)}
+
+/* ---------- main ---------- */
+main{flex:1;min-width:0;height:100vh;overflow-y:auto}
+.wrap{max-width:1150px;margin:0 auto;padding:26px 30px 70px}
+.mod{display:none}.mod.on{display:block}
+.hd{margin-bottom:16px}
+.hd .kick{font:700 10.5px/1 inherit;letter-spacing:1.3px;text-transform:uppercase;color:var(--ember);margin-bottom:7px}
+.hd h2{font-size:26px;margin-bottom:6px}
+.hd p{margin:0;color:var(--muted);font-size:14px;max-width:900px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.card>h3{font-size:15px;margin-bottom:10px;color:var(--ink)}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.col{flex:1;min-width:260px}
+.prob{background:var(--ember-bg);border:1px solid #EFCFB0;border-left:4px solid var(--ember);border-radius:8px;padding:12px 15px;margin-bottom:14px;font-size:13.5px}
+.prob b{color:#8A4310}
+.note{background:var(--teal-bg);border:1px solid #C4DEE2;border-radius:8px;padding:12px 15px;font-size:13px;color:#1D5A64}
+.warn{background:var(--amb-bg);border:1px solid #EBD9B4;border-radius:8px;padding:12px 15px;font-size:13px;color:#6E4A0C}
+.bad{background:var(--red-bg);border:1px solid #EBCDCA;border-radius:8px;padding:12px 15px;font-size:13px;color:#7A1C16}
+.good{background:var(--grn-bg);border:1px solid #C9E0D3;border-radius:8px;padding:12px 15px;font-size:13px;color:#1B4E32}
+
+/* controls */
+.ctl{margin-bottom:13px}
+.ctl label{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:4px}
+.ctl label .v{color:var(--ember);font-family:ui-monospace,Consolas,monospace}
+.ctl input[type=range]{width:100%;accent-color:var(--ember)}
+.ctl select,.ctl input[type=text]{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:13px}
+.ctl .hint{font-size:11.5px;color:var(--muted);margin-top:3px}
+.tog{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:9px;cursor:pointer;user-select:none}
+.tog input{width:16px;height:16px;accent-color:var(--ember);cursor:pointer}
+button.btn{background:var(--ember);color:#fff;border:0;border-radius:7px;padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer}
+button.btn:hover{background:#C25E10}
+button.btn.alt{background:var(--ink2)} button.btn.alt:hover{background:#37485A}
+button.btn.gh{background:#fff;color:var(--ink2);border:1px solid var(--line)}
+button.btn.gh:hover{background:var(--soft)}
+button.btn:disabled{background:#B8C4CE;cursor:not-allowed}
+
+/* stats */
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stat{flex:1;min-width:130px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+.stat .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700}
+.stat .n{font:700 21px/1.2 Cambria,Georgia,serif;color:var(--ink);margin-top:4px}
+.stat .n.em{color:var(--ember)} .stat .n.rd{color:var(--red)} .stat .n.gn{color:var(--grn)} .stat .n.tl{color:var(--teal)}
+.stat .s{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* tables */
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--ink2);color:#fff;font-weight:600;font-size:11.5px;position:sticky;top:0}
+tbody tr:nth-child(even){background:#F7FAFC}
+tbody tr.hi{background:var(--ember-bg)!important}
+td.num,th.num{text-align:right;font-family:ui-monospace,Consolas,monospace}
+.tw{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.tw.tall{max-height:520px}
+.toolrow{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+.toolrow:last-child{border-bottom:0}
+.toolrow code{flex:0 0 auto;font-size:11px}
+.toolrow .tp{flex:1;color:var(--muted);font-size:11.5px;line-height:1.35}
+.pill{white-space:nowrap}
+.tw table{border:0} .tw th,.tw td{border-left:0;border-top:0}
+
+canvas{display:block;width:100%;background:#fff;border-radius:8px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin-top:8px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:11px}
+.pill.ok{background:var(--grn-bg);color:var(--grn)} .pill.wn{background:var(--amb-bg);color:var(--amb)}
+.pill.er{background:var(--red-bg);color:var(--red)} .pill.nu{background:var(--soft2);color:var(--muted)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+pre{background:var(--ink);color:#D7E2EA;padding:12px 14px;border-radius:8px;font-size:12px;overflow:auto;font-family:ui-monospace,Consolas,monospace;line-height:1.5}
+ol,ul{margin:6px 0 6px 20px;padding:0} li{margin-bottom:4px}
+.small{font-size:12px;color:var(--muted)}
+hr.sep{border:0;border-top:1px solid var(--line);margin:16px 0}
+@media(max-width:900px){#side{width:60px;flex-basis:60px}#side .brand p,#side a span.t,#side .grp{display:none}.wrap{padding:18px}}
+</style>
+</head>
+<body>
+<div id="side">
+  <div class="brand">
+    <h1>AI Simulation Lab</h1>
+    <p>MAHAGENCO Training Centre, Nashik<br>Runs offline · real algorithms · June 2026 plant data</p>
+  </div>
+  <nav id="nav">
+    <div class="grp">Start here</div>
+    <a data-m="home" class="on"><span class="c">—</span><span class="t">Overview</span></a>
+    <div class="grp">Monitoring &amp; maintenance</div>
+    <a data-m="s1"><span class="c">SIM-1</span><span class="t">Anomaly detection</span></a>
+    <a data-m="s5"><span class="c">SIM-5</span><span class="t">Predictive maintenance</span></a>
+    <div class="grp">Performance &amp; efficiency</div>
+    <a data-m="s2"><span class="c">SIM-2</span><span class="t">Heat rate attribution</span></a>
+    <a data-m="s3"><span class="c">SIM-3</span><span class="t">Auxiliary power</span></a>
+    <a data-m="s6"><span class="c">SIM-6</span><span class="t">Combustion optimiser</span></a>
+    <div class="grp">Fuel</div>
+    <a data-m="s4"><span class="c">SIM-4</span><span class="t">Coal GCV soft sensor</span></a>
+    <div class="grp">Generative &amp; agentic AI</div>
+    <a data-m="s7"><span class="c">SIM-7</span><span class="t">RAG on plant documents</span></a>
+    <a data-m="s8"><span class="c">SIM-8</span><span class="t">Agentic assistant</span></a>
+    <div class="grp">Reference</div>
+    <a data-m="data"><span class="c">DATA</span><span class="t">June 2026 dataset</span></a>
+  </nav>
+</div>
+
+<main><div class="wrap" id="wrap">
+__MODULES__
+</div></main>
+
+<script>
+/* ============================================================
+   June 2026 MAHAGENCO data — from the energy bill, the Part-I FSA
+   bill F10 ECR calculation, and the MERC MOD stack for July 2026.
+   ============================================================ */
+const ST = __STATIONS__;
+ST.forEach(s=>{
+  s.ghrAct  = s.hr_act  * (1 - s.aux_act/100);
+  s.ghrNorm = s.hr_norm * (1 - s.aux_norm/100);
+  s.hrGap   = s.hr_act  - s.hr_norm;
+  s.ghrGap  = s.ghrAct  - s.ghrNorm;
+  s.auxGap  = s.aux_act - s.aux_norm;
+  s.rsKcal  = s.vc_mod / s.hr_act;
+  s.coalRsT = s.rsKcal * s.gcv_fired * 1000;
+  s.auxMU   = s.auxGap/100 * s.gross;
+  s.auxCr   = s.auxMU*1e6 * s.vc_mod / 1e7;
+  s.hrGapCr = s.hrGap * s.net*1e6 * s.rsKcal / 1e7;
+  s.ghrCr   = s.ghrGap * s.gross*1e6 * s.rsKcal / 1e7;
+});
+const fmt=(x,d=2)=>Number(x).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const cr =(x)=>'₹'+fmt(x,2)+' cr';
+const $  =(id)=>document.getElementById(id);
+
+/* ---------- minimal canvas chart library ---------- */
+function hidpi(cv,h){
+  const r=window.devicePixelRatio||1, w=cv.clientWidth||700;
+  cv.height=h*r; cv.width=w*r; cv.style.height=h+'px';
+  const x=cv.getContext('2d'); x.setTransform(r,0,0,r,0,0);
+  return {x,w,h};
+}
+const CSS=getComputedStyle(document.documentElement);
+const C={ink:'#1C2530',mut:'#5C6B7A',line:'#D3DDE5',grid:'#EAF0F5',
+         ember:'#D96A16',teal:'#11707F',red:'#A8261E',grn:'#256B45',amb:'#C58A18',soft:'#F1F4F7'};
+
+/* line chart: series=[{name,data:[y..],color,dash,fill}] */
+function lineChart(cv,{labels,series,yMin,yMax,yLabel,height=250,bands=[],marks=[],xEvery=1}){
+  const {x,w,h}=hidpi(cv,height);
+  const P={l:56,r:14,t:14,b:30};
+  const iw=w-P.l-P.r, ih=h-P.t-P.b;
+  let lo=yMin, hi=yMax;
+  if(lo===undefined||hi===undefined){
+    let a=Infinity,b=-Infinity;
+    series.forEach(s=>s.data.forEach(v=>{if(v!=null){a=Math.min(a,v);b=Math.max(b,v);}}));
+    const pad=(b-a)*0.12||1; lo=(yMin!==undefined?yMin:a-pad); hi=(yMax!==undefined?yMax:b+pad);
+  }
+  const X=i=>P.l+(labels.length<2?0:i*iw/(labels.length-1));
+  const Y=v=>P.t+ih-(v-lo)/(hi-lo)*ih;
+  x.clearRect(0,0,w,h);
+  bands.forEach(bd=>{ x.fillStyle=bd.color; x.fillRect(P.l,Y(bd.to),iw,Math.abs(Y(bd.from)-Y(bd.to))); });
+  x.strokeStyle=C.grid; x.lineWidth=1; x.fillStyle=C.mut; x.font='11px Calibri,sans-serif';
+  for(let g=0;g<=4;g++){ const v=lo+(hi-lo)*g/4, y=Y(v);
+    x.beginPath(); x.moveTo(P.l,y); x.lineTo(P.l+iw,y); x.stroke();
+    x.textAlign='right'; x.textBaseline='middle'; x.fillText(v.toFixed(Math.abs(hi-lo)<12?1:0), P.l-7, y); }
+  x.textAlign='center'; x.textBaseline='top';
+  labels.forEach((L,i)=>{ if(i%xEvery===0) x.fillText(L, X(i), P.t+ih+7); });
+  if(yLabel){ x.save(); x.translate(12,P.t+ih/2); x.rotate(-Math.PI/2);
+    x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=C.mut; x.fillText(yLabel,0,0); x.restore(); }
+  marks.forEach(m=>{ const px=X(m.i);
+    x.strokeStyle=m.color||C.red; x.setLineDash([4,3]); x.lineWidth=1.5;
+    x.beginPath(); x.moveTo(px,P.t); x.lineTo(px,P.t+ih); x.stroke(); x.setLineDash([]);
+    if(m.label){ x.fillStyle=m.color||C.red; x.font='700 10.5px Calibri,sans-serif';
+      x.textAlign=m.i>labels.length*0.7?'right':'left'; x.textBaseline='top';
+      x.fillText(m.label, px+(m.i>labels.length*0.7?-5:5), P.t+2); } });
+  x.save(); x.beginPath(); x.rect(P.l,P.t,iw,ih); x.clip();
+  series.forEach(s=>{
+    if(s.fill){ x.beginPath(); s.data.forEach((v,i)=>{ if(v==null)return; i?x.lineTo(X(i),Y(v)):x.moveTo(X(i),Y(v)); });
+      for(let i=s.fillTo.length-1;i>=0;i--){ if(s.fillTo[i]!=null) x.lineTo(X(i),Y(s.fillTo[i])); }
+      x.closePath(); x.fillStyle=s.fill; x.fill(); }
+    x.beginPath(); x.lineWidth=s.width||2.2; x.strokeStyle=s.color;
+    if(s.dash) x.setLineDash(s.dash); else x.setLineDash([]);
+    let started=false;
+    s.data.forEach((v,i)=>{ if(v==null){started=false;return;} if(!started){x.moveTo(X(i),Y(v));started=true;} else x.lineTo(X(i),Y(v)); });
+    x.stroke(); x.setLineDash([]);
+    if(s.dots) s.data.forEach((v,i)=>{ if(v==null)return; x.beginPath(); x.arc(X(i),Y(v),2.6,0,7); x.fillStyle=s.color; x.fill(); });
+  });
+  x.restore();
+  x.strokeStyle=C.line; x.lineWidth=1;
+  x.beginPath(); x.moveTo(P.l,P.t); x.lineTo(P.l,P.t+ih); x.lineTo(P.l+iw,P.t+ih); x.stroke();
+}
+
+/* horizontal bar chart: rows=[{label,value,color,note}] */
+function barChart(cv,{rows,height=260,unit='',maxV}){
+  const {x,w,h}=hidpi(cv,height);
+  const anyNeg=rows.some(r=>r.value<0);
+  const P={l:150,r:86,t:8,b:8};
+  const iw=w-P.l-P.r, bh=(h-P.t-P.b)/rows.length;
+  const mx=maxV||Math.max(...rows.map(r=>Math.abs(r.value)))*1.05||1;
+  const zero = anyNeg ? P.l + iw*0.34 : P.l;          // signed bars get a zero line
+  const scale= anyNeg ? (iw*0.64)/mx : iw/mx;
+  x.clearRect(0,0,w,h);
+  rows.forEach((r,i)=>{
+    const y=P.t+i*bh, bw=Math.abs(r.value)*scale;
+    x.fillStyle=i%2?'#fff':C.soft; x.fillRect(0,y,w,bh);
+    x.fillStyle=r.color||C.ember;
+    x.fillRect(r.value>=0?zero:zero-bw, y+bh*0.22, bw, bh*0.56);
+    x.fillStyle=C.ink; x.font='11.5px Calibri,sans-serif'; x.textAlign='right'; x.textBaseline='middle';
+    x.fillText(r.label,P.l-8,y+bh/2);
+    x.fillStyle=r.color||C.ember; x.font='700 11.5px Calibri,sans-serif';
+    const txt=(r.value<0?'\u2212':'')+fmt(Math.abs(r.value),r.dp===undefined?2:r.dp)+unit;
+    if(r.value>=0){ x.textAlign='left'; x.fillText(txt, zero+bw+6, y+bh/2); }
+    else { x.textAlign='right'; x.fillText(txt, zero-bw-6, y+bh/2); }
+  });
+  if(anyNeg){ x.strokeStyle='#9AA9B6'; x.lineWidth=1; x.beginPath();
+    x.moveTo(zero,P.t); x.lineTo(zero,h-P.b); x.stroke(); }
+}
+
+/* scatter with fit line */
+function scatter(cv,{pts,fit,height=250,xLabel,yLabel}){
+  const {x,w,h}=hidpi(cv,height);
+  const P={l:58,r:14,t:14,b:34}, iw=w-P.l-P.r, ih=h-P.t-P.b;
+  const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  const x0=Math.min(...xs,...(fit?fit.map(p=>p[0]):[])), x1=Math.max(...xs,...(fit?fit.map(p=>p[0]):[]));
+  const y0=Math.min(...ys,...(fit?fit.map(p=>p[1]):[])), y1=Math.max(...ys,...(fit?fit.map(p=>p[1]):[]));
+  const px=v=>P.l+(v-x0)/((x1-x0)||1)*iw, py=v=>P.t+ih-(v-y0)/((y1-y0)||1)*ih;
+  x.clearRect(0,0,w,h);
+  x.strokeStyle=C.grid; x.fillStyle=C.mut; x.font='11px Calibri,sans-serif';
+  for(let g=0;g<=4;g++){ const v=y0+(y1-y0)*g/4,yy=py(v);
+    x.beginPath();x.moveTo(P.l,yy);x.lineTo(P.l+iw,yy);x.stroke();
+    x.textAlign='right';x.textBaseline='middle';x.fillText(v.toFixed(0),P.l-7,yy); }
+  for(let g=0;g<=4;g++){ const v=x0+(x1-x0)*g/4;
+    x.textAlign='center';x.textBaseline='top';x.fillText(v.toFixed(0),px(v),P.t+ih+6); }
+  pts.forEach(p=>{ x.beginPath(); x.arc(px(p[0]),py(p[1]),3.2,0,7);
+    x.fillStyle=p[2]||'rgba(17,112,127,.65)'; x.fill(); });
+  if(fit){ x.beginPath(); fit.forEach((p,i)=>i?x.lineTo(px(p[0]),py(p[1])):x.moveTo(px(p[0]),py(p[1])));
+    x.strokeStyle=C.ember; x.lineWidth=2.2; x.stroke(); }
+  x.strokeStyle=C.line;x.lineWidth=1;x.beginPath();x.moveTo(P.l,P.t);x.lineTo(P.l,P.t+ih);x.lineTo(P.l+iw,P.t+ih);x.stroke();
+  x.fillStyle=C.mut;x.font='11px Calibri,sans-serif';
+  if(xLabel){x.textAlign='center';x.textBaseline='bottom';x.fillText(xLabel,P.l+iw/2,h-2);}
+  if(yLabel){x.save();x.translate(12,P.t+ih/2);x.rotate(-Math.PI/2);x.textAlign='center';x.fillText(yLabel,0,0);x.restore();}
+}
+
+/* seeded RNG so every run is reproducible in class */
+function rng(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+function gauss(r){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+
+/* ---------- nav ---------- */
+document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',()=>{
+  document.querySelectorAll('#nav a').forEach(b=>b.classList.toggle('on',b===a));
+  document.querySelectorAll('.mod').forEach(m=>m.classList.toggle('on',m.id==='m-'+a.dataset.m));
+  document.querySelector('main').scrollTop=0;
+  if(REDRAW[a.dataset.m]) REDRAW[a.dataset.m]();
+}));
+const REDRAW={};
+window.addEventListener('resize',()=>{ const on=document.querySelector('#nav a.on'); if(on&&REDRAW[on.dataset.m]) REDRAW[on.dataset.m](); });
+__SCRIPTS__
+</script>
+</body>
+</html>

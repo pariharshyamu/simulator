@@ -1,0 +1,1 @@
+{"model":"Xenova/bge-small-en-v1.5","dtype":"q8","dim":384,"n":1302,"queryPrefix":"Represent this sentence for searching relevant passages: ","built":"2026-08-09","embedSeconds":179}

@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAHAGENCO AI Simulation Lab</title>
+<style>
+:root{
+  --ink:#1C2530; --ink2:#2A3644; --ink3:#3B4A5A;
+  --paper:#fff; --soft:#F1F4F7; --soft2:#E3EAF0; --line:#D3DDE5;
+  --ember:#D96A16; --ember-bg:#FCEDE0; --teal:#11707F; --teal-bg:#E1EFF1;
+  --red:#A8261E; --red-bg:#F9E7E5; --grn:#256B45; --grn-bg:#E4F0EA;
+  --amb:#9A6408; --amb-bg:#FBF0DC; --muted:#5C6B7A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{font:14px/1.5 Calibri,Carlito,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:#F7F9FB;display:flex}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;margin:0}
+button,input,select{font-family:inherit}
+
+/* ---------- sidebar ---------- */
+#side{width:250px;flex:0 0 250px;background:var(--ink);color:#C8D4DE;height:100vh;overflow-y:auto;position:sticky;top:0}
+#side .brand{padding:18px 16px 14px;border-bottom:1px solid #2E3C4B}
+#side .brand h1{font-size:18px;color:#fff;line-height:1.2}
+#side .brand p{margin:6px 0 0;font-size:11px;color:#7E8E9C;line-height:1.35}
+#side nav{padding:8px 0 24px}
+#side .grp{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:#61707E;padding:14px 16px 5px}
+#side a{display:block;padding:9px 16px 9px 14px;color:#C8D4DE;text-decoration:none;font-size:13px;border-left:3px solid transparent;cursor:pointer}
+#side a:hover{background:#22303E;color:#fff}
+#side a.on{background:#22303E;color:#fff;border-left-color:var(--ember)}
+#side a .c{display:inline-block;width:46px;font:700 10.5px/1 ui-monospace,Consolas,monospace;color:var(--ember)}
+
+/* ---------- main ---------- */
+main{flex:1;min-width:0;height:100vh;overflow-y:auto}
+.wrap{max-width:1150px;margin:0 auto;padding:26px 30px 70px}
+.mod{display:none}.mod.on{display:block}
+.hd{margin-bottom:16px}
+.hd .kick{font:700 10.5px/1 inherit;letter-spacing:1.3px;text-transform:uppercase;color:var(--ember);margin-bottom:7px}
+.hd h2{font-size:26px;margin-bottom:6px}
+.hd p{margin:0;color:var(--muted);font-size:14px;max-width:900px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.card>h3{font-size:15px;margin-bottom:10px;color:var(--ink)}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.col{flex:1;min-width:260px}
+.prob{background:var(--ember-bg);border:1px solid #EFCFB0;border-left:4px solid var(--ember);border-radius:8px;padding:12px 15px;margin-bottom:14px;font-size:13.5px}
+.prob b{color:#8A4310}
+.note{background:var(--teal-bg);border:1px solid #C4DEE2;border-radius:8px;padding:12px 15px;font-size:13px;color:#1D5A64}
+.warn{background:var(--amb-bg);border:1px solid #EBD9B4;border-radius:8px;padding:12px 15px;font-size:13px;color:#6E4A0C}
+.bad{background:var(--red-bg);border:1px solid #EBCDCA;border-radius:8px;padding:12px 15px;font-size:13px;color:#7A1C16}
+.good{background:var(--grn-bg);border:1px solid #C9E0D3;border-radius:8px;padding:12px 15px;font-size:13px;color:#1B4E32}
+
+/* controls */
+.ctl{margin-bottom:13px}
+.ctl label{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:4px}
+.ctl label .v{color:var(--ember);font-family:ui-monospace,Consolas,monospace}
+.ctl input[type=range]{width:100%;accent-color:var(--ember)}
+.ctl select,.ctl input[type=text]{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:13px}
+.ctl .hint{font-size:11.5px;color:var(--muted);margin-top:3px}
+.tog{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:9px;cursor:pointer;user-select:none}
+.tog input{width:16px;height:16px;accent-color:var(--ember);cursor:pointer}
+button.btn{background:var(--ember);color:#fff;border:0;border-radius:7px;padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer}
+button.btn:hover{background:#C25E10}
+button.btn.alt{background:var(--ink2)} button.btn.alt:hover{background:#37485A}
+button.btn.gh{background:#fff;color:var(--ink2);border:1px solid var(--line)}
+button.btn.gh:hover{background:var(--soft)}
+button.btn:disabled{background:#B8C4CE;cursor:not-allowed}
+
+/* stats */
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stat{flex:1;min-width:130px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:11px 13px}
+.stat .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700}
+.stat .n{font:700 21px/1.2 Cambria,Georgia,serif;color:var(--ink);margin-top:4px}
+.stat .n.em{color:var(--ember)} .stat .n.rd{color:var(--red)} .stat .n.gn{color:var(--grn)} .stat .n.tl{color:var(--teal)}
+.stat .s{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* tables */
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--ink2);color:#fff;font-weight:600;font-size:11.5px;position:sticky;top:0}
+tbody tr:nth-child(even){background:#F7FAFC}
+tbody tr.hi{background:var(--ember-bg)!important}
+td.num,th.num{text-align:right;font-family:ui-monospace,Consolas,monospace}
+.tw{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.tw.tall{max-height:520px}
+.toolrow{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+.toolrow:last-child{border-bottom:0}
+.toolrow code{flex:0 0 auto;font-size:11px}
+.toolrow .tp{flex:1;color:var(--muted);font-size:11.5px;line-height:1.35}
+.pill{white-space:nowrap}
+.tw table{border:0} .tw th,.tw td{border-left:0;border-top:0}
+
+canvas{display:block;width:100%;background:#fff;border-radius:8px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;margin-top:8px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:11px}
+.pill.ok{background:var(--grn-bg);color:var(--grn)} .pill.wn{background:var(--amb-bg);color:var(--amb)}
+.pill.er{background:var(--red-bg);color:var(--red)} .pill.nu{background:var(--soft2);color:var(--muted)}
+code{background:var(--soft);padding:1px 5px;border-radius:4px;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+pre{background:var(--ink);color:#D7E2EA;padding:12px 14px;border-radius:8px;font-size:12px;overflow:auto;font-family:ui-monospace,Consolas,monospace;line-height:1.5}
+ol,ul{margin:6px 0 6px 20px;padding:0} li{margin-bottom:4px}
+.small{font-size:12px;color:var(--muted)}
+hr.sep{border:0;border-top:1px solid var(--line);margin:16px 0}
+@media(max-width:900px){#side{width:60px;flex-basis:60px}#side .brand p,#side a span.t,#side .grp{display:none}.wrap{padding:18px}}
+</style>
+</head>
+<body>
+<div id="side">
+  <div class="brand">
+    <h1>AI Simulation Lab</h1>
+    <p>MAHAGENCO Training Centre, Nashik<br>Runs offline · real algorithms · June 2026 plant data</p>
+  </div>
+  <nav id="nav">
+    <div class="grp">Start here</div>
+    <a data-m="home" class="on"><span class="c">—</span><span class="t">Overview</span></a>
+    <div class="grp">Monitoring &amp; maintenance</div>
+    <a data-m="s1"><span class="c">SIM-1</span><span class="t">Anomaly detection</span></a>
+    <a data-m="s5"><span class="c">SIM-5</span><span class="t">Predictive maintenance</span></a>
+    <div class="grp">Performance &amp; efficiency</div>
+    <a data-m="s2"><span class="c">SIM-2</span><span class="t">Heat rate attribution</span></a>
+    <a data-m="s3"><span class="c">SIM-3</span><span class="t">Auxiliary power</span></a>
+    <a data-m="s6"><span class="c">SIM-6</span><span class="t">Combustion optimiser</span></a>
+    <div class="grp">Fuel</div>
+    <a data-m="s4"><span class="c">SIM-4</span><span class="t">Coal GCV soft sensor</span></a>
+    <div class="grp">Generative &amp; agentic AI</div>
+    <a data-m="s7"><span class="c">SIM-7</span><span class="t">RAG on plant documents</span></a>
+    <a data-m="s8"><span class="c">SIM-8</span><span class="t">Agentic assistant</span></a>
+    <div class="grp">Reference</div>
+    <a data-m="data"><span class="c">DATA</span><span class="t">June 2026 dataset</span></a>
+  </nav>
+</div>
+
+<main><div class="wrap" id="wrap">
+<section class="mod on" id="m-home">
+  <div class="hd">
+    <div class="kick">MAHAGENCO Training Centre, Nashik</div>
+    <h2>AI Simulation Lab</h2>
+    <p>Eight working machine-learning models you can run, break and argue with — built around the pain points
+    that MAHAGENCO's own June 2026 regulatory filing exposes. Everything runs in this browser. No internet,
+    no installation, no login. The algorithms are real; the plant data is either the actual June 2026 figures
+    or physics-based synthetic data whose generating equations are stated in each module.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="l">Net heat-rate gap</div><div class="n em">₹56 cr</div><div class="s">in June 2026 alone, against MERC norms</div></div>
+    <div class="stat"><div class="l">Auxiliary above norm</div><div class="n em">81.5 MU</div><div class="s">one month · ₹33 cr at own variable charge</div></div>
+    <div class="stat"><div class="l">Availability penalty</div><div class="n rd">₹100.87 cr</div><div class="s">cumulative fixed-charge disallowance</div></div>
+    <div class="stat"><div class="l">Thermal sent out</div><div class="n tl">4,588 MU</div><div class="s">June 2026 · net bill ₹2,806 cr</div></div>
+  </div>
+
+  <div class="prob"><b>Read this first.</b> These are teaching instruments. They run genuine algorithms on realistic
+  data at small scale. They are not plant models, they are not validated, and no output from them should ever
+  influence an operating decision. What they are good for is understanding <i>how</i> these methods behave — where
+  they help, and exactly how they fail.</div>
+
+  <div class="card">
+    <h3>The eight modules</h3>
+    <div class="tw"><table>
+      <thead><tr><th style="width:62px">ID</th><th>Module</th><th>Pain point it addresses</th><th>Algorithm actually running</th></tr></thead>
+      <tbody>
+        <tr><td><b>SIM-1</b></td><td>Residual anomaly detection — ID fan bearing</td><td>Forced outages; alarms that arrive last</td><td>k-nearest-neighbour similarity model on a healthy-history memory matrix, with persistence logic</td></tr>
+        <tr><td><b>SIM-2</b></td><td>Heat rate loss attribution</td><td>₹56 crore/month net heat-rate gap</td><td>Gross/net decomposition and sensitivity-weighted loss allocation on the real June 2026 data</td></tr>
+        <tr><td><b>SIM-3</b></td><td>Auxiliary power optimiser</td><td>81.5 MU/month above norm</td><td>Exhaustive combinatorial search with constraint checking and a heat-rate trade-off</td></tr>
+        <tr><td><b>SIM-4</b></td><td>Coal GCV soft sensor</td><td>As-fired GCV spread 2,733–3,270 kcal/kg</td><td>Ridge regression trained live by gradient descent, with a time-based train/test split</td></tr>
+        <tr><td><b>SIM-5</b></td><td>Predictive maintenance and RUL</td><td>₹100.87 crore availability disallowance</td><td>Exponential degradation model with recursive parameter update and uncertainty bands</td></tr>
+        <tr><td><b>SIM-6</b></td><td>Combustion multi-objective optimiser</td><td>Koradi 8-10 gross heat-rate gap of 176 kcal/kWh</td><td>Response-surface model with weighted-sum optimisation, clamps and rate limits</td></tr>
+        <tr><td><b>SIM-7</b></td><td>RAG over plant documents</td><td>Knowledge loss; slow precedent search</td><td>TF-IDF retrieval with cosine similarity over an indexed corpus, plus citation rendering</td></tr>
+        <tr><td><b>SIM-8</b></td><td>Agentic engineering assistant</td><td>Slow alert triage</td><td>Reason–act–observe planner calling simulated historian, CMMS and performance tools</td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="row">
+    <div class="col"><div class="note"><b>How to work through the lab.</b> Each module opens in its default state
+    showing the problem as it exists today. Move one control at a time and watch the numbers. Every module has a
+    <b>What just happened</b> panel that explains the mechanism in engineering language, and a
+    <b>Where this is simpler than your plant</b> panel that tells you what has been left out.</div></div>
+    <div class="col"><div class="warn"><b>On the money figures.</b> Rupee values are computed from each station's own
+    MERC merit-order variable charge divided by its own actual net heat rate, giving a station-specific cost of heat.
+    Nashik's heat is worth ₹0.002133/kcal; Khaperkheda Unit 5's is ₹0.001337/kcal. The same technical improvement is
+    worth roughly sixty per cent more at Nashik than at Khaperkheda.</div></div>
+  </div>
+</section>
+
+<!-- ================= SIM-1 ================= -->
+<section class="mod" id="m-s1">
+  <div class="hd"><div class="kick">SIM-1 · Monitoring &amp; maintenance</div>
+    <h2>Residual anomaly detection — ID fan bearing</h2>
+    <p>Why a model that knows what the bearing <i>should</i> be running at finds a fault weeks before a fixed
+    threshold does — and what destroys that advantage.</p></div>
+
+  <div class="prob"><b>The problem.</b> A DCS alarm fires at a fixed number. That number has to be set high enough
+  not to nuisance-trip at full load on a May afternoon, which makes it blind at forty per cent load on a January
+  night. By the time it operates, most of the P–F interval is gone. Availability shortfall cost MAHAGENCO
+  ₹100.87 crore of disallowed fixed charge; a large part of that is unplanned.</p></div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card">
+        <h3>Fault and plant</h3>
+        <div class="ctl"><label>Fault onset <span class="v" id="s1-onset-v">day 45</span></label>
+          <input type="range" id="s1-onset" min="20" max="100" value="45" step="1">
+          <div class="hint">When the bearing begins to degrade</div></div>
+        <div class="ctl"><label>Degradation rate <span class="v" id="s1-rate-v">1.00×</span></label>
+          <input type="range" id="s1-rate" min="30" max="250" value="100" step="5">
+          <div class="hint">How fast it develops once started</div></div>
+        <div class="ctl"><label>Sensor noise <span class="v" id="s1-noise-v">0.45 °C</span></label>
+          <input type="range" id="s1-noise" min="10" max="150" value="45" step="5"></div>
+        <div class="ctl"><label>Load variability <span class="v" id="s1-var-v">normal</span></label>
+          <input type="range" id="s1-var" min="0" max="100" value="55" step="5">
+          <div class="hint">Two-shifting and low-load running widen the operating envelope</div></div>
+      </div>
+      <div class="card">
+        <h3>Detection settings</h3>
+        <div class="ctl"><label>DCS alarm setpoint <span class="v" id="s1-alarm-v">90 °C</span></label>
+          <input type="range" id="s1-alarm" min="80" max="105" value="90" step="1"></div>
+        <div class="ctl"><label>Residual threshold <span class="v" id="s1-thr-v">3.0 °C</span></label>
+          <input type="range" id="s1-thr" min="10" max="80" value="30" step="1">
+          <div class="hint">How far from expected before it counts</div></div>
+        <div class="ctl"><label>Persistence required <span class="v" id="s1-pers-v">5 days</span></label>
+          <input type="range" id="s1-pers" min="1" max="20" value="5" step="1">
+          <div class="hint">A spike is a sensor. A slope is a machine.</div></div>
+        <div class="ctl"><label>Neighbours (k) <span class="v" id="s1-k-v">12</span></label>
+          <input type="range" id="s1-k" min="3" max="40" value="12" step="1"></div>
+        <label class="tog"><input type="checkbox" id="s1-dirty"> <span><b>Train on contaminated history</b> — let the training window run past fault onset</span></label>
+        <button class="btn" id="s1-reseed">New random plant</button>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="stats">
+        <div class="stat"><div class="l">Model advisory</div><div class="n em" id="s1-mday">—</div><div class="s" id="s1-mday-s">residual exceeded threshold</div></div>
+        <div class="stat"><div class="l">DCS alarm</div><div class="n rd" id="s1-aday">—</div><div class="s">fixed setpoint crossed</div></div>
+        <div class="stat"><div class="l">Lead time gained</div><div class="n gn" id="s1-lead">—</div><div class="s">warning the model bought you</div></div>
+        <div class="stat"><div class="l">False alarms</div><div class="n" id="s1-fa">—</div><div class="s">per model-month, healthy period</div></div>
+      </div>
+      <div class="card"><h3>Bearing temperature — measured against what the model expected</h3>
+        <canvas id="s1-c1"></canvas>
+        <div class="legend"><span><i style="background:#D96A16"></i>Measured</span>
+          <span><i style="background:#11707F"></i>Model expected</span>
+          <span><i style="background:#A8261E"></i>DCS setpoint</span>
+          <span class="small">Shaded band = model training window</span></div></div>
+      <div class="card"><h3>Residual — measured minus expected, load and ambient already removed</h3>
+        <canvas id="s1-c2"></canvas>
+        <div class="legend"><span><i style="background:#5C6B7A"></i>Raw residual</span>
+          <span><i style="background:#D96A16"></i>Smoothed (EWMA)</span>
+          <span><i style="background:#256B45"></i>Threshold</span></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s1-say"></div></div>
+      <div class="warn"><b>Where this is simpler than your plant.</b> One bearing, four input signals and a clean
+      physical relationship. A real ID fan model uses thirty to sixty tags, has to cope with a second fan starting
+      and stopping, damper and blade-pitch changes, an APH that fouls over the same period, and a historian whose
+      compression settings may already have thrown away the slow drift you are trying to see.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-2 ================= -->
+<section class="mod" id="m-s2">
+  <div class="hd"><div class="kick">SIM-2 · Performance &amp; efficiency</div>
+    <h2>Heat rate loss attribution</h2>
+    <p>The June 2026 net heat-rate gap was worth ₹56 crore in one month. This module splits that gap into the part
+    that belongs to the boiler and turbine and the part that belongs to the auxiliary switchgear — and shows that
+    the answer is completely different at different stations.</p></div>
+
+  <div class="prob"><b>The identity everything rests on.</b>
+  Generated (gross) heat rate = net heat rate × (1 − auxiliary fraction). Rearranged, it tells you whether a station's
+  heat-rate penalty is a combustion problem or an electrical one. Nashik's boiler and turbine are <i>beating</i> the norm;
+  its entire penalty is auxiliary power. Koradi Units 8-10 are the opposite.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Station</h3>
+        <div class="ctl"><select id="s2-st"></select></div>
+        <div id="s2-facts"></div></div>
+      <div class="card"><h3>Controllable parameters</h3>
+        <p class="small" style="margin:0 0 10px">Move these to the values an optimiser would hold, and see what comes back.
+        Sensitivities are indicative for this class of unit.</p>
+        <div class="ctl"><label>Excess O₂ above optimum <span class="v" id="s2-o2-v">1.2 %</span></label>
+          <input type="range" id="s2-o2" min="0" max="30" value="12" step="1"></div>
+        <div class="ctl"><label>Main steam temp below design <span class="v" id="s2-mst-v">8 °C</span></label>
+          <input type="range" id="s2-mst" min="0" max="30" value="8" step="1"></div>
+        <div class="ctl"><label>Back pressure above achievable <span class="v" id="s2-bp-v">8 mmHg</span></label>
+          <input type="range" id="s2-bp" min="0" max="30" value="8" step="1"></div>
+        <div class="ctl"><label>Unburnt carbon above target <span class="v" id="s2-ubc-v">0.8 %</span></label>
+          <input type="range" id="s2-ubc" min="0" max="30" value="8" step="1"></div>
+        <div class="ctl"><label>APH leakage above design <span class="v" id="s2-aph-v">5 %</span></label>
+          <input type="range" id="s2-aph" min="0" max="20" value="5" step="1"></div>
+        <div class="ctl"><label>Auxiliary power reduction <span class="v" id="s2-aux-v">0.00 pp</span></label>
+          <input type="range" id="s2-aux" min="0" max="300" value="0" step="5">
+          <div class="hint">How much of the auxiliary gap you close</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s2-stats"></div>
+      <div class="card"><h3>Where the net heat-rate gap actually sits</h3>
+        <canvas id="s2-c1"></canvas>
+        <div class="legend"><span><i style="background:#D96A16"></i>Auxiliary power component</span>
+          <span><i style="background:#11707F"></i>Boiler and turbine component</span>
+          <span><i style="background:#256B45"></i>Better than norm</span></div></div>
+      <div class="card"><h3>Attributed losses at the current settings</h3><div id="s2-tbl"></div></div>
+      <div class="card"><h3>Whole fleet, June 2026 — where the gap sits station by station</h3>
+        <canvas id="s2-c2"></canvas>
+        <p class="small" style="margin-top:8px">Positive bar = the boiler and turbine are worse than the norm.
+        Negative bar = they are better, and the whole penalty is auxiliary power.</p></div>
+      <div class="bad"><b>Never add these two together.</b> Net heat rate already contains auxiliary power. The
+      ₹56 crore net gap and the ₹33 crore auxiliary gap are not additive — the second is a component of the first.
+      Adding them double-counts about ₹33 crore, and any business case that does so will not survive the first
+      conversation with the finance department.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-3 ================= -->
+<section class="mod" id="m-s3">
+  <div class="hd"><div class="kick">SIM-3 · Performance &amp; efficiency</div>
+    <h2>Auxiliary power optimiser</h2>
+    <p>MAHAGENCO burned 81.5 million units above normative auxiliary consumption in June 2026 — worth about
+    ₹33 crore at each station's own variable charge. Much of it is a scheduling problem, not an equipment problem.</p></div>
+
+  <div class="prob"><b>The problem.</b> How many mills, how many CW pumps, which fan control mode, how many ESP
+  fields? On most shifts the answer is "whatever the last shift left running". Every combination has a different
+  auxiliary power draw <i>and</i> a different effect on heat rate — more CW pumps cost auxiliary power but improve
+  back pressure. It is a small optimisation problem that a computer solves exactly and habit solves badly.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Operating point</h3>
+        <div class="ctl"><label>Unit load <span class="v" id="s3-load-v">330 MW</span></label>
+          <input type="range" id="s3-load" min="200" max="500" value="330" step="5">
+          <div class="hint">500 MW class unit</div></div>
+        <div class="ctl"><label>CW inlet temperature <span class="v" id="s3-cw-v">32 °C</span></label>
+          <input type="range" id="s3-cw" min="24" max="38" value="32" step="1"></div>
+        <div class="ctl"><label>As-fired GCV <span class="v" id="s3-gcv-v">3,150 kcal/kg</span></label>
+          <input type="range" id="s3-gcv" min="2700" max="3400" value="3150" step="10"></div>
+        <div class="ctl"><label>Ash content <span class="v" id="s3-ash-v">36 %</span></label>
+          <input type="range" id="s3-ash" min="28" max="46" value="36" step="1">
+          <div class="hint">Drives the ESP field requirement</div></div>
+        <div class="ctl"><label>Variable charge <span class="v" id="s3-vc-v">₹3.65/kWh</span></label>
+          <input type="range" id="s3-vc" min="300" max="600" value="365" step="5"></div>
+      </div>
+      <div class="card"><h3>What the shift is running now</h3>
+        <div class="ctl"><label>Mills in service <span class="v" id="s3-mill-v">5</span></label>
+          <input type="range" id="s3-mill" min="3" max="7" value="5" step="1"></div>
+        <div class="ctl"><label>CW pumps <span class="v" id="s3-cwp-v">3</span></label>
+          <input type="range" id="s3-cwp" min="2" max="4" value="3" step="1"></div>
+        <div class="ctl"><label>ESP fields energised <span class="v" id="s3-esp-v">24</span></label>
+          <input type="range" id="s3-esp" min="12" max="24" value="24" step="1"></div>
+        <div class="ctl"><label>Draft fan control <span class="v" id="s3-fan-v">damper</span></label>
+          <input type="range" id="s3-fan" min="0" max="2" value="0" step="1">
+          <div class="hint">0 damper · 1 IGV · 2 variable speed</div></div>
+        <button class="btn" id="s3-apply">Adopt the optimiser's answer</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s3-stats"></div>
+      <div class="card"><h3>Auxiliary power by equipment — as run against optimised</h3>
+        <canvas id="s3-c1"></canvas></div>
+      <div class="card"><h3>The search</h3><div id="s3-tbl"></div>
+        <p class="small" style="margin-top:8px">Every feasible combination is evaluated on total cost — auxiliary
+        power plus the heat-rate consequence — and ranked. Infeasible combinations are rejected by constraint,
+        not by preference.</p></div>
+      <div class="card"><h3>What just happened</h3><div id="s3-say"></div></div>
+      <div class="warn"><b>Where this is simpler than your plant.</b> Real constraints include mill maintenance
+      schedules, coal quality varying between bunkers, CW pump changeover restrictions, ESP hopper heater loads,
+      ash handling cycles, and the fact that a mill start is not free. This model assumes changeovers are costless
+      and instantaneous. They are not — a real optimiser must include switching cost or it will chatter.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-4 ================= -->
+<section class="mod" id="m-s4">
+  <div class="hd"><div class="kick">SIM-4 · Fuel</div>
+    <h2>Coal GCV soft sensor</h2>
+    <p>As-fired GCV across MAHAGENCO's stations ranged from 2,733 to 3,270 kcal/kg in June 2026, and between
+    619 and 941 kcal/kg was lost between the loading and unloading ends. The lab result arrives after the shift
+    has already made its decisions. A soft sensor fills the gap.</p></div>
+
+  <div class="prob"><b>The problem.</b> You cannot control what you learn about a day late. A soft sensor is a model
+  trained on the lab results you already have, which then estimates as-fired GCV every minute from signals the plant
+  already measures. It does not replace the laboratory — it interpolates between laboratory results.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Training data</h3>
+        <div class="ctl"><label>Laboratory samples available <span class="v" id="s4-n-v">180</span></label>
+          <input type="range" id="s4-n" min="30" max="500" value="180" step="10">
+          <div class="hint">One year of daily composite samples is about 350</div></div>
+        <div class="ctl"><label>Laboratory measurement scatter <span class="v" id="s4-lab-v">60 kcal/kg</span></label>
+          <input type="range" id="s4-lab" min="10" max="200" value="60" step="5">
+          <div class="hint">Sampling and analysis repeatability</div></div>
+        <div class="ctl"><label>Process signal noise <span class="v" id="s4-noise-v">1.0×</span></label>
+          <input type="range" id="s4-noise" min="20" max="300" value="100" step="10"></div>
+        <div class="ctl"><label>Ridge penalty λ <span class="v" id="s4-lam-v">1.00</span></label>
+          <input type="range" id="s4-lam" min="0" max="200" value="100" step="1">
+          <div class="hint">Restrains the model from chasing noise</div></div>
+      </div>
+      <div class="card"><h3>Input signals</h3>
+        <div id="s4-feats"></div>
+        <button class="btn" id="s4-train" style="margin-top:8px">Retrain the model</button>
+        <button class="btn gh" id="s4-reseed" style="margin-top:8px">New coal year</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s4-stats"></div>
+      <div class="card"><h3>Predicted against laboratory GCV — hold-out period only</h3>
+        <canvas id="s4-c1"></canvas>
+        <p class="small" style="margin-top:8px">The orange line is perfect agreement. Points are the hold-out
+        samples the model never saw during training.</p></div>
+      <div class="card"><h3>Estimated GCV every shift, against the laboratory results it interpolates</h3>
+        <canvas id="s4-c2"></canvas>
+        <div class="legend"><span><i style="background:#11707F"></i>Soft sensor, continuous</span>
+          <span><i style="background:#D96A16"></i>Laboratory result</span>
+          <span class="small">Shaded = training period</span></div></div>
+      <div class="card"><h3>What the model learned</h3><div id="s4-tbl"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s4-say"></div></div>
+      <div class="warn"><b>Where this is simpler than your plant.</b> Real coal changes source, and a model trained
+      on one supply will mislead you on another — this is the single biggest failure mode of a GCV soft sensor.
+      Real sampling has its own bias. Real mills wear, which changes the relationship the model learned. Any deployed
+      soft sensor needs a standing comparison against the laboratory and a retraining trigger when the source changes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-5 ================= -->
+<section class="mod" id="m-s5">
+  <div class="hd"><div class="kick">SIM-5 · Monitoring &amp; maintenance</div>
+    <h2>Predictive maintenance and remaining useful life</h2>
+    <p>Availability shortfall cost MAHAGENCO ₹100.87 crore of disallowed fixed charge. This module turns a
+    degradation trend into the only question a planner actually needs answered: will it reach the next planned
+    outage, and what does it cost if it does not?</p></div>
+
+  <div class="prob"><b>The problem.</b> A point estimate of remaining life is almost useless — "the bearing has
+  62 days left" invites either complacency or panic. What a maintenance planner needs is a probability: the chance
+  this machine survives to the outage already in the plan. That is a different question, and it has a different answer.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Station and machine</h3>
+        <div class="ctl"><select id="s5-st"></select></div>
+        <div class="ctl"><label>Days of trend observed <span class="v" id="s5-obs-v">70</span></label>
+          <input type="range" id="s5-obs" min="25" max="150" value="70" step="5">
+          <div class="hint">How much history the model has to fit</div></div>
+        <div class="ctl"><label>Degradation rate <span class="v" id="s5-k-v">1.00×</span></label>
+          <input type="range" id="s5-k" min="40" max="220" value="100" step="5"></div>
+        <div class="ctl"><label>Measurement noise <span class="v" id="s5-noise-v">1.0×</span></label>
+          <input type="range" id="s5-noise" min="20" max="300" value="100" step="10"></div>
+        <div class="ctl"><label>Next planned outage in <span class="v" id="s5-out-v">120 days</span></label>
+          <input type="range" id="s5-out" min="30" max="300" value="120" step="10"></div>
+      </div>
+      <div class="card"><h3>Consequence</h3>
+        <div class="ctl"><label>Forced outage duration <span class="v" id="s5-fdur-v">4 days</span></label>
+          <input type="range" id="s5-fdur" min="1" max="14" value="4" step="1"></div>
+        <div class="ctl"><label>Planned intervention <span class="v" id="s5-pdur-v">1.5 days</span></label>
+          <input type="range" id="s5-pdur" min="5" max="40" value="15" step="5">
+          <div class="hint">Taken inside an outage already scheduled</div></div>
+        <button class="btn" id="s5-reseed">New machine</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s5-stats"></div>
+      <div class="card"><h3>Health index — observed, fitted and projected with uncertainty</h3>
+        <canvas id="s5-c1"></canvas>
+        <div class="legend"><span><i style="background:#11707F"></i>Measured health index</span>
+          <span><i style="background:#D96A16"></i>Fitted degradation model</span>
+          <span><i style="background:#A8261E"></i>Functional failure threshold</span>
+          <span class="small">Shaded = 90 % projection band</span></div></div>
+      <div class="card"><h3>The decision, in money</h3><div id="s5-tbl"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s5-say"></div></div>
+      <div class="warn"><b>Where this is simpler than your plant.</b> A single monotonic degradation mode with a
+      known failure threshold. Real machines have several competing damage mechanisms, a threshold nobody has ever
+      measured, step changes at every intervention, and a health index that resets when a sensor is replaced. The
+      uncertainty band here is honest about statistical error only — it says nothing about the model being the
+      wrong model, which is usually the larger risk.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-6 ================= -->
+<section class="mod" id="m-s6">
+  <div class="hd"><div class="kick">SIM-6 · Performance &amp; efficiency</div>
+    <h2>Combustion multi-objective optimiser</h2>
+    <p>Koradi Units 8-10 ran a gross heat rate of 2,272 kcal/kWh against a normative 2,096 — a 176 kcal/kWh gap on
+    964.8 MU, the single largest thermodynamic loss in the fleet in June 2026. Combustion optimisation is the
+    most established closed-loop AI application in thermal generation, and also the one that needs the most
+    engineering around it.</p></div>
+
+  <div class="prob"><b>The problem.</b> There is no single best combustion setting. Lowering excess O₂ improves heat
+  rate and lowers NOx, but raises unburnt carbon and CO and can destabilise the flame. Raising over-fire air lowers
+  NOx but raises unburnt carbon. It is a trade-off surface, and where you choose to sit on it is a management
+  decision about the relative price of fuel, of a NOx penalty and of ash saleability — not a technical one.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Manual setpoints</h3>
+        <div class="ctl"><label>Excess O₂ <span class="v" id="s6-o2-v">3.8 %</span></label>
+          <input type="range" id="s6-o2" min="20" max="60" value="38" step="1"></div>
+        <div class="ctl"><label>Burner tilt <span class="v" id="s6-tilt-v">0°</span></label>
+          <input type="range" id="s6-tilt" min="-20" max="20" value="0" step="1"></div>
+        <div class="ctl"><label>Over-fire air damper <span class="v" id="s6-ofa-v">35 %</span></label>
+          <input type="range" id="s6-ofa" min="0" max="80" value="35" step="1"></div>
+        <div class="ctl"><label>Mill bias — upper elevations <span class="v" id="s6-bias-v">0 %</span></label>
+          <input type="range" id="s6-bias" min="-25" max="25" value="0" step="1"></div>
+        <div class="ctl"><label>Unit load <span class="v" id="s6-load-v">560 MW</span></label>
+          <input type="range" id="s6-load" min="330" max="660" value="560" step="10"></div>
+      </div>
+      <div class="card"><h3>What matters to management</h3>
+        <div class="ctl"><label>Weight on heat rate <span class="v" id="s6-wh-v">0.55</span></label>
+          <input type="range" id="s6-wh" min="0" max="100" value="55" step="5"></div>
+        <div class="ctl"><label>Weight on NOx <span class="v" id="s6-wn-v">0.30</span></label>
+          <input type="range" id="s6-wn" min="0" max="100" value="30" step="5"></div>
+        <div class="ctl"><label>Weight on unburnt carbon <span class="v" id="s6-wu-v">0.15</span></label>
+          <input type="range" id="s6-wu" min="0" max="100" value="15" step="5"></div>
+        <hr class="sep">
+        <label class="tog"><input type="checkbox" id="s6-clamp" checked> <span><b>Clamps enforced</b> — optimiser may only bias within engineered limits</span></label>
+        <label class="tog"><input type="checkbox" id="s6-rate" checked> <span><b>Rate limits enforced</b> — no change faster than an operator would make</span></label>
+        <button class="btn" id="s6-opt">Run the optimiser</button>
+        <button class="btn gh" id="s6-reset">Back to manual</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s6-stats"></div>
+      <div class="card"><h3>The trade-off surface — every feasible setting, and where you are on it</h3>
+        <canvas id="s6-c1"></canvas>
+        <p class="small" style="margin-top:8px">Each point is one feasible combination of O₂, tilt, over-fire air and
+        mill bias. The lower-left frontier is the Pareto set — settings where you cannot improve heat rate without
+        worsening NOx. Everything above and right of it is simply wasteful.</p></div>
+      <div class="card"><h3>Outcome at the current settings</h3><div id="s6-tbl"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s6-say"></div></div>
+      <div class="bad"><b>The engineering that makes this safe.</b> Clamps on every bias the system can write. Rate
+      limits so no change is faster than an operator would make it. A watchdog that returns the DCS to base control
+      if the optimiser stops responding. Bumpless transfer in and out. A clearly marked operator override. If a
+      vendor cannot describe all five for their system, they are not ready to connect to your DCS. Switch the clamps
+      off above and watch what an unconstrained optimiser proposes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-7 ================= -->
+<section class="mod" id="m-s7">
+  <div class="hd"><div class="kick">SIM-7 · Generative AI</div>
+    <h2>RAG — grounding AI in your own documents</h2>
+    <p>Retrieval-augmented generation is the difference between a party trick and a plant tool. This module runs a
+    real retrieval engine over an indexed corpus of plant documents and shows you exactly what the model would be
+    given before it answers.</p></div>
+
+  <div class="prob"><b>The problem.</b> A public chatbot answers from what it half-remembers of the internet. It has
+  never read your OEM manual, your SOPs or your trip reports — and it will not tell you that. It will produce a
+  clearance figure with total confidence and no source. RAG changes the order of operations: search your documents
+  first, then answer only from what was found, and cite it.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Ask the corpus</h3>
+        <div class="ctl"><input type="text" id="s7-q" placeholder="Type a question…" value="ID fan bearing temperature high — what should I check?"></div>
+        <button class="btn" id="s7-go">Search and answer</button>
+        <p class="small" style="margin-top:10px">Try one of these:</p>
+        <div id="s7-presets"></div>
+      </div>
+      <div class="card"><h3>Retrieval settings</h3>
+        <div class="ctl"><label>Passages retrieved (k) <span class="v" id="s7-k-v">4</span></label>
+          <input type="range" id="s7-k" min="1" max="8" value="4" step="1"></div>
+        <div class="ctl"><label>Filter by station</label>
+          <select id="s7-station"><option value="">All stations</option></select></div>
+        <div class="ctl"><label>Filter by unit</label>
+          <select id="s7-unit"><option value="">All units</option></select></div>
+        <label class="tog"><input type="checkbox" id="s7-ground" checked> <span><b>Grounded</b> — answer only from retrieved passages</span></label>
+        <label class="tog"><input type="checkbox" id="s7-kw" checked> <span><b>Hybrid search</b> — keyword matching alongside semantic scoring</span></label>
+      </div>
+      <div class="card"><h3>Indexed corpus</h3><div id="s7-corpus"></div></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Step 1 — retrieval, before any answer is generated</h3><div id="s7-ret"></div></div>
+      <div class="card"><h3>Step 2 — the answer</h3><div id="s7-ans"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s7-say"></div></div>
+      <div class="warn"><b>Honest about this demo.</b> The retrieval is real — TF-IDF term weighting with cosine
+      similarity, plus optional exact keyword matching for tag numbers and equipment codes, running in this browser
+      over an indexed corpus. The <i>answer generation</i> is templated from the retrieved passages, because there is
+      no language model inside this file. In a real deployment a language model writes that paragraph from the same
+      retrieved text. What this demo shows faithfully is the part that determines whether the answer is trustworthy:
+      what gets retrieved, how it is scored, and whether it is cited.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-8 ================= -->
+<section class="mod" id="m-s8">
+  <div class="hd"><div class="kick">SIM-8 · Agentic AI</div>
+    <h2>Agentic engineering assistant</h2>
+    <p>An agent is a model given tools, a goal and permission to decide the order in which to use them. This module
+    walks a real triage scenario step by step, showing every tool call, what came back, and what the agent concluded
+    — and stops at the point where an engineer has to sign.</p></div>
+
+  <div class="prob"><b>The scenario.</b> 06:40. A residual monitoring model raises an advisory on Koradi Unit 8 —
+  ID fan A drive-end bearing, 4.6 °C above expected, sustained for six days. Today that alert lands in an inbox and
+  waits for somebody to have time. Watch what an agent does with it in ninety seconds.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Run the agent</h3>
+        <button class="btn" id="s8-step">Next step</button>
+        <button class="btn alt" id="s8-all" style="margin-top:8px">Run to the approval gate</button>
+        <button class="btn gh" id="s8-reset" style="margin-top:8px">Reset</button>
+        <hr class="sep">
+        <label class="tog"><input type="checkbox" id="s8-write"> <span><b>Grant write access</b> to the CMMS and DCS</span></label>
+        <div id="s8-writewarn"></div>
+      </div>
+      <div class="card"><h3>Tools the agent may call</h3><div id="s8-tools"></div></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Agent trace</h3><div id="s8-trace"><p class="small">Press <b>Next step</b> to begin.</p></div></div>
+      <div class="card" id="s8-gate" style="display:none"><h3>Human approval gate</h3><div id="s8-gatebody"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s8-say"><p class="small">The explanation appears once the agent reaches the gate.</p></div></div>
+      <div class="bad"><b>The rule that does not bend.</b> An agent may hold read-only credentials to the historian,
+      the CMMS and the document store. It must never hold a credential that can write to the DCS, change a protection
+      setting, or close a permit. Every write goes through a named human. Switch on write access above and read what
+      it says.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DATA ================= -->
+<section class="mod" id="m-data">
+  <div class="hd"><div class="kick">Reference</div>
+    <h2>June 2026 dataset</h2>
+    <p>Every figure used anywhere in this lab, with its derivation. Source: MAHAGENCO Regulatory &amp; Commercial
+    Department — June 2026 energy bill (Bills 001/2026 and 35/2026), Provisional Part-I Fuel Surcharge Adjustment
+    bill 43/2026 including the F10 ECR calculation, and the MERC Merit Order Dispatch stack for July 2026 (R0),
+    effective 16.07.2026 to 15.08.2026.</p></div>
+
+  <div class="stats">
+    <div class="stat"><div class="l">Thermal sent out</div><div class="n">4,588 MU</div><div class="s">June 2026</div></div>
+    <div class="stat"><div class="l">Net bill</div><div class="n">₹2,806 cr</div><div class="s">thermal and gas</div></div>
+    <div class="stat"><div class="l">Net heat-rate gap</div><div class="n em">₹56.35 cr</div><div class="s">one month, against norm</div></div>
+    <div class="stat"><div class="l">Auxiliary above norm</div><div class="n em">81.5 MU</div><div class="s">₹32.9 cr — a component of the above</div></div>
+    <div class="stat"><div class="l">Availability disallowance</div><div class="n rd">₹100.87 cr</div><div class="s">cumulative; ₹32.93 cr adjusted in June</div></div>
+    <div class="stat"><div class="l">June FSA</div><div class="n gn">−₹101.44 cr</div><div class="s">withdrawal</div></div>
+  </div>
+
+  <div class="card"><h3>Station performance, June 2026</h3><div id="d-t1"></div></div>
+  <div class="card"><h3>The decomposition — auxiliary power against boiler and turbine</h3><div id="d-t2"></div>
+    <p class="small" style="margin-top:8px"><b>Gross heat rate = net heat rate × (1 − auxiliary fraction).</b>
+    A negative gross gap means the boiler and turbine are beating the norm and the whole penalty is auxiliary power.</p></div>
+  <div class="card"><h3>Fuel economics, derived from each station's own merit-order variable charge</h3><div id="d-t3"></div>
+    <p class="small" style="margin-top:8px">Cost of heat = MOD variable charge ÷ actual net heat rate. Implied
+    as-fired coal cost = cost of heat × as-fired GCV. This is the station's own money, not an assumption.</p></div>
+  <div class="card"><h3>Value at stake, June 2026</h3><div id="d-t4"></div>
+    <p class="small" style="margin-top:8px"><b>Do not add columns 2 and 4.</b> Net heat rate already contains
+    auxiliary power; the auxiliary figure is a component of the heat-rate figure, not an addition to it.</p></div>
+
+  <div class="warn"><b>What this data does not tell you.</b> One month is not a trend, and June is a low-demand-season
+  month. Normative values are regulatory constructs, not thermodynamic optima. The filing does not separate planned
+  overhaul from forced outage inside the availability figure. Heat rate is a monthly average across a group of units,
+  so a single poor unit hides inside a group number. And auxiliary consumption is structurally higher at low PLF,
+  so part of the auxiliary gap at Chandrapur 3-7 and Khaperkheda 1-4 is a consequence of being backed down rather
+  than of inefficiency — separating those two is itself a worthwhile analytics project.</div>
+</section>
+
+</div></main>
+
+<script>
+/* ============================================================
+   June 2026 MAHAGENCO data — from the energy bill, the Part-I FSA
+   bill F10 ECR calculation, and the MERC MOD stack for July 2026.
+   ============================================================ */
+const ST = [{"station":"Bhusawal Unit 3","cap":210,"avail":88.91,"plf":64.4,"gross":101.5,"aux_act":12.71,"aux_norm":10.96,"net":88.6,"hr_act":2847.53,"hr_norm":2787,"sfo_act":0.62,"sfo_norm":1.4,"gcv_fired":3039,"transit":0.852,"transit_norm":0.8,"vc_bill":5.329,"vc_mod":4.947,"afc_lakh":0,"avf_peak":88.233,"ghr_act":2485.6089370000004,"ghr_norm":2481.5448,"hr_gap":60.5300000000002,"ghr_gap":4.064137000000301,"aux_gap":1.75,"rs_per_kcal":0.0017372951294630785,"coal_rs_per_t":5279.639898438296,"hr_gap_cr":0.9317040812915085,"ghr_gap_cr":0.07166514496804778,"aux_gap_mu":1.77625,"aux_gap_cr":0.878710875,"sfo_gap_kl":-0.07916999999999999,"afc_cr":0,"unit_mw":210},{"station":"Bhusawal Units 4-5","cap":1000,"avail":90.19,"plf":76.05,"gross":551.63,"aux_act":7.06,"aux_norm":6,"net":512.71,"hr_act":2432.68,"hr_norm":2375,"sfo_act":0.21,"sfo_norm":0.5,"gcv_fired":3127,"transit":1.037,"transit_norm":0.8,"vc_bill":4.404,"vc_mod":4.061,"afc_lakh":0,"avf_peak":90.557,"ghr_act":2260.932792,"ghr_norm":2232.5,"hr_gap":57.679999999999836,"ghr_gap":28.432792000000063,"aux_gap":1.0599999999999996,"rs_per_kcal":0.0016693523192528406,"coal_rs_per_t":5220.064702303633,"hr_gap_cr":4.936794444020573,"ghr_gap_cr":2.6182757883465437,"aux_gap_mu":5.847277999999998,"aux_gap_cr":2.3745795957999993,"sfo_gap_kl":-0.15997270000000002,"afc_cr":0,"unit_mw":500},{"station":"Bhusawal Unit 6","cap":660,"avail":79.01,"plf":70.37,"gross":335.13,"aux_act":6.68,"aux_norm":5.75,"net":312.74,"hr_act":2183.13,"hr_norm":2139.05,"sfo_act":0.95,"sfo_norm":0.5,"gcv_fired":3081,"transit":1.459,"transit_norm":0.8,"vc_bill":3.668,"vc_mod":3.441,"afc_lakh":788.19,"avf_peak":76.129,"ghr_act":2037.2969160000002,"ghr_norm":2016.0546250000002,"hr_gap":44.07999999999993,"ghr_gap":21.242291000000023,"aux_gap":0.9299999999999997,"rs_per_kcal":0.001576177323384315,"coal_rs_per_t":4856.202333347074,"hr_gap_cr":2.172851732475845,"ghr_gap_cr":1.1220694429520026,"aux_gap_mu":3.1167089999999993,"aux_gap_cr":1.0724595668999997,"sfo_gap_kl":0.1508085,"afc_cr":7.8819,"unit_mw":660},{"station":"Khaperkheda Units 1-4","cap":840,"avail":57.85,"plf":54.55,"gross":342.19,"aux_act":12.44,"aux_norm":9.7,"net":299.57,"hr_act":2714.99,"hr_norm":2630,"sfo_act":1.33,"sfo_norm":1.2,"gcv_fired":2755,"transit":0.148,"transit_norm":0.8,"vc_bill":3.84,"vc_mod":3.649,"afc_lakh":2174.79,"avf_peak":56.867,"ghr_act":2377.2452439999997,"ghr_norm":2374.89,"hr_gap":84.98999999999978,"ghr_gap":2.355243999999857,"aux_gap":2.74,"rs_per_kcal":0.0013440196833137508,"coal_rs_per_t":3702.774227529383,"hr_gap_cr":3.421935172531014,"ghr_gap_cr":0.10832004928082466,"aux_gap_mu":9.376006,"aux_gap_cr":3.4213045894,"sfo_gap_kl":0.04448470000000004,"afc_cr":21.7479,"unit_mw":210},{"station":"Khaperkheda Unit 5","cap":500,"avail":87.86,"plf":82.03,"gross":299.05,"aux_act":6.57,"aux_norm":6,"net":279.4,"hr_act":2384.59,"hr_norm":2375,"sfo_act":0,"sfo_norm":0.5,"gcv_fired":2733,"transit":0.396,"transit_norm":0.8,"vc_bill":3.428,"vc_mod":3.189,"afc_lakh":0,"avf_peak":88.429,"ghr_act":2227.922437,"ghr_norm":2232.5,"hr_gap":9.590000000000146,"ghr_gap":-4.577562999999827,"aux_gap":0.5700000000000003,"rs_per_kcal":0.0013373368168112757,"coal_rs_per_t":3654.9415203452163,"hr_gap_cr":0.358332178445776,"ghr_gap_cr":-0.18307074029972387,"aux_gap_mu":1.704585000000001,"aux_gap_cr":0.5435921565000004,"sfo_gap_kl":-0.14952499999999996,"afc_cr":0,"unit_mw":500},{"station":"Nashik Units 3-5","cap":630,"avail":94.62,"plf":58.4,"gross":264.91,"aux_act":12.96,"aux_norm":10.75,"net":230.57,"hr_act":2803.8,"hr_norm":2754,"sfo_act":0.87,"sfo_norm":1,"gcv_fired":2915,"transit":0.692,"transit_norm":0.8,"vc_bill":5.401,"vc_mod":5.98,"afc_lakh":0,"avf_peak":94.277,"ghr_act":2440.42752,"ghr_norm":2457.9449999999997,"hr_gap":49.80000000000018,"ghr_gap":-17.517479999999523,"aux_gap":2.210000000000001,"rs_per_kcal":0.002132819744632285,"coal_rs_per_t":6217.16955560311,"hr_gap_cr":2.448985957628941,"ghr_gap_cr":-0.989746866690322,"aux_gap_mu":5.854511000000003,"aux_gap_cr":3.5009975780000016,"sfo_gap_kl":-0.034438300000000005,"afc_cr":0,"unit_mw":210},{"station":"Chandrapur Units 3-7","cap":1920,"avail":64.88,"plf":53.56,"gross":762.5,"aux_act":11.69,"aux_norm":8.67,"net":673.36,"hr_act":2709.3,"hr_norm":2688,"sfo_act":3.23,"sfo_norm":1,"gcv_fired":3149,"transit":-0.082,"transit_norm":0.8,"vc_bill":4.658,"vc_mod":4.133,"afc_lakh":2393.62,"avf_peak":64.096,"ghr_act":2392.5828300000003,"ghr_norm":2454.9504,"hr_gap":21.300000000000182,"ghr_gap":-62.36756999999989,"aux_gap":3.0199999999999996,"rs_per_kcal":0.0015254862879710625,"coal_rs_per_t":4803.756320820876,"hr_gap_cr":2.187939081829273,"ghr_gap_cr":-7.254491554741986,"aux_gap_mu":23.027499999999996,"aux_gap_cr":9.517265749999998,"sfo_gap_kl":1.7003749999999997,"afc_cr":23.9362,"unit_mw":500},{"station":"Chandrapur Units 8-9","cap":1000,"avail":74.87,"plf":66.68,"gross":486.89,"aux_act":6.9,"aux_norm":6,"net":453.31,"hr_act":2425.27,"hr_norm":2375,"sfo_act":0.54,"sfo_norm":0.5,"gcv_fired":3158,"transit":0.078,"transit_norm":0.8,"vc_bill":3.617,"vc_mod":3.626,"afc_lakh":1174.8,"avf_peak":73.894,"ghr_act":2257.92637,"ghr_norm":2232.5,"hr_gap":50.26999999999998,"ghr_gap":25.426370000000134,"aux_gap":0.9000000000000004,"rs_per_kcal":0.0014950912681886966,"coal_rs_per_t":4721.498224939904,"hr_gap_cr":3.40699808912822,"ghr_gap_cr":1.8508998593559491,"aux_gap_mu":4.382010000000001,"aux_gap_cr":1.5889168260000004,"sfo_gap_kl":0.019475600000000017,"afc_cr":11.748,"unit_mw":500},{"station":"Paras Units 3-4","cap":500,"avail":74.83,"plf":66.92,"gross":245.15,"aux_act":11.59,"aux_norm":9.3,"net":216.73,"hr_act":2578.17,"hr_norm":2415,"sfo_act":1.64,"sfo_norm":0.5,"gcv_fired":2940,"transit":1.924,"transit_norm":0.8,"vc_bill":4.202,"vc_mod":3.947,"afc_lakh":573.66,"avf_peak":73.809,"ghr_act":2279.360097,"ghr_norm":2190.405,"hr_gap":163.17000000000007,"ghr_gap":88.95509700000002,"aux_gap":2.289999999999999,"rs_per_kcal":0.0015309308540553959,"coal_rs_per_t":4500.936710922864,"hr_gap_cr":5.413958474138635,"ghr_gap_cr":3.338553275797712,"aux_gap_mu":5.613934999999998,"aux_gap_cr":2.2158201444999994,"sfo_gap_kl":0.279471,"afc_cr":5.736599999999999,"unit_mw":250},{"station":"Parli Units 6-7","cap":500,"avail":82.34,"plf":68.35,"gross":252.68,"aux_act":12.41,"aux_norm":9.3,"net":221.32,"hr_act":2511.04,"hr_norm":2415,"sfo_act":2.87,"sfo_norm":0.5,"gcv_fired":3268,"transit":1.451,"transit_norm":0.8,"vc_bill":5.53,"vc_mod":4.134,"afc_lakh":152.92,"avf_peak":81.324,"ghr_act":2199.419936,"ghr_norm":2190.405,"hr_gap":96.03999999999996,"ghr_gap":9.01493599999958,"aux_gap":3.1099999999999994,"rs_per_kcal":0.001646329807569772,"coal_rs_per_t":5380.205811138016,"hr_gap_cr":3.499368307760927,"ghr_gap_cr":0.3750164837571636,"aux_gap_mu":7.8583479999999994,"aux_gap_cr":3.2486410632,"sfo_gap_kl":0.5988516,"afc_cr":1.5292,"unit_mw":250},{"station":"Parli Unit 8","cap":250,"avail":97.4,"plf":79.55,"gross":145.56,"aux_act":10.74,"aux_norm":8.5,"net":129.92,"hr_act":2461.42,"hr_norm":2415,"sfo_act":0.25,"sfo_norm":0.5,"gcv_fired":3270,"transit":0.62,"transit_norm":0.8,"vc_bill":5.393,"vc_mod":4.133,"afc_lakh":0,"avf_peak":97.221,"ghr_act":2197.063492,"ghr_norm":2209.725,"hr_gap":46.42000000000007,"ghr_gap":-12.661507999999685,"aux_gap":2.24,"rs_per_kcal":0.001679112057267756,"coal_rs_per_t":5490.696427265562,"hr_gap_cr":1.0126534070252144,"ghr_gap_cr":-0.30946188089865406,"aux_gap_mu":3.2605440000000003,"aux_gap_cr":1.3475828352,"sfo_gap_kl":-0.03639,"afc_cr":0,"unit_mw":250},{"station":"Koradi Unit 6","cap":210,"avail":75.46,"plf":65.16,"gross":98.06,"aux_act":11.37,"aux_norm":10.81,"net":86.88,"hr_act":2534.3,"hr_norm":2455.75,"sfo_act":1.73,"sfo_norm":2.81,"gcv_fired":2767,"transit":0.809,"transit_norm":0.8,"vc_bill":3.703,"vc_mod":3.52,"afc_lakh":25.1,"avf_peak":71.214,"ghr_act":2246.15009,"ghr_norm":2190.283425,"hr_gap":78.55000000000018,"ghr_gap":55.86666500000001,"aux_gap":0.5599999999999987,"rs_per_kcal":0.0013889436925383733,"coal_rs_per_t":3843.207197253679,"hr_gap_cr":0.9478740670007517,"ghr_gap_cr":0.7609029632659118,"aux_gap_mu":0.5491359999999987,"aux_gap_cr":0.19329587199999956,"sfo_gap_kl":-0.10590480000000001,"afc_cr":0.251,"unit_mw":210},{"station":"Koradi Units 8-10","cap":1980,"avail":72.5,"plf":66.62,"gross":964.8,"aux_act":6.95,"aux_norm":6,"net":897.75,"hr_act":2442.18,"hr_norm":2230,"sfo_act":0.41,"sfo_norm":0.5,"gcv_fired":3061,"transit":0.49,"transit_norm":0.8,"vc_bill":3.378,"vc_mod":3.284,"afc_lakh":2803.71,"avf_peak":72.123,"ghr_act":2272.4484899999998,"ghr_norm":2096.2,"hr_gap":212.17999999999984,"ghr_gap":176.24848999999995,"aux_gap":0.9500000000000002,"rs_per_kcal":0.001344700226846506,"coal_rs_per_t":4116.127394377156,"hr_gap_cr":25.614467810726463,"ghr_gap_cr":22.86589357505048,"aux_gap_mu":9.165600000000001,"aux_gap_cr":3.0099830400000007,"sfo_gap_kl":-0.08683200000000002,"afc_cr":28.0371,"unit_mw":660}];
+ST.forEach(s=>{
+  s.ghrAct  = s.hr_act  * (1 - s.aux_act/100);
+  s.ghrNorm = s.hr_norm * (1 - s.aux_norm/100);
+  s.hrGap   = s.hr_act  - s.hr_norm;
+  s.ghrGap  = s.ghrAct  - s.ghrNorm;
+  s.auxGap  = s.aux_act - s.aux_norm;
+  s.rsKcal  = s.vc_mod / s.hr_act;
+  s.coalRsT = s.rsKcal * s.gcv_fired * 1000;
+  s.auxMU   = s.auxGap/100 * s.gross;
+  s.auxCr   = s.auxMU*1e6 * s.vc_mod / 1e7;
+  s.hrGapCr = s.hrGap * s.net*1e6 * s.rsKcal / 1e7;
+  s.ghrCr   = s.ghrGap * s.gross*1e6 * s.rsKcal / 1e7;
+});
+const fmt=(x,d=2)=>Number(x).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const cr =(x)=>'₹'+fmt(x,2)+' cr';
+const $  =(id)=>document.getElementById(id);
+
+/* ---------- minimal canvas chart library ---------- */
+function hidpi(cv,h){
+  const r=window.devicePixelRatio||1, w=cv.clientWidth||700;
+  cv.height=h*r; cv.width=w*r; cv.style.height=h+'px';
+  const x=cv.getContext('2d'); x.setTransform(r,0,0,r,0,0);
+  return {x,w,h};
+}
+const CSS=getComputedStyle(document.documentElement);
+const C={ink:'#1C2530',mut:'#5C6B7A',line:'#D3DDE5',grid:'#EAF0F5',
+         ember:'#D96A16',teal:'#11707F',red:'#A8261E',grn:'#256B45',amb:'#C58A18',soft:'#F1F4F7'};
+
+/* line chart: series=[{name,data:[y..],color,dash,fill}] */
+function lineChart(cv,{labels,series,yMin,yMax,yLabel,height=250,bands=[],marks=[],xEvery=1}){
+  const {x,w,h}=hidpi(cv,height);
+  const P={l:56,r:14,t:14,b:30};
+  const iw=w-P.l-P.r, ih=h-P.t-P.b;
+  let lo=yMin, hi=yMax;
+  if(lo===undefined||hi===undefined){
+    let a=Infinity,b=-Infinity;
+    series.forEach(s=>s.data.forEach(v=>{if(v!=null){a=Math.min(a,v);b=Math.max(b,v);}}));
+    const pad=(b-a)*0.12||1; lo=(yMin!==undefined?yMin:a-pad); hi=(yMax!==undefined?yMax:b+pad);
+  }
+  const X=i=>P.l+(labels.length<2?0:i*iw/(labels.length-1));
+  const Y=v=>P.t+ih-(v-lo)/(hi-lo)*ih;
+  x.clearRect(0,0,w,h);
+  bands.forEach(bd=>{ x.fillStyle=bd.color; x.fillRect(P.l,Y(bd.to),iw,Math.abs(Y(bd.from)-Y(bd.to))); });
+  x.strokeStyle=C.grid; x.lineWidth=1; x.fillStyle=C.mut; x.font='11px Calibri,sans-serif';
+  for(let g=0;g<=4;g++){ const v=lo+(hi-lo)*g/4, y=Y(v);
+    x.beginPath(); x.moveTo(P.l,y); x.lineTo(P.l+iw,y); x.stroke();
+    x.textAlign='right'; x.textBaseline='middle'; x.fillText(v.toFixed(Math.abs(hi-lo)<12?1:0), P.l-7, y); }
+  x.textAlign='center'; x.textBaseline='top';
+  labels.forEach((L,i)=>{ if(i%xEvery===0) x.fillText(L, X(i), P.t+ih+7); });
+  if(yLabel){ x.save(); x.translate(12,P.t+ih/2); x.rotate(-Math.PI/2);
+    x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=C.mut; x.fillText(yLabel,0,0); x.restore(); }
+  marks.forEach(m=>{ const px=X(m.i);
+    x.strokeStyle=m.color||C.red; x.setLineDash([4,3]); x.lineWidth=1.5;
+    x.beginPath(); x.moveTo(px,P.t); x.lineTo(px,P.t+ih); x.stroke(); x.setLineDash([]);
+    if(m.label){ x.fillStyle=m.color||C.red; x.font='700 10.5px Calibri,sans-serif';
+      x.textAlign=m.i>labels.length*0.7?'right':'left'; x.textBaseline='top';
+      x.fillText(m.label, px+(m.i>labels.length*0.7?-5:5), P.t+2); } });
+  x.save(); x.beginPath(); x.rect(P.l,P.t,iw,ih); x.clip();
+  series.forEach(s=>{
+    if(s.fill){ x.beginPath(); s.data.forEach((v,i)=>{ if(v==null)return; i?x.lineTo(X(i),Y(v)):x.moveTo(X(i),Y(v)); });
+      for(let i=s.fillTo.length-1;i>=0;i--){ if(s.fillTo[i]!=null) x.lineTo(X(i),Y(s.fillTo[i])); }
+      x.closePath(); x.fillStyle=s.fill; x.fill(); }
+    x.beginPath(); x.lineWidth=s.width||2.2; x.strokeStyle=s.color;
+    if(s.dash) x.setLineDash(s.dash); else x.setLineDash([]);
+    let started=false;
+    s.data.forEach((v,i)=>{ if(v==null){started=false;return;} if(!started){x.moveTo(X(i),Y(v));started=true;} else x.lineTo(X(i),Y(v)); });
+    x.stroke(); x.setLineDash([]);
+    if(s.dots) s.data.forEach((v,i)=>{ if(v==null)return; x.beginPath(); x.arc(X(i),Y(v),2.6,0,7); x.fillStyle=s.color; x.fill(); });
+  });
+  x.restore();
+  x.strokeStyle=C.line; x.lineWidth=1;
+  x.beginPath(); x.moveTo(P.l,P.t); x.lineTo(P.l,P.t+ih); x.lineTo(P.l+iw,P.t+ih); x.stroke();
+}
+
+/* horizontal bar chart: rows=[{label,value,color,note}] */
+function barChart(cv,{rows,height=260,unit='',maxV}){
+  const {x,w,h}=hidpi(cv,height);
+  const anyNeg=rows.some(r=>r.value<0);
+  const P={l:150,r:86,t:8,b:8};
+  const iw=w-P.l-P.r, bh=(h-P.t-P.b)/rows.length;
+  const mx=maxV||Math.max(...rows.map(r=>Math.abs(r.value)))*1.05||1;
+  const zero = anyNeg ? P.l + iw*0.34 : P.l;          // signed bars get a zero line
+  const scale= anyNeg ? (iw*0.64)/mx : iw/mx;
+  x.clearRect(0,0,w,h);
+  rows.forEach((r,i)=>{
+    const y=P.t+i*bh, bw=Math.abs(r.value)*scale;
+    x.fillStyle=i%2?'#fff':C.soft; x.fillRect(0,y,w,bh);
+    x.fillStyle=r.color||C.ember;
+    x.fillRect(r.value>=0?zero:zero-bw, y+bh*0.22, bw, bh*0.56);
+    x.fillStyle=C.ink; x.font='11.5px Calibri,sans-serif'; x.textAlign='right'; x.textBaseline='middle';
+    x.fillText(r.label,P.l-8,y+bh/2);
+    x.fillStyle=r.color||C.ember; x.font='700 11.5px Calibri,sans-serif';
+    const txt=(r.value<0?'\u2212':'')+fmt(Math.abs(r.value),r.dp===undefined?2:r.dp)+unit;
+    if(r.value>=0){ x.textAlign='left'; x.fillText(txt, zero+bw+6, y+bh/2); }
+    else { x.textAlign='right'; x.fillText(txt, zero-bw-6, y+bh/2); }
+  });
+  if(anyNeg){ x.strokeStyle='#9AA9B6'; x.lineWidth=1; x.beginPath();
+    x.moveTo(zero,P.t); x.lineTo(zero,h-P.b); x.stroke(); }
+}
+
+/* scatter with fit line */
+function scatter(cv,{pts,fit,height=250,xLabel,yLabel}){
+  const {x,w,h}=hidpi(cv,height);
+  const P={l:58,r:14,t:14,b:34}, iw=w-P.l-P.r, ih=h-P.t-P.b;
+  const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  const x0=Math.min(...xs,...(fit?fit.map(p=>p[0]):[])), x1=Math.max(...xs,...(fit?fit.map(p=>p[0]):[]));
+  const y0=Math.min(...ys,...(fit?fit.map(p=>p[1]):[])), y1=Math.max(...ys,...(fit?fit.map(p=>p[1]):[]));
+  const px=v=>P.l+(v-x0)/((x1-x0)||1)*iw, py=v=>P.t+ih-(v-y0)/((y1-y0)||1)*ih;
+  x.clearRect(0,0,w,h);
+  x.strokeStyle=C.grid; x.fillStyle=C.mut; x.font='11px Calibri,sans-serif';
+  for(let g=0;g<=4;g++){ const v=y0+(y1-y0)*g/4,yy=py(v);
+    x.beginPath();x.moveTo(P.l,yy);x.lineTo(P.l+iw,yy);x.stroke();
+    x.textAlign='right';x.textBaseline='middle';x.fillText(v.toFixed(0),P.l-7,yy); }
+  for(let g=0;g<=4;g++){ const v=x0+(x1-x0)*g/4;
+    x.textAlign='center';x.textBaseline='top';x.fillText(v.toFixed(0),px(v),P.t+ih+6); }
+  pts.forEach(p=>{ x.beginPath(); x.arc(px(p[0]),py(p[1]),3.2,0,7);
+    x.fillStyle=p[2]||'rgba(17,112,127,.65)'; x.fill(); });
+  if(fit){ x.beginPath(); fit.forEach((p,i)=>i?x.lineTo(px(p[0]),py(p[1])):x.moveTo(px(p[0]),py(p[1])));
+    x.strokeStyle=C.ember; x.lineWidth=2.2; x.stroke(); }
+  x.strokeStyle=C.line;x.lineWidth=1;x.beginPath();x.moveTo(P.l,P.t);x.lineTo(P.l,P.t+ih);x.lineTo(P.l+iw,P.t+ih);x.stroke();
+  x.fillStyle=C.mut;x.font='11px Calibri,sans-serif';
+  if(xLabel){x.textAlign='center';x.textBaseline='bottom';x.fillText(xLabel,P.l+iw/2,h-2);}
+  if(yLabel){x.save();x.translate(12,P.t+ih/2);x.rotate(-Math.PI/2);x.textAlign='center';x.fillText(yLabel,0,0);x.restore();}
+}
+
+/* seeded RNG so every run is reproducible in class */
+function rng(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+function gauss(r){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+
+/* ---------- nav ---------- */
+document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',()=>{
+  document.querySelectorAll('#nav a').forEach(b=>b.classList.toggle('on',b===a));
+  document.querySelectorAll('.mod').forEach(m=>m.classList.toggle('on',m.id==='m-'+a.dataset.m));
+  document.querySelector('main').scrollTop=0;
+  if(REDRAW[a.dataset.m]) REDRAW[a.dataset.m]();
+}));
+const REDRAW={};
+window.addEventListener('resize',()=>{ const on=document.querySelector('#nav a.on'); if(on&&REDRAW[on.dataset.m]) REDRAW[on.dataset.m](); });
+/* ==========================================================
+   SIM-1  Residual anomaly detection — ID fan bearing
+   k-nearest-neighbour similarity model on a healthy-history
+   memory matrix.  Physics of the synthetic plant:
+     bearing = 38 + 14*loadFrac + 0.45*(amb-30) + 0.55*(oil-42)
+               + 3.2*(vibFrac) + fault(t) + noise
+   Fault:  f(t) = sev * ((t-onset)/25)^1.85   for t > onset
+   ========================================================== */
+const S1={seed:7};
+function s1gen(p){
+  const r=rng(p.seed), N=140, d=[];
+  let load=0.78, amb=30, oil=42;
+  for(let t=0;t<N;t++){
+    const wk=t%7;
+    const drift=(wk===0||wk===6)?-0.16:0;                 // weekend backing down
+    load += (0.78+drift-load)*0.35 + gauss(r)*0.055*p.varf;
+    load = Math.max(0.42, Math.min(1.0, load));
+    amb  = 30 + 5.5*Math.sin(t/12) + gauss(r)*1.5;
+    oil  = 42 + 0.35*(amb-30) + gauss(r)*0.7;
+    const power = 3.1 + 4.9*Math.pow(load,2.35) + gauss(r)*0.06;   // MW, ID fan pair
+    let vib = 2.4 + 1.5*load + gauss(r)*0.10;
+    let f = 0;
+    if(t>p.onset){ f = Math.min(58, p.sev*Math.pow((t-p.onset)/25, 1.85)); }
+    vib += f*0.42;
+    const bear = 38 + 14*load + 0.45*(amb-30) + 0.55*(oil-42) + 3.2*(vib-3.5)/3 + f + gauss(r)*p.noise;
+    d.push({t,load,amb,oil,power,vib,bear,f});
+  }
+  return d;
+}
+/* memory-matrix similarity model: predict bearing from the k most similar healthy states */
+function s1model(d,trainEnd,k){
+  const F=x=>[x.load, x.amb/40, x.oil/50, x.power/8];
+  const mem=d.slice(0,trainEnd).map(x=>({f:F(x), y:x.bear}));
+  const sd=[0,1,2,3].map(j=>{ const v=mem.map(m=>m.f[j]); const mu=v.reduce((a,b)=>a+b,0)/v.length;
+    return Math.sqrt(v.reduce((a,b)=>a+(b-mu)*(b-mu),0)/v.length)||1; });
+  return d.map(x=>{
+    const f=F(x);
+    const sc=mem.map(m=>{ let s=0; for(let j=0;j<4;j++){ const z=(f[j]-m.f[j])/sd[j]; s+=z*z; } return {d:Math.sqrt(s), y:m.y}; });
+    sc.sort((a,b)=>a.d-b.d);
+    let wn=0, ws=0;
+    for(let i=0;i<Math.min(k,sc.length);i++){ const w=1/(sc[i].d+0.06); wn+=w*sc[i].y; ws+=w; }
+    return wn/ws;
+  });
+}
+function s1(){
+  const p={ seed:S1.seed,
+    onset:+$('s1-onset').value, sev:+$('s1-rate').value/100*7.5,
+    noise:+$('s1-noise').value/100, varf:+$('s1-var').value/55 };
+  $('s1-onset-v').textContent='day '+p.onset;
+  $('s1-rate-v').textContent=(+$('s1-rate').value/100).toFixed(2)+'×';
+  $('s1-noise-v').textContent=p.noise.toFixed(2)+' °C';
+  $('s1-var-v').textContent = p.varf<0.5?'steady':(p.varf<1.2?'normal':'heavy cycling');
+  const alarm=+$('s1-alarm').value, thr=+$('s1-thr').value/10,
+        pers=+$('s1-pers').value, k=+$('s1-k').value, dirty=$('s1-dirty').checked;
+  $('s1-alarm-v').textContent=alarm+' °C';
+  $('s1-thr-v').textContent=thr.toFixed(1)+' °C';
+  $('s1-pers-v').textContent=pers+' day'+(pers>1?'s':'');
+  $('s1-k-v').textContent=k;
+
+  const d=s1gen(p);
+  const trainEnd = dirty ? Math.min(140, p.onset+38) : Math.min(p.onset-6, 60);
+  const pred=s1model(d,Math.max(20,trainEnd),k);
+  const res=d.map((x,i)=>x.bear-pred[i]);
+  // EWMA smoothing then persistence rule
+  const ew=[]; let e=0;
+  res.forEach((v,i)=>{ e = i? 0.78*e+0.22*v : v; ew.push(e); });
+  let run=0, mday=null;
+  for(let i=Math.max(20,trainEnd);i<ew.length;i++){
+    if(ew[i]>thr){ run++; if(run>=pers && mday===null) mday=i; } else run=0;
+  }
+  let aday=null;
+  for(let i=0;i<d.length;i++) if(d[i].bear>=alarm){ aday=i; break; }
+  // false alarms during the genuinely healthy period
+  let fa=0, r2=0;
+  for(let i=Math.max(20,trainEnd);i<p.onset;i++){ if(ew[i]>thr){ r2++; if(r2===pers) fa++; } else r2=0; }
+  const healthyDays=Math.max(1,p.onset-Math.max(20,trainEnd));
+  const faRate=fa/healthyDays*30;
+
+  $('s1-mday').textContent = mday!==null? 'Day '+mday : 'none';
+  $('s1-mday-s').textContent = mday!==null? ('residual held above '+thr.toFixed(1)+' °C for '+pers+' days') : 'never triggered';
+  $('s1-aday').textContent = aday!==null? 'Day '+aday : 'not in window';
+  const lead = (mday!==null&&aday!==null)? aday-mday : null;
+  $('s1-lead').textContent = lead!==null? lead+' days' : '—';
+  $('s1-fa').textContent = faRate.toFixed(2);
+
+  const labels=d.map(x=> x.t%20===0? 'D'+x.t : '');
+  lineChart($('s1-c1'),{labels,height:250,yLabel:'Bearing temperature (°C)',xEvery:1,yMin:30,yMax:118,
+    bands:[{from:0,to:200,color:'rgba(0,0,0,0)'}],
+    marks:[...(mday!==null?[{i:mday,label:'model advisory',color:'#D96A16'}]:[]),
+           ...(aday!==null?[{i:aday,label:'DCS alarm',color:'#A8261E'}]:[])],
+    series:[
+      {name:'Measured',data:d.map(x=>x.bear),color:'#D96A16',width:2.2},
+      {name:'Expected',data:pred,color:'#11707F',width:2},
+      {name:'Setpoint',data:d.map(()=>alarm),color:'#A8261E',dash:[6,4],width:1.6}
+    ]});
+  // shade the training window
+  (function(){ const cv=$('s1-c1'), x=cv.getContext('2d'), w=cv.clientWidth, P=56, iw=w-P-14;
+    x.save(); x.globalCompositeOperation='destination-over';
+    x.fillStyle='rgba(17,112,127,.07)';
+    x.fillRect(P,14,iw*Math.max(20,trainEnd)/(d.length-1),250-14-30); x.restore(); })();
+
+  lineChart($('s1-c2'),{labels,height:190,yLabel:'Residual (°C)',yMin:-6,yMax:Math.max(12,Math.ceil(Math.max(...ew)/5)*5),
+    marks: mday!==null?[{i:mday,label:'advisory',color:'#D96A16'}]:[],
+    series:[
+      {name:'Raw',data:res,color:'#8C9AA6',width:1.2},
+      {name:'EWMA',data:ew,color:'#D96A16',width:2.4},
+      {name:'Threshold',data:res.map(()=>thr),color:'#256B45',dash:[5,4],width:1.6},
+      {name:'Zero',data:res.map(()=>0),color:'#D3DDE5',width:1}
+    ]});
+
+  let msg='';
+  if(dirty){
+    msg=`<div class="bad"><b>You have trained the model on the fault.</b> The training window now runs to day
+    ${Math.max(20,trainEnd)}, past the onset at day ${p.onset}. The model has learned the degrading bearing as normal,
+    so the expected line rises with the measured line and the residual stays flat. Detection is
+    ${mday===null?'lost entirely':'delayed to day '+mday}. This is the most common single cause of a failed
+    predictive-maintenance pilot, and it is invisible unless somebody who knows the machine's history curates the
+    training window.</div>`;
+  } else if(mday===null){
+    msg=`<div class="warn">No advisory was raised. Either the threshold of ${thr.toFixed(1)} °C is above anything this
+    fault produced, or the persistence requirement of ${pers} days is never met. Lower the threshold and watch the
+    false-alarm rate rise — that trade-off is the whole of alert engineering.</div>`;
+  } else {
+    msg=`<div class="good"><b>The model raised an advisory on day ${mday}; the DCS alarm operated on day
+    ${aday!==null?aday:'—'}.</b> ${lead!==null?'That is '+lead+' days of notice':'The alarm never operated in the window'} —
+    enough to order a bearing, plan the outage and take the fan out on your terms. Notice what the model did: it did
+    not compare the temperature to a number. It compared it to what this bearing has historically run at under
+    <i>this</i> load, <i>this</i> ambient and <i>this</i> oil temperature. At day ${mday} the measured value was
+    ${d[mday].bear.toFixed(1)} °C — nowhere near the ${alarm} °C setpoint, but ${ew[mday].toFixed(1)} °C above expected,
+    and it had stayed there for ${pers} days.</div>
+    <p class="small">False-alarm rate during the healthy period: <b>${faRate.toFixed(2)} per model-month</b>.
+    Below about two is workable. Above five and the shift stops reading them, which is worse than having no model.</p>`;
+  }
+  $('s1-say').innerHTML=msg;
+}
+['s1-onset','s1-rate','s1-noise','s1-var','s1-alarm','s1-thr','s1-pers','s1-k'].forEach(id=>$(id).addEventListener('input',s1));
+$('s1-dirty').addEventListener('change',s1);
+$('s1-reseed').addEventListener('click',()=>{S1.seed=Math.floor(Math.random()*1e6);s1();});
+REDRAW.s1=s1;
+
+/* ==========================================================
+   SIM-2  Heat rate loss attribution — real June 2026 data
+   ========================================================== */
+const S2SENS={o2:{lo:10,hi:15,n:'Excess O₂ above optimum',u:'%',step:0.1},
+              mst:{lo:0.5,hi:0.8,n:'Main steam temperature below design',u:'°C',step:1},
+              bp:{lo:0.8,hi:1.2,n:'Condenser back pressure above achievable',u:'mmHg',step:1},
+              ubc:{lo:10,hi:15,n:'Unburnt carbon above target',u:'%',step:0.1},
+              aph:{lo:0.6,hi:1.0,n:'APH leakage above design',u:'%',step:1}};
+function s2(){
+  const st=ST[+$('s2-st').value];
+  const o2=+$('s2-o2').value/10, mst=+$('s2-mst').value, bp=+$('s2-bp').value,
+        ubc=+$('s2-ubc').value/10, aph=+$('s2-aph').value, auxCut=+$('s2-aux').value/100;
+  $('s2-o2-v').textContent=o2.toFixed(1)+' %';
+  $('s2-mst-v').textContent=mst+' °C';
+  $('s2-bp-v').textContent=bp+' mmHg';
+  $('s2-ubc-v').textContent=ubc.toFixed(1)+' %';
+  $('s2-aph-v').textContent=aph+' %';
+  $('s2-aux-v').textContent=auxCut.toFixed(2)+' pp';
+
+  // decomposition — exact, sums to the net gap
+  const auxComp = st.ghrAct*(1/(1-st.aux_act/100) - 1/(1-st.aux_norm/100));
+  const btComp  = (st.ghrAct - st.ghrNorm)/(1-st.aux_norm/100);
+  const auxCr = auxComp * st.net*1e6 * st.rsKcal/1e7;
+  const btCr  = btComp  * st.net*1e6 * st.rsKcal/1e7;
+
+  $('s2-facts').innerHTML=`<table style="margin-top:8px">
+    <tr><td>Capacity</td><td class="num">${st.cap} MW</td></tr>
+    <tr><td>Availability</td><td class="num">${fmt(st.avail,2)} %</td></tr>
+    <tr><td>PLF</td><td class="num">${fmt(st.plf,2)} %</td></tr>
+    <tr><td>Gross generation</td><td class="num">${fmt(st.gross,2)} MU</td></tr>
+    <tr><td>Net heat rate</td><td class="num">${fmt(st.hr_act,0)} / ${fmt(st.hr_norm,0)}</td></tr>
+    <tr><td>Gross heat rate</td><td class="num">${fmt(st.ghrAct,0)} / ${fmt(st.ghrNorm,0)}</td></tr>
+    <tr><td>Auxiliary</td><td class="num">${fmt(st.aux_act,2)} / ${fmt(st.aux_norm,2)} %</td></tr>
+    <tr><td>As-fired GCV</td><td class="num">${fmt(st.gcv_fired,0)} kcal/kg</td></tr>
+    <tr><td>MOD variable charge</td><td class="num">₹${fmt(st.vc_mod,4)}/kWh</td></tr>
+    <tr><td>Cost of heat</td><td class="num">₹${st.rsKcal.toFixed(6)}/kcal</td></tr></table>`;
+
+  const rec = o2*(S2SENS.o2.lo+S2SENS.o2.hi)/2 + mst/10*(S2SENS.mst.lo+S2SENS.mst.hi)/2*10/10*6.5
+            + bp/10*10*1.0 + ubc*12.5 + aph/5*4;
+  // recompute cleanly with explicit per-parameter sensitivity
+  const items=[
+    ['Excess O₂ above optimum', o2, '%', 12.5, o2*12.5],
+    ['Main steam temperature below design', mst, '°C', 0.65, mst*0.65],
+    ['Back pressure above achievable', bp, 'mmHg', 1.0, bp*1.0],
+    ['Unburnt carbon above target', ubc, '%', 12.5, ubc*12.5],
+    ['APH leakage above design', aph, '%', 0.8, aph*0.8]
+  ];
+  const thermRecov=items.reduce((a,b)=>a+b[4],0);
+  const thermCap = Math.max(0, btComp);
+  const thermReal= Math.min(thermRecov, thermCap>0?thermCap:thermRecov);
+  const auxRecovPP = Math.min(auxCut, Math.max(0,st.auxGap));
+  const auxRecovK = st.ghrAct*(1/(1-(st.aux_act-auxRecovPP)/100) - 1/(1-st.aux_act/100))*-1;
+  const totK = thermReal + auxRecovK;
+  const totCrM = totK * st.net*1e6 * st.rsKcal/1e7;
+
+  $('s2-stats').innerHTML=`
+    <div class="stat"><div class="l">Net heat-rate gap</div><div class="n em">+${fmt(st.hrGap,0)}</div><div class="s">kcal/kWh against MERC norm</div></div>
+    <div class="stat"><div class="l">Auxiliary component</div><div class="n ${auxComp>0?'em':'gn'}">${auxComp>0?'+':''}${fmt(auxComp,0)}</div><div class="s">${cr(auxCr)}/month</div></div>
+    <div class="stat"><div class="l">Boiler &amp; turbine</div><div class="n ${btComp>0?'rd':'gn'}">${btComp>0?'+':''}${fmt(btComp,0)}</div><div class="s">${cr(btCr)}/month</div></div>
+    <div class="stat"><div class="l">Recoverable at these settings</div><div class="n tl">${fmt(totK,0)}</div><div class="s">${cr(totCrM)}/month · ${cr(totCrM*12)}/year</div></div>`;
+
+  barChart($('s2-c1'),{height:130,unit:' kcal/kWh',dp:0,rows:[
+    {label:'Auxiliary power component', value:auxComp, color:auxComp>0?'#D96A16':'#256B45', dp:0},
+    {label:'Boiler and turbine component', value:btComp, color:btComp>0?'#11707F':'#256B45', dp:0},
+    {label:'Net gap (the sum)', value:st.hrGap, color:'#2A3644', dp:0}
+  ]});
+
+  $('s2-tbl').innerHTML='<div class="tw"><table><thead><tr><th>Loss</th><th class="num">Deviation</th>'+
+    '<th class="num">Sensitivity</th><th class="num">kcal/kWh</th><th class="num">₹ crore/month</th></tr></thead><tbody>'+
+    items.map(i=>`<tr><td>${i[0]}</td><td class="num">${fmt(i[1],1)} ${i[2]}</td>`+
+      `<td class="num">${i[3]} per ${i[2]}</td><td class="num">${fmt(i[4],1)}</td>`+
+      `<td class="num">${fmt(i[4]*st.net*1e6*st.rsKcal/1e7,2)}</td></tr>`).join('')+
+    `<tr class="hi"><td><b>Auxiliary power reduction</b></td><td class="num">${fmt(auxRecovPP,2)} pp</td>`+
+    `<td class="num">—</td><td class="num">${fmt(Math.abs(auxRecovK)<0.05?0:auxRecovK,1)}</td>`+
+    `<td class="num">${fmt(Math.abs(auxRecovK)<0.05?0:auxRecovK*st.net*1e6*st.rsKcal/1e7,2)}</td></tr>`+
+    `<tr><td colspan="3"><b>Total at these settings</b></td><td class="num"><b>${fmt(totK,1)}</b></td>`+
+    `<td class="num"><b>${fmt(totCrM,2)}</b></td></tr></tbody></table></div>`;
+
+  const rows=ST.map(s=>({label:s.station.replace(' Units',' U').replace(' Unit',' U'),
+    value:s.ghrGap, color:s.ghrGap>0?'#11707F':'#256B45', dp:0}));
+  barChart($('s2-c2'),{rows,height:Math.max(280,rows.length*24),unit:' kcal/kWh'});
+}
+(function(){ const sel=$('s2-st');
+  ST.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=s.station; sel.appendChild(o); });
+  sel.value=ST.findIndex(s=>/Nashik/.test(s.station));
+  sel.addEventListener('change',s2);
+  ['s2-o2','s2-mst','s2-bp','s2-ubc','s2-aph','s2-aux'].forEach(id=>$(id).addEventListener('input',s2));
+})();
+REDRAW.s2=s2;
+
+/* ==========================================================
+   SIM-3  Auxiliary power optimiser — 500 MW class unit
+   Equipment power models (indicative, load-dependent):
+     mill   : 340 kW running + 2.6 kW per t/h above 30 t/h
+     ID fan : cubic in flow, penalty by control mode
+     CW pump: 1,650 kW each; back pressure falls with flow
+     ESP    : 26 kW per energised field
+   ========================================================== */
+function s3calc(load,cw,gcv,ash,mills,cwp,esp,fanMode){
+  const coal = load*2450/gcv*1000/1000;              // t/h  (net HR ~2450 kcal/kWh)
+  const millCap = 62;                                 // t/h per mill (500 MW class bowl mill)
+  const feasMill = mills*millCap >= coal*1.08;        // 8 % margin
+  const perMill = coal/mills;
+  const millKW = mills*(340 + Math.max(0,perMill-30)*2.6);
+  const airFlow = load/500;
+  const fanPen = [1.00,0.88,0.74][fanMode];           // damper / IGV / VSD
+  const fanKW = (2400*Math.pow(airFlow,2.6))*fanPen + 1200*Math.pow(airFlow,2.4)*fanPen;
+  const cwFlow = cwp/3;
+  const cwKW = cwp*1650;
+  // back pressure: rises with CW inlet temp and falls with flow
+  const bp = 62 + (cw-32)*2.6 - (cwFlow-1)*13 + (load/500-0.66)*10;
+  const bpPen = Math.max(0, bp-68)*1.0;               // kcal/kWh above achievable
+  const feasCW = bp < 105;
+  const espKW = esp*26;
+  const opacity = 22 + (ash-36)*1.5 - (esp-18)*1.4 + (load/500-0.66)*8;
+  const feasESP = opacity <= 30;
+  const totKW = millKW+fanKW+cwKW+espKW+ 26000*Math.pow(load/500,0.55);  // BFP, CEP, condensate, air, lighting, ash
+  return {coal,millKW,fanKW,cwKW,espKW,totKW,bp,bpPen,opacity,
+          feasible: feasMill&&feasCW&&feasESP, feasMill,feasCW,feasESP,
+          auxPct: totKW/1000/load*100};
+}
+function s3(){
+  const load=+$('s3-load').value, cw=+$('s3-cw').value, gcv=+$('s3-gcv').value,
+        ash=+$('s3-ash').value, vc=+$('s3-vc').value/100;
+  const mills=+$('s3-mill').value, cwp=+$('s3-cwp').value, esp=+$('s3-esp').value, fan=+$('s3-fan').value;
+  $('s3-load-v').textContent=load+' MW'; $('s3-cw-v').textContent=cw+' °C';
+  $('s3-gcv-v').textContent=fmt(gcv,0)+' kcal/kg'; $('s3-ash-v').textContent=ash+' %';
+  $('s3-vc-v').textContent='₹'+vc.toFixed(2)+'/kWh';
+  $('s3-mill-v').textContent=mills; $('s3-cwp-v').textContent=cwp; $('s3-esp-v').textContent=esp;
+  $('s3-fan-v').textContent=['damper','IGV','variable speed'][fan];
+
+  const now=s3calc(load,cw,gcv,ash,mills,cwp,esp,fan);
+  // exhaustive search
+  const cands=[];
+  for(let m=3;m<=7;m++) for(let p=2;p<=4;p++) for(let e=12;e<=24;e++) for(let f=0;f<=2;f++){
+    const r=s3calc(load,cw,gcv,ash,m,p,e,f);
+    if(!r.feasible) continue;
+    const auxCost = r.totKW/1000*vc*1000;             // ₹/h
+    const hrCost  = r.bpPen*load*1000*(vc/2450)*1;    // ₹/h from back-pressure penalty
+    cands.push({m,p,e,f,r,total:auxCost+hrCost,auxCost,hrCost});
+  }
+  cands.sort((a,b)=>a.total-b.total);
+  if(!cands.length){
+    $('s3-stats').innerHTML='<div class="stat"><div class="l">No feasible configuration</div><div class="n rd">—</div><div class="s">constraints cannot all be met</div></div>';
+    $('s3-tbl').innerHTML='';
+    $('s3-say').innerHTML='<div class="bad"><b>Every combination violates a constraint.</b> At this load and coal '+
+      'quality the required coal flow of '+fmt(now.coal,1)+' t/h exceeds the available milling capacity, or the '+
+      'back pressure or opacity limit cannot be met. This is the correct behaviour: an optimiser that returns an '+
+      'answer when no feasible answer exists is worse than one that returns nothing. In the plant this is the '+
+      'moment you accept a load restriction.</div>';
+    barChart($('s3-c1'),{height:190,unit:' MW',rows:[{label:'Mills — as run',value:now.millKW/1000,color:'#8C9AA6'},{label:'Draft fans — as run',value:now.fanKW/1000,color:'#8C9AA6'},{label:'CW pumps — as run',value:now.cwKW/1000,color:'#8C9AA6'},{label:'ESP — as run',value:now.espKW/1000,color:'#8C9AA6'}]});
+    return;
+  }
+  const best=cands[0];
+  const nowAuxCost=now.totKW/1000*vc*1000, nowHrCost=now.bpPen*load*1000*(vc/2450);
+  const nowTotal=nowAuxCost+nowHrCost;
+  const saveKW=now.totKW-best.r.totKW;
+  const saveRsH=nowTotal-best.total;
+  const saveCrY=saveRsH*8760*0.72/1e7;
+
+  $('s3-stats').innerHTML=`
+   <div class="stat"><div class="l">As run</div><div class="n">${fmt(now.totKW/1000,1)} MW</div><div class="s">${fmt(now.auxPct,2)} % of load · BP ${fmt(now.bp,0)} mmHg</div></div>
+   <div class="stat"><div class="l">Optimised</div><div class="n gn">${fmt(best.r.totKW/1000,1)} MW</div><div class="s">${fmt(best.r.auxPct,2)} % · BP ${fmt(best.r.bp,0)} mmHg</div></div>
+   <div class="stat"><div class="l">Saving</div><div class="n em">${fmt(saveKW/1000,2)} MW</div><div class="s">${saveKW>0?'₹'+fmt(saveRsH,0)+'/hour':'already optimal'}</div></div>
+   <div class="stat"><div class="l">Annualised</div><div class="n em">${cr(Math.max(0,saveCrY))}</div><div class="s">at 72 % running hours</div></div>
+   <div class="stat"><div class="l">Feasible options</div><div class="n tl">${cands.length}</div><div class="s">of 585 combinations evaluated</div></div>`;
+
+  barChart($('s3-c1'),{height:190,unit:' MW',rows:[
+    {label:'Mills — as run',value:now.millKW/1000,color:'#8C9AA6'},
+    {label:'Mills — optimised',value:best.r.millKW/1000,color:'#D96A16'},
+    {label:'Draft fans — as run',value:now.fanKW/1000,color:'#8C9AA6'},
+    {label:'Draft fans — optimised',value:best.r.fanKW/1000,color:'#D96A16'},
+    {label:'CW pumps — as run',value:now.cwKW/1000,color:'#8C9AA6'},
+    {label:'CW pumps — optimised',value:best.r.cwKW/1000,color:'#D96A16'},
+    {label:'ESP — as run',value:now.espKW/1000,color:'#8C9AA6'},
+    {label:'ESP — optimised',value:best.r.espKW/1000,color:'#D96A16'}
+  ]});
+
+  const cur=cands.findIndex(c=>c.m===mills&&c.p===cwp&&c.e===esp&&c.f===fan);
+  $('s3-tbl').innerHTML='<div class="tw"><table><thead><tr><th>Rank</th><th>Mills</th><th>CW pumps</th>'+
+    '<th>ESP fields</th><th>Fan control</th><th class="num">Aux MW</th><th class="num">BP mmHg</th>'+
+    '<th class="num">Opacity</th><th class="num">₹/hour</th></tr></thead><tbody>'+
+    cands.slice(0,10).map((c,i)=>`<tr class="${i===0?'hi':''}"><td>${i+1}</td><td>${c.m}</td><td>${c.p}</td><td>${c.e}</td>`+
+      `<td>${['damper','IGV','VSD'][c.f]}</td><td class="num">${fmt(c.r.totKW/1000,2)}</td>`+
+      `<td class="num">${fmt(c.r.bp,0)}</td><td class="num">${fmt(c.r.opacity,0)}</td>`+
+      `<td class="num">${fmt(c.total,0)}</td></tr>`).join('')+
+    (cur>10?`<tr><td>${cur+1}</td><td>${mills}</td><td>${cwp}</td><td>${esp}</td><td>${['damper','IGV','VSD'][fan]}</td>`+
+      `<td class="num">${fmt(now.totKW/1000,2)}</td><td class="num">${fmt(now.bp,0)}</td>`+
+      `<td class="num">${fmt(now.opacity,0)}</td><td class="num">${fmt(nowTotal,0)}</td></tr>`:'')+
+    '</tbody></table></div>';
+
+  let why=[];
+  if(best.m!==mills) why.push(`run <b>${best.m} mills instead of ${mills}</b> — ${best.m<mills?'the coal flow of '+fmt(now.coal,1)+' t/h fits in fewer mills, and an idle mill still draws about 340 kW':'more mills reduce the loading per mill and the specific grinding power'}`);
+  if(best.p!==cwp) why.push(`run <b>${best.p} CW pumps instead of ${cwp}</b> — at ${cw} °C inlet the back pressure ${best.p>cwp?'penalty outweighs the extra 1.65 MW per pump':'gain does not pay for the pump'}`);
+  if(best.e!==esp) why.push(`energise <b>${best.e} ESP fields instead of ${esp}</b> — opacity stays at ${fmt(best.r.opacity,0)} against the 30 limit, so the remaining fields are buying margin nobody needs`);
+  if(best.f!==fan) why.push(`move draft fan control from <b>${['damper','IGV','variable speed'][fan]} to ${['damper','IGV','variable speed'][best.f]}</b> — throttling against a damper is the most expensive way to control flow`);
+
+  $('s3-say').innerHTML = saveKW>1 ?
+   `<div class="good"><b>The optimiser found ${fmt(saveKW/1000,2)} MW.</b> It would ${why.join('; ')}.
+    That is ${fmt(saveKW/1000/load*100,2)} percentage points of auxiliary consumption, worth about
+    ${cr(Math.max(0,saveCrY))} a year on this one unit at ₹${vc.toFixed(2)}/kWh.</div>
+    <p class="small">Note what the search did <i>not</i> do: it rejected ${585-cands.length} combinations outright
+    because they violated a constraint — insufficient mill capacity for the coal flow, back pressure above
+    105 mmHg, or stack opacity above 30. An optimiser without hard constraints is not an optimiser, it is a hazard.</p>` :
+   `<div class="note">The configuration you are running is at or very near the optimum for this operating point.
+    Change the load, the cooling water temperature or the coal quality and watch the optimum move — that movement
+    is the entire argument for doing this continuously rather than once.</div>`;
+}
+['s3-load','s3-cw','s3-gcv','s3-ash','s3-vc','s3-mill','s3-cwp','s3-esp','s3-fan'].forEach(id=>$(id).addEventListener('input',s3));
+$('s3-apply').addEventListener('click',()=>{
+  const load=+$('s3-load').value, cw=+$('s3-cw').value, gcv=+$('s3-gcv').value, ash=+$('s3-ash').value;
+  let best=null;
+  for(let m=3;m<=7;m++) for(let p=2;p<=4;p++) for(let e=12;e<=24;e++) for(let f=0;f<=2;f++){
+    const r=s3calc(load,cw,gcv,ash,m,p,e,f); if(!r.feasible) continue;
+    const vc=+$('s3-vc').value/100;
+    const tot=r.totKW/1000*vc*1000 + r.bpPen*load*1000*(vc/2450);
+    if(!best||tot<best.tot) best={m,p,e,f,tot};
+  }
+  if(best){ $('s3-mill').value=best.m; $('s3-cwp').value=best.p; $('s3-esp').value=best.e; $('s3-fan').value=best.f; s3(); }
+});
+REDRAW.s3=s3;
+
+/* ==========================================================
+   SIM-4  Coal GCV soft sensor — ridge regression by gradient descent
+   True relationship used to generate the data:
+     GCV = 3050 + 140*z(millDP) - 190*z(millCurrent) + 95*z(paFlow)
+           - 165*z(feederSpeed) + 120*z(flame) - 80*z(o2) + 130*z(steamCoal)
+   ========================================================== */
+const S4={seed:11, feats:[
+  ['millDP','Mill differential pressure',140,true],
+  ['millI','Mill motor current',-190,true],
+  ['paFlow','Primary air flow',95,true],
+  ['feeder','Feeder speed at constant load',-165,true],
+  ['flame','Flame intensity',120,true],
+  ['o2','Flue gas O₂',-80,true],
+  ['ratio','Steam flow to coal flow ratio',130,true]
+]};
+function s4data(n,labN,noise){
+  const r=rng(S4.seed), rows=[];
+  let base=3050;
+  for(let i=0;i<n;i++){
+    if(i%37===0) base = 3050 + gauss(r)*120;           // a new coal source arrives
+    const gcv = base + 95*Math.sin(i/9) + gauss(r)*70;
+    const z = {};
+    S4.feats.forEach(f=>{ z[f[0]] = (gcv-3050)/150*(f[2]/150) + gauss(r)*noise; });
+    rows.push({i, gcv, z, lab: gcv + gauss(r)*labN});
+  }
+  return rows;
+}
+function ridge(X,y,lam,iters=900,lr=0.06){
+  const n=X.length, p=X[0].length;
+  const mu=[],sd=[];
+  for(let j=0;j<p;j++){ const v=X.map(r=>r[j]); const m=v.reduce((a,b)=>a+b,0)/n;
+    mu.push(m); sd.push(Math.sqrt(v.reduce((a,b)=>a+(b-m)*(b-m),0)/n)||1); }
+  const Z=X.map(r=>r.map((v,j)=>(v-mu[j])/sd[j]));
+  const ym=y.reduce((a,b)=>a+b,0)/n, ys=Math.sqrt(y.reduce((a,b)=>a+(b-ym)*(b-ym),0)/n)||1;
+  const t=y.map(v=>(v-ym)/ys);
+  let w=new Array(p).fill(0), b=0;
+  for(let it=0;it<iters;it++){
+    const g=new Array(p).fill(0); let gb=0;
+    for(let i=0;i<n;i++){ let pr=b; for(let j=0;j<p;j++) pr+=w[j]*Z[i][j];
+      const e=pr-t[i]; gb+=e; for(let j=0;j<p;j++) g[j]+=e*Z[i][j]; }
+    for(let j=0;j<p;j++) w[j]-=lr*(g[j]/n + lam*w[j]);
+    b-=lr*gb/n;
+  }
+  return {predict:x=>{ let pr=b; for(let j=0;j<x.length;j++) pr+=w[j]*((x[j]-mu[j])/sd[j]); return pr*ys+ym; },
+          w, mu, sd, ym, ys};
+}
+function s4(){
+  const n=+$('s4-n').value, labN=+$('s4-lab').value, noise=+$('s4-noise').value/100, lam=+$('s4-lam').value/100;
+  $('s4-n-v').textContent=n; $('s4-lab-v').textContent=labN+' kcal/kg';
+  $('s4-noise-v').textContent=noise.toFixed(1)+'×'; $('s4-lam-v').textContent=lam.toFixed(2);
+  const active=S4.feats.filter(f=>$('f-'+f[0]).checked);
+  if(!active.length){ $('s4-say').innerHTML='<div class="bad">Select at least one input signal.</div>'; return; }
+  const rows=s4data(Math.max(n,220), labN, noise*0.55);
+  const trainN=Math.floor(n*0.7);
+  const tr=rows.slice(0,trainN), te=rows.slice(trainN, n);
+  const X=tr.map(r=>active.map(f=>r.z[f[0]])), y=tr.map(r=>r.lab);
+  const m=ridge(X,y,lam);
+  const pe=te.map(r=>m.predict(active.map(f=>r.z[f[0]])));
+  const err=pe.map((p,i)=>p-te[i].gcv);
+  const rmse=Math.sqrt(err.reduce((a,b)=>a+b*b,0)/err.length);
+  const mae=err.reduce((a,b)=>a+Math.abs(b),0)/err.length;
+  const ybar=te.reduce((a,b)=>a+b.gcv,0)/te.length;
+  const r2=1-err.reduce((a,b)=>a+b*b,0)/te.reduce((a,b)=>a+(b.gcv-ybar)*(b.gcv-ybar),0);
+  const trp=tr.map(r=>m.predict(active.map(f=>r.z[f[0]])));
+  const trE=trp.map((p,i)=>p-tr[i].gcv);
+  const trRmse=Math.sqrt(trE.reduce((a,b)=>a+b*b,0)/trE.length);
+  // value: GCV error translates to heat-rate error in blending decisions
+  const hrEquiv = rmse/3050*2600;
+
+  $('s4-stats').innerHTML=`
+   <div class="stat"><div class="l">Hold-out RMSE</div><div class="n em">${fmt(rmse,0)}</div><div class="s">kcal/kg on data never seen</div></div>
+   <div class="stat"><div class="l">Training RMSE</div><div class="n">${fmt(trRmse,0)}</div><div class="s">${trRmse<rmse*0.6?'much lower — overfitting':'close to hold-out — healthy'}</div></div>
+   <div class="stat"><div class="l">R² (hold-out)</div><div class="n tl">${r2.toFixed(3)}</div><div class="s">variance explained</div></div>
+   <div class="stat"><div class="l">Mean absolute error</div><div class="n">${fmt(mae,0)}</div><div class="s">≈ ${fmt(hrEquiv,0)} kcal/kWh of heat-rate uncertainty</div></div>
+   <div class="stat"><div class="l">Laboratory scatter</div><div class="n">${labN}</div><div class="s">the floor the model cannot beat</div></div>`;
+
+  const pts=te.map((r,i)=>[r.gcv, pe[i]]);
+  const lo=Math.min(...te.map(r=>r.gcv)), hi=Math.max(...te.map(r=>r.gcv));
+  scatter($('s4-c1'),{pts, fit:[[lo,lo],[hi,hi]], height:250,
+    xLabel:'Laboratory GCV (kcal/kg)', yLabel:'Predicted GCV (kcal/kg)'});
+
+  const show=rows.slice(0,n);
+  const labSeries=show.map((r,i)=> (i%7===0)? r.lab : null);
+  lineChart($('s4-c2'),{height:210, yLabel:'GCV (kcal/kg)',
+    labels:show.map((r,i)=> i%20===0? 'D'+i:''),
+    marks:[{i:trainN,label:'hold-out begins',color:'#2A3644'}],
+    series:[
+      {name:'Soft sensor',data:show.map(r=>m.predict(active.map(f=>r.z[f[0]]))),color:'#11707F',width:2},
+      {name:'Lab',data:labSeries,color:'#D96A16',width:0.1,dots:true}
+    ]});
+
+  const co=active.map((f,j)=>({n:f[1], w:m.w[j], t:f[2]}));
+  co.sort((a,b)=>Math.abs(b.w)-Math.abs(a.w));
+  $('s4-tbl').innerHTML='<div class="tw"><table><thead><tr><th>Input signal</th>'+
+    '<th class="num">Learned weight</th><th class="num">True weight</th><th>Direction</th></tr></thead><tbody>'+
+    co.map(c=>`<tr><td>${c.n}</td><td class="num">${c.w.toFixed(3)}</td><td class="num">${(c.t/150).toFixed(3)}</td>`+
+      `<td>${c.w>0?'higher signal → higher GCV':'higher signal → lower GCV'}</td></tr>`).join('')+
+    '</tbody></table></div>';
+
+  let msg='';
+  if(lam<0.05 && trRmse<rmse*0.6){
+    msg=`<div class="warn"><b>The model is overfitting.</b> Training error is ${fmt(trRmse,0)} kcal/kg but hold-out
+    error is ${fmt(rmse,0)}. With the ridge penalty at ${lam.toFixed(2)} there is nothing restraining the weights,
+    so the model has memorised the noise in the training set. Raise λ and watch the two errors converge — the
+    hold-out error will improve even though the training error gets worse. That is the entire idea of regularisation.</div>`;
+  } else if(rmse < labN*1.4){
+    msg=`<div class="good"><b>The model is now about as good as the laboratory it was trained on.</b> Hold-out RMSE
+    of ${fmt(rmse,0)} kcal/kg against laboratory scatter of ${labN} kcal/kg. It cannot do better than that — the
+    labels themselves carry that much uncertainty. This is the honest ceiling of any soft sensor, and it is why
+    improving sampling discipline is often worth more than improving the model.</div>`;
+  } else {
+    msg=`<div class="note">Hold-out RMSE ${fmt(rmse,0)} kcal/kg. Try three things and watch which helps most:
+    increase the number of laboratory samples, reduce the process signal noise, and tune λ. On most plants the
+    first of those is the binding constraint — a soft sensor is limited by how many labelled examples you have,
+    not by the sophistication of the algorithm.</div>`;
+  }
+  msg+=`<p class="small">In plant terms, ${fmt(rmse,0)} kcal/kg of GCV uncertainty is roughly
+  ${fmt(hrEquiv,0)} kcal/kWh of uncertainty in your computed heat rate — which is the same order as the entire
+  gap this fleet is trying to close. That is why fuel measurement quality is a performance problem, not a
+  commercial one.</p>`;
+  $('s4-say').innerHTML=msg;
+}
+(function(){
+  $('s4-feats').innerHTML=S4.feats.map(f=>
+    `<label class="tog"><input type="checkbox" id="f-${f[0]}" checked> <span>${f[1]}</span></label>`).join('');
+  S4.feats.forEach(f=>$('f-'+f[0]).addEventListener('change',s4));
+  ['s4-n','s4-lab','s4-noise','s4-lam'].forEach(id=>$(id).addEventListener('input',s4));
+  $('s4-train').addEventListener('click',s4);
+  $('s4-reseed').addEventListener('click',()=>{S4.seed=Math.floor(Math.random()*1e6);s4();});
+})();
+REDRAW.s4=s4;
+
+/* ==========================================================
+   SIM-5  Predictive maintenance and remaining useful life
+   Degradation:  H(t) = H0 * exp(k t) + noise,  failure at H = 100
+   Fit log-linear on the observed window, propagate parameter
+   uncertainty to a projection band and a survival probability.
+   ========================================================== */
+const S5={seed:23};
+function s5(){
+  const st=ST[+$('s5-st').value];
+  const obs=+$('s5-obs').value, kMul=+$('s5-k').value/100, nz=+$('s5-noise').value/100,
+        outDay=+$('s5-out').value, fdur=+$('s5-fdur').value, pdur=+$('s5-pdur').value/10;
+  $('s5-obs-v').textContent=obs; $('s5-k-v').textContent=kMul.toFixed(2)+'×';
+  $('s5-noise-v').textContent=nz.toFixed(1)+'×'; $('s5-out-v').textContent=outDay+' days';
+  $('s5-fdur-v').textContent=fdur+' days'; $('s5-pdur-v').textContent=pdur.toFixed(1)+' days';
+
+  const r=rng(S5.seed), H0=8, k=0.0175*kMul, N=340;
+  const truth=[], meas=[];
+  for(let t=0;t<N;t++){ const h=H0*Math.exp(k*t); truth.push(h); meas.push(h + gauss(r)*2.2*nz*(1+h/60)); }
+  // least squares on log of the observed window
+  const xs=[], ys=[];
+  for(let t=0;t<obs;t++){ if(meas[t]>0.5){ xs.push(t); ys.push(Math.log(meas[t])); } }
+  const n=xs.length, mx=xs.reduce((a,b)=>a+b,0)/n, my=ys.reduce((a,b)=>a+b,0)/n;
+  let sxy=0,sxx=0; for(let i=0;i<n;i++){ sxy+=(xs[i]-mx)*(ys[i]-my); sxx+=(xs[i]-mx)*(xs[i]-mx); }
+  const kh=sxy/sxx, ah=my-kh*mx;
+  let ss=0; for(let i=0;i<n;i++){ const e=ys[i]-(ah+kh*xs[i]); ss+=e*e; }
+  const se=Math.sqrt(ss/(n-2)), seK=se/Math.sqrt(sxx);
+  const FAIL=100;
+  const rulAt=(kk)=>(Math.log(FAIL)-ah)/kk - obs;
+  const rul=rulAt(kh), rulLo=rulAt(kh+1.645*seK), rulHi=rulAt(kh-1.645*seK);
+  // probability of surviving to the planned outage: P(time-to-fail > outDay)
+  const kNeed=(Math.log(FAIL)-ah)/(obs+outDay);
+  const z=(kNeed-kh)/seK;
+  const Phi=x=>0.5*(1+ (x<0?-1:1)*Math.sqrt(1-Math.exp(-2*x*x/Math.PI)));
+  const pSurvive=Math.max(0,Math.min(1,Phi(z)));
+
+  const mwLost = st.unit_mw || st.cap;   // one machine, not the whole station
+  const forcedMWh = mwLost*24*fdur*(st.plf/100);
+  const forcedCr  = forcedMWh*1000*st.vc_mod/1e7 + (st.afc_cr>0? st.afc_cr*fdur/30 : 0.35*fdur);
+  const plannedCr = mwLost*24*pdur*(st.plf/100)*1000*st.vc_mod/1e7*0.25;
+  const expCost = (1-pSurvive)*forcedCr + pSurvive*plannedCr;
+  const actNow  = plannedCr*1.35;
+
+  $('s5-stats').innerHTML=`
+   <div class="stat"><div class="l">Remaining useful life</div><div class="n em">${rul>0?fmt(rul,0):'0'} days</div><div class="s">90 % range ${rulLo>0?fmt(rulLo,0):0}–${rulHi>0?fmt(rulHi,0):'∞'}</div></div>
+   <div class="stat"><div class="l">Survives to planned outage</div><div class="n ${pSurvive>0.8?'gn':(pSurvive>0.5?'':'rd')}">${(pSurvive*100).toFixed(0)} %</div><div class="s">outage is ${outDay} days away</div></div>
+   <div class="stat"><div class="l">If it fails first</div><div class="n rd">${cr(forcedCr)}</div><div class="s">${fdur}-day forced outage on one ${mwLost} MW unit</div></div>
+   <div class="stat"><div class="l">If taken in the outage</div><div class="n gn">${cr(plannedCr)}</div><div class="s">${pdur.toFixed(1)} days inside a planned window</div></div>
+   <div class="stat"><div class="l">Expected cost of waiting</div><div class="n ${expCost>actNow?'rd':'gn'}">${cr(expCost)}</div><div class="s">versus ${cr(actNow)} to act now</div></div>`;
+
+  const lab=[], fit=[], hi=[], lo=[], thr=[];
+  const HORIZON=Math.min(N, obs+Math.max(180,outDay+60));
+  for(let t=0;t<HORIZON;t++){
+    lab.push(t%30===0?'D'+t:'');
+    const f=Math.exp(ah+kh*t);
+    fit.push(f>150?null:f);
+    const u=Math.exp(ah+(kh+1.645*seK)*t), d=Math.exp(ah+(kh-1.645*seK)*t);
+    hi.push(t<obs?null:(u>150?null:u)); lo.push(t<obs?null:(d>150?null:d));
+    thr.push(FAIL);
+  }
+  lineChart($('s5-c1'),{labels:lab,height:270,yLabel:'Health index',yMin:0,yMax:130,
+    marks:[{i:obs,label:'today',color:'#2A3644'},
+           {i:Math.min(HORIZON-1,obs+outDay),label:'planned outage',color:'#256B45'}],
+    series:[
+      {name:'band',data:hi,color:'rgba(0,0,0,0)',fill:'rgba(217,106,22,.16)',fillTo:lo,width:0.1},
+      {name:'Measured',data:meas.slice(0,HORIZON).map((v,i)=>i<obs?v:null),color:'#11707F',width:2},
+      {name:'Fitted',data:fit,color:'#D96A16',width:2.2,dash:[5,3]},
+      {name:'Failure',data:thr,color:'#A8261E',width:1.8}
+    ]});
+
+  $('s5-tbl').innerHTML=`<table>
+   <thead><tr><th>Option</th><th class="num">Probability</th><th class="num">Cost if it happens</th><th class="num">Expected cost</th></tr></thead>
+   <tbody>
+    <tr><td>Wait — machine survives to the planned outage</td><td class="num">${(pSurvive*100).toFixed(0)} %</td>
+        <td class="num">${cr(plannedCr)}</td><td class="num">${cr(pSurvive*plannedCr)}</td></tr>
+    <tr><td>Wait — machine fails first</td><td class="num">${((1-pSurvive)*100).toFixed(0)} %</td>
+        <td class="num">${cr(forcedCr)}</td><td class="num">${cr((1-pSurvive)*forcedCr)}</td></tr>
+    <tr class="hi"><td><b>Wait — expected total</b></td><td class="num">—</td><td class="num">—</td><td class="num"><b>${cr(expCost)}</b></td></tr>
+    <tr><td>Act now — pull an opportunity outage forward</td><td class="num">100 %</td>
+        <td class="num">${cr(actNow)}</td><td class="num">${cr(actNow)}</td></tr>
+   </tbody></table>
+   <p class="small" style="margin-top:8px">Forced-outage cost uses ${st.station}'s own variable charge of
+   ₹${fmt(st.vc_mod,4)}/kWh and its PLF of ${fmt(st.plf,2)} %, plus a pro-rata share of the fixed-charge
+   disallowance the station is already carrying. Planned intervention is costed only at the marginal extension
+   of an outage that was happening anyway.</p>`;
+
+  const rec = expCost>actNow*1.15 ? 'act now' : (expCost<actNow*0.85 ? 'wait for the planned outage' : 'too close to call on cost alone');
+  $('s5-say').innerHTML=`<div class="${expCost>actNow?'bad':'good'}">
+   <b>Recommendation: ${rec}.</b> The model estimates ${rul>0?fmt(rul,0):'zero'} days of remaining life, but the
+   number that decides anything is the ${(pSurvive*100).toFixed(0)} per cent probability of reaching the outage
+   that is already planned in ${outDay} days. At that probability the expected cost of waiting is ${cr(expCost)}
+   against ${cr(actNow)} to act now.</div>
+   <p class="small">Watch two things. First, drag <b>days of trend observed</b> down to 30 — the projection band
+   opens up dramatically, because a short window cannot distinguish a fast degradation from a slow one with noise
+   on it. More history is worth more than a better algorithm. Second, notice that the recommendation flips as the
+   planned outage moves. The same machine, the same trend, and a different answer — because remaining useful life
+   is only meaningful relative to the outage plan.</p>`;
+}
+(function(){ const sel=$('s5-st');
+  ST.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=s.station; sel.appendChild(o); });
+  sel.value=ST.findIndex(s=>/Koradi Units 8/.test(s.station));
+  sel.addEventListener('change',s5);
+  ['s5-obs','s5-k','s5-noise','s5-out','s5-fdur','s5-pdur'].forEach(id=>$(id).addEventListener('input',s5));
+  $('s5-reseed').addEventListener('click',()=>{S5.seed=Math.floor(Math.random()*1e6);s5();});
+})();
+REDRAW.s5=s5;
+
+/* ==========================================================
+   SIM-6  Combustion multi-objective optimiser
+   Response surface (indicative, 660 MW supercritical class):
+     NOx  = 250 + 78*(O2-3.0) - 2.9*OFA + 1.4*tilt - 1.1*bias
+     UBC  = 0.55 - 0.24*(O2-3.0) + 0.031*OFA + 0.010*bias
+     dHR  = 12.5*(O2-3.2)^2 + 0.55*|tilt-3| + 0.09*OFA + 13*UBC + ...
+     CO   = 18*exp(-2.1*(O2-2.4))
+   ========================================================== */
+const S6={applied:null};
+function s6resp(o2,tilt,ofa,bias,load){
+  const lf=load/660;
+  const NOx = 250 + 78*(o2-3.0) - 2.9*ofa + 1.4*tilt - 1.1*bias + 40*(lf-0.85);
+  const UBC = Math.max(0.05, 0.55 - 0.24*(o2-3.0) + 0.031*ofa + 0.010*bias + 0.20*(0.85-lf));
+  const CO  = 18*Math.exp(-2.1*(o2-2.4)) + 0.9*ofa*Math.max(0,3.2-o2);
+  const MST = 540 + 1.05*tilt + 0.10*ofa - 8*(0.85-lf)*4;
+  const RHspray = Math.max(0, 6 - 0.42*tilt - 0.05*ofa + 14*(0.85-lf));
+  const dHR = 12.5*Math.pow(o2-3.2,2) + 0.55*Math.abs(tilt-3) + 0.09*ofa
+            + 13*UBC + 0.65*Math.max(0,540-MST) + 0.9*RHspray + 0.02*CO;
+  return {NOx,UBC,CO,MST,RHspray,dHR};
+}
+function s6feasible(o2,tilt,ofa,bias,clamp){
+  if(!clamp) return true;
+  return o2>=2.6 && o2<=4.6 && tilt>=-12 && tilt<=12 && ofa>=10 && ofa<=65 && bias>=-15 && bias<=15;
+}
+function s6(){
+  const o2=+$('s6-o2').value/10, tilt=+$('s6-tilt').value, ofa=+$('s6-ofa').value,
+        bias=+$('s6-bias').value, load=+$('s6-load').value;
+  const wh=+$('s6-wh').value/100, wn=+$('s6-wn').value/100, wu=+$('s6-wu').value/100;
+  const clamp=$('s6-clamp').checked, rate=$('s6-rate').checked;
+  $('s6-o2-v').textContent=o2.toFixed(1)+' %'; $('s6-tilt-v').textContent=tilt+'°';
+  $('s6-ofa-v').textContent=ofa+' %'; $('s6-bias-v').textContent=bias+' %';
+  $('s6-load-v').textContent=load+' MW';
+  const ws=wh+wn+wu||1;
+  $('s6-wh-v').textContent=(wh/ws).toFixed(2); $('s6-wn-v').textContent=(wn/ws).toFixed(2); $('s6-wu-v').textContent=(wu/ws).toFixed(2);
+
+  const cur=s6resp(o2,tilt,ofa,bias,load);
+  // search
+  const pts=[]; let best=null;
+  for(let a=20;a<=60;a+=2) for(let t=-20;t<=20;t+=4) for(let f=0;f<=80;f+=5) for(let b=-25;b<=25;b+=5){
+    const O=a/10;
+    if(!s6feasible(O,t,f,b,clamp)) continue;
+    const r=s6resp(O,t,f,b,load);
+    if(r.CO>200||r.UBC>2.5) continue;
+    pts.push([r.dHR,r.NOx]);
+    const score=(wh/ws)*(r.dHR/60)+(wn/ws)*(r.NOx/450)+(wu/ws)*(r.UBC/2.0);
+    if(!best||score<best.score) best={score,O,t,f,b,r};
+  }
+  if(!best){ $('s6-say').innerHTML='<div class="bad">No feasible setting satisfies the clamps and the CO and unburnt-carbon limits at this load. Widen the clamps or change the load.</div>'; return; }
+  let target=best;
+  if(rate&&best){ // rate limit: no more than one step of movement from current per cycle
+    const lim=(v,c,mx)=>c+Math.max(-mx,Math.min(mx,v-c));
+    const O=lim(best.O,o2,0.3), t=lim(best.t,tilt,3), f=lim(best.f,ofa,6), b=lim(best.b,bias,4);
+    target={O,t,f,b,r:s6resp(O,t,f,b,load)};
+  }
+  S6.target=target;
+  const gain=cur.dHR-target.r.dHR;
+  const st=ST.find(s=>/Koradi Units 8/.test(s.station));
+  const crY=gain*st.net*12*1e6*st.rsKcal/1e7;
+
+  $('s6-stats').innerHTML=`
+   <div class="stat"><div class="l">Heat-rate penalty now</div><div class="n">${fmt(cur.dHR,0)}</div><div class="s">kcal/kWh above the best achievable</div></div>
+   <div class="stat"><div class="l">Optimiser target</div><div class="n gn">${fmt(target.r.dHR,0)}</div><div class="s">O₂ ${target.O.toFixed(1)} · tilt ${target.t}° · OFA ${target.f} % · bias ${target.b} %</div></div>
+   <div class="stat"><div class="l">Recoverable</div><div class="n em">${fmt(Math.max(0,gain),0)}</div><div class="s">kcal/kWh</div></div>
+   <div class="stat"><div class="l">NOx</div><div class="n ${target.r.NOx<cur.NOx?'gn':'rd'}">${fmt(target.r.NOx,0)}</div><div class="s">from ${fmt(cur.NOx,0)} mg/Nm³</div></div>
+   <div class="stat"><div class="l">Unburnt carbon</div><div class="n ${target.r.UBC<cur.UBC?'gn':'rd'}">${fmt(target.r.UBC,2)} %</div><div class="s">from ${fmt(cur.UBC,2)} %</div></div>
+   <div class="stat"><div class="l">Annualised on Koradi 8-10</div><div class="n em">${cr(Math.max(0,crY))}</div><div class="s">at that station's own cost of heat</div></div>`;
+
+  scatter($('s6-c1'),{height:260,
+    pts:pts.map(p=>[p[0],p[1],'rgba(140,154,166,.30)'])
+      .concat([[cur.dHR,cur.NOx,'#A8261E'],[target.r.dHR,target.r.NOx,'#256B45']]),
+    xLabel:'Heat-rate penalty (kcal/kWh) — lower is better',
+    yLabel:'NOx (mg/Nm³)'});
+
+  $('s6-tbl').innerHTML=`<table><thead><tr><th>Outcome</th><th class="num">Manual now</th>
+    <th class="num">Optimiser target</th><th class="num">Change</th><th>Limit</th></tr></thead><tbody>
+    <tr><td>Heat-rate penalty (kcal/kWh)</td><td class="num">${fmt(cur.dHR,1)}</td><td class="num">${fmt(target.r.dHR,1)}</td><td class="num">${fmt(target.r.dHR-cur.dHR,1)}</td><td>—</td></tr>
+    <tr><td>NOx (mg/Nm³)</td><td class="num">${fmt(cur.NOx,0)}</td><td class="num">${fmt(target.r.NOx,0)}</td><td class="num">${fmt(target.r.NOx-cur.NOx,0)}</td><td>450 consent</td></tr>
+    <tr><td>Unburnt carbon in ash (%)</td><td class="num">${fmt(cur.UBC,2)}</td><td class="num">${fmt(target.r.UBC,2)}</td><td class="num">${fmt(target.r.UBC-cur.UBC,2)}</td><td>1.0 for ash sale</td></tr>
+    <tr><td>CO (ppm)</td><td class="num">${fmt(cur.CO,0)}</td><td class="num">${fmt(target.r.CO,0)}</td><td class="num">${fmt(target.r.CO-cur.CO,0)}</td><td>200 hard limit</td></tr>
+    <tr><td>Main steam temperature (°C)</td><td class="num">${fmt(cur.MST,0)}</td><td class="num">${fmt(target.r.MST,0)}</td><td class="num">${fmt(target.r.MST-cur.MST,0)}</td><td>568 metal</td></tr>
+    <tr><td>Reheat spray (t/h)</td><td class="num">${fmt(cur.RHspray,1)}</td><td class="num">${fmt(target.r.RHspray,1)}</td><td class="num">${fmt(target.r.RHspray-cur.RHspray,1)}</td><td>minimise</td></tr>
+    </tbody></table>`;
+
+  let msg='';
+  if(!clamp){
+    msg=`<div class="bad"><b>Clamps are off.</b> The optimiser is now free to propose O₂ of ${target.O.toFixed(1)} %,
+    burner tilt of ${target.t}° and over-fire air of ${target.f} % — settings outside the range any commissioning
+    engineer signed off. On paper the number improves. In the furnace you may be looking at flame instability,
+    reducing conditions on the waterwall and accelerated fireside corrosion, none of which appear in the objective
+    function. This is exactly why clamps are not a formality.</div>`;
+  } else if(rate && best && Math.abs(best.O-target.O)>0.05){
+    msg=`<div class="note"><b>Rate limits are working.</b> The unconstrained optimum is O₂ ${best.O.toFixed(1)} %,
+    but the system is only asking for ${target.O.toFixed(1)} % this cycle — a step of ${Math.abs(target.O-o2).toFixed(1)} %.
+    It will walk there over several cycles. This is deliberate: an optimiser that makes a large step change is
+    indistinguishable, from the control room, from a fault. Switch rate limits off and watch the target jump.</div>`;
+  } else {
+    msg=`<div class="good"><b>The optimiser is asking for ${fmt(Math.max(0,gain),0)} kcal/kWh.</b> Notice the shape
+    of the trade-off surface — you cannot move to the lower-left corner, because low NOx and low heat rate pull in
+    opposite directions through excess air and over-fire air. The frontier is real. Where you sit on it is a
+    commercial judgement about the price of fuel against the price of a consent breach, and it should be made by
+    management with the numbers in front of them, not silently by whoever set the weights in the software.</div>`;
+  }
+  msg+=`<p class="small">Change the three weights and watch the target move along the frontier. Nothing about the
+  plant changed — only what you told the optimiser to care about.</p>`;
+  $('s6-say').innerHTML=msg;
+}
+['s6-o2','s6-tilt','s6-ofa','s6-bias','s6-load','s6-wh','s6-wn','s6-wu'].forEach(id=>$(id).addEventListener('input',s6));
+['s6-clamp','s6-rate'].forEach(id=>$(id).addEventListener('change',s6));
+$('s6-opt').addEventListener('click',()=>{ const t=S6.target; if(!t)return;
+  $('s6-o2').value=Math.round(t.O*10); $('s6-tilt').value=Math.round(t.t);
+  $('s6-ofa').value=Math.round(t.f); $('s6-bias').value=Math.round(t.b); s6(); });
+$('s6-reset').addEventListener('click',()=>{ $('s6-o2').value=38; $('s6-tilt').value=0;
+  $('s6-ofa').value=35; $('s6-bias').value=0; s6(); });
+REDRAW.s6=s6;
+
+/* ==========================================================
+   SIM-7  RAG — real TF-IDF retrieval over an indexed corpus
+   ========================================================== */
+const DOCS=[
+ {id:'SOP-BLR-014', t:'SOP — ID fan bearing high temperature response', st:'All', u:'All', ty:'SOP', ver:'Rev 4, eff. 12.03.2024',
+  x:`On ID fan drive-end or non-drive-end bearing metal temperature exceeding 85 degC, the shift charge engineer shall: verify the reading against the local dial thermometer and against the companion fan; confirm lube oil cooler outlet temperature and cooling water flow; check oil level and oil pressure at the bearing; record vibration on the portable analyser at the bearing housing in horizontal, vertical and axial directions; and reduce fan loading by adjusting inlet damper or blade pitch if temperature continues to rise. On reaching the alarm setpoint of 90 degC, inform the Operation Head. On reaching 95 degC, prepare for controlled unit load reduction and standby fan changeover.`},
+ {id:'OEM-IDF-221', t:'OEM manual extract — ID fan bearing limits and lubrication', st:'All', u:'All', ty:'OEM manual', ver:'BHEL, Section 7.3',
+  x:`Recommended bearing metal temperature under continuous operation shall not exceed 80 degC. Alarm shall be set at 90 degC and trip at 100 degC. Lube oil grade ISO VG 68 for ambient above 25 degC. Oil cooler outlet temperature shall be maintained between 38 and 45 degC. Bearing clearance for the drive end journal bearing is 0.18 to 0.24 mm diametral. Permissible vibration on bearing housing 4.5 mm/s RMS in service, 7.1 mm/s for alarm, 11.0 mm/s for trip, in accordance with the applicable rotating machinery vibration standard.`},
+ {id:'RCA-2023-17', t:'RCA — Unit 9 ID fan A bearing failure, forced outage 62 hours', st:'Koradi', u:'9', ty:'RCA report', ver:'Issued 22.09.2023',
+  x:`Root cause established as progressive lubricant degradation following partial blockage of the oil cooler on the cooling water side, leading to elevated oil temperature, reduced film thickness and eventual babbitt wear on the drive end journal bearing. Bearing metal temperature had been trending upward for approximately eleven weeks before the alarm operated, from 68 to 91 degC, but remained below the fixed alarm setpoint of 90 degC for the majority of that period. Contributing factor: cooling water side of the lube oil cooler was not included in the monsoon cleaning schedule. Corrective action: cooler cleaning added to the pre-monsoon checklist; recommendation raised for load-normalised trending of bearing temperature rather than fixed threshold alarm alone. Outage duration 62 hours. Generation loss approximately 33.9 MU.`},
+ {id:'RCA-2021-04', t:'RCA — Unit 4 ID fan bearing high vibration, load restriction 9 days', st:'Khaperkheda', u:'4', ty:'RCA report', ver:'Issued 07.02.2021',
+  x:`Progressive increase in bearing housing vibration from 3.1 to 8.4 mm/s RMS over six weeks. Spectrum showed dominant 1x running speed component with rising phase drift, indicating progressive unbalance rather than a bearing defect. Cause established as uneven ash deposit build-up on the impeller following operation at sustained low load with high ash coal. Corrective action: impeller cleaned during opportunity outage; water washing frequency revised. Note that 1x dominance distinguishes unbalance from a bearing defect, which would show characteristic defect frequencies with sidebands.`},
+ {id:'TRIP-2024-31', t:'Trip report — Unit 8 tripped on ID fan A motor overload', st:'Koradi', u:'8', ty:'Trip report', ver:'Issued 03.11.2024',
+  x:`Unit tripped from 612 MW on ID fan A motor overload protection operation at 03:41 hours. Sequence of events shows fan A motor current rising from 178 A to 244 A over 40 minutes preceding the trip, with furnace draft becoming progressively more negative and fan B compensating. Investigation found the fan A inlet damper actuator linkage had partially seized, causing the damper to remain more open than the control demand. Bearing temperatures were normal throughout. Restoration after 14 hours. Recommendation: include actuator stroke checks in the fortnightly schedule and trend motor current against gas flow as a health indicator.`},
+ {id:'PERF-2026-06', t:'Performance note — June 2026 auxiliary consumption review', st:'All', u:'All', ty:'Performance note', ver:'June 2026',
+  x:`Auxiliary consumption across the thermal fleet ran 81.5 million units above normative in June 2026. Worst deviations were Parli Units 6-7 at 12.41 percent against 9.30 normative, Chandrapur Units 3-7 at 11.69 against 8.67, and Nashik Units 3-5 at 12.96 against 10.75. Analysis of the Nashik case shows the generated heat rate of 2440 kcal per kWh is actually better than the normative 2458, meaning the entire net heat rate penalty of 50 kcal per kWh arises from auxiliary consumption rather than from boiler or turbine performance. Recommended focus areas are mill combination at part load, cooling water pump scheduling against ambient, and electrostatic precipitator field energisation against measured opacity margin.`},
+ {id:'PERF-2026-07', t:'Performance note — Koradi Units 8-10 heat rate deviation', st:'Koradi', u:'8-10', ty:'Performance note', ver:'June 2026',
+  x:`Koradi Units 8 to 10 recorded a net heat rate of 2442 kcal per kWh against a normative 2230 in June 2026, a gap of 212 kcal per kWh on 964.8 million units of gross generation. Decomposition shows the auxiliary consumption gap of 0.95 percentage points accounts for a small part; the generated heat rate of 2272 against a normative 2096 indicates a genuine boiler and turbine shortfall of 176 kcal per kWh. This is the largest single thermodynamic deviation in the fleet. Priority investigation areas: main and reheat steam temperature attainment, condenser cleanliness and back pressure, air preheater leakage, and combustion tuning across the mill combinations in regular use.`},
+ {id:'SOP-CHM-006', t:'SOP — cycle chemistry excursion response', st:'All', u:'All', ty:'SOP', ver:'Rev 6, eff. 01.08.2025',
+  x:`On cation conductivity at condensate extraction pump discharge exceeding 0.30 microsiemens per cm, the shift chemist shall confirm the reading against a grab sample, check condenser vacuum and air ingress indications, and isolate suspect condenser sections by the hot well partition method if fitted. On exceeding 1.0 microsiemens per cm sustained for one hour, unit load shall be reduced and condenser tube leak location commenced. For once-through supercritical units the limits are tighter and no sustained excursion is permitted.`},
+ {id:'MERC-AFC-26', t:'Regulatory note — availability, AFC and disallowance mechanism', st:'All', u:'All', ty:'Regulatory', ver:'June 2026',
+  x:`Annual fixed charge is approved against a normative availability, being 85 percent for most stations, 80 percent for Chandrapur Units 3-7, 75 percent for Koradi Unit 6 and 40.89 percent for Uran. Availability below the normative level results in proportionate disallowance of fixed cost recovery. For June 2026 the cumulative fixed charge disallowance stands at 100.87 crore rupees, of which 32.93 crore rupees was adjusted in the June bill. The largest contributors are Koradi Units 8-10 at 28.04 crore, Chandrapur Units 3-7 at 23.94 crore and Khaperkheda Units 1-4 at 21.75 crore. Availability is measured on declared capability, so a unit that is available but not despatched still earns fixed cost recovery.`},
+ {id:'SOP-MLL-009', t:'SOP — mill choking and clearance', st:'All', u:'All', ty:'SOP', ver:'Rev 3, eff. 19.06.2023',
+  x:`Indications of impending mill choking include rising mill differential pressure at constant feeder rate, falling mill outlet temperature, rising mill motor current followed by a sudden fall, and increasing reject rate. On confirmation, reduce feeder speed in steps, raise hot air damper opening to restore outlet temperature to 75 to 80 degC, and if differential pressure continues to rise, trip the feeder and run the mill empty before restarting. Do not attempt to clear a choked mill by increasing primary air alone as this risks a mill fire on high volatile coal.`},
+ {id:'INSP-2025-88', t:'Inspection report — ID fan impeller thickness survey', st:'Nashik', u:'4', ty:'Inspection', ver:'Issued 14.05.2025',
+  x:`Ultrasonic thickness survey of ID fan A impeller carried out during the unit 4 overhaul. Original blade thickness 12 mm. Minimum recorded thickness 7.4 mm at the trailing edge of blade number 7, representing 38 percent erosion loss. Six blades showed loss exceeding 25 percent. Wear pattern consistent with high ash loading and confirms the elevated vibration trend observed since the previous overhaul. Recommendation: blade liner replacement at the next overhaul, and interim monitoring of vibration and fan power against gas flow.`},
+ {id:'SFT-PTW-002', t:'Permit to work — rotating equipment isolation', st:'All', u:'All', ty:'Safety', ver:'Rev 8, eff. 01.04.2026',
+  x:`No work shall commence on any rotating equipment until the permit to work has been issued by the authorised issuing officer, the motor has been electrically isolated and locked off at the breaker with the key retained by the permit holder, the isolation has been physically verified by attempted start from the local station, and the shaft has been mechanically restrained where stored energy or draught-driven windmilling is possible. Permits shall be signed by name. No AI system, automated tool or software agent is authorised to issue, amend or close a permit under any circumstances.`}
+];
+const S7={idx:null};
+function tok(s){ return (s.toLowerCase().match(/[a-z0-9]+/g)||[]).filter(w=>w.length>2 &&
+  !['the','and','for','with','from','that','this','shall','are','was','has','have','not','all','any','per','its','into'].includes(w)); }
+function buildIndex(){
+  const df={}, docs=DOCS.map(d=>{
+    const w=tok(d.t+' '+d.x), tf={};
+    w.forEach(t=>tf[t]=(tf[t]||0)+1);
+    Object.keys(tf).forEach(t=>df[t]=(df[t]||0)+1);
+    return {d, tf, len:w.length};
+  });
+  const N=docs.length;
+  docs.forEach(o=>{ o.v={}; let n=0;
+    Object.keys(o.tf).forEach(t=>{ const w=(1+Math.log(o.tf[t]))*Math.log(N/(df[t]||1)+1); o.v[t]=w; n+=w*w; });
+    o.norm=Math.sqrt(n)||1; });
+  S7.idx={docs,df,N};
+}
+function retrieve(q,k,station,unit,hybrid){
+  const {docs,df,N}=S7.idx;
+  const qt=tok(q), qtf={};
+  qt.forEach(t=>qtf[t]=(qtf[t]||0)+1);
+  const qv={}; let qn=0;
+  Object.keys(qtf).forEach(t=>{ const w=(1+Math.log(qtf[t]))*Math.log(N/(df[t]||1)+1); qv[t]=w; qn+=w*w; });
+  qn=Math.sqrt(qn)||1;
+  const raw=(q.match(/[A-Za-z]{2,}-?\d+|\b\d{2,}\b/g)||[]).map(s=>s.toLowerCase());
+  return docs.filter(o=>(!station||o.d.st===station||o.d.st==='All')&&(!unit||o.d.u===unit||o.d.u==='All'))
+    .map(o=>{
+      let dot=0; Object.keys(qv).forEach(t=>{ if(o.v[t]) dot+=qv[t]*o.v[t]; });
+      let sc=dot/(qn*o.norm);
+      let kwHit=0;
+      if(hybrid){ raw.forEach(r=>{ if((o.d.x+' '+o.d.id+' '+o.d.t).toLowerCase().includes(r)){ kwHit++; sc+=0.14; } }); }
+      return {o,sc,kwHit};
+    }).filter(r=>r.sc>0.001).sort((a,b)=>b.sc-a.sc).slice(0,k);
+}
+const HALLUC={
+ 'bearing':'For an ID fan drive-end bearing the permissible metal temperature is <b>78 °C</b>, with the alarm set at <b>88 °C</b> and trip at <b>96 °C</b>. Recommended journal bearing diametral clearance is <b>0.12 to 0.16 mm</b> and the specified lubricant is <b>ISO VG 46</b>. Vibration should be maintained below <b>3.5 mm/s RMS</b>.',
+ 'mill':'On mill choking, increase primary air flow to <b>135 % of normal</b> to clear the pulveriser, and maintain mill outlet temperature at <b>92 °C</b> to assist drying. Reject rate above <b>4 %</b> is normal during clearance.',
+ 'chem':'Cation conductivity should be maintained below <b>0.65 µS/cm</b> at the CEP discharge, and a sustained excursion up to <b>2.5 µS/cm</b> is acceptable for up to four hours before load reduction is required.',
+ 'afc':'The fixed-charge disallowance for June 2026 was <b>₹64.2 crore</b>, driven mainly by Bhusawal Unit 3 and Parli Unit 8, both of which fell below the <b>90 %</b> normative availability threshold.',
+ 'default':'Based on general industry practice the applicable limit is approximately <b>85 % of the design value</b>, and the standard maintenance interval is <b>8,000 operating hours</b>. Consult the relevant national standard for confirmation.'
+};
+function s7run(){
+  const q=$('s7-q').value.trim(); if(!q) return;
+  const k=+$('s7-k').value, station=$('s7-station').value, unit=$('s7-unit').value,
+        ground=$('s7-ground').checked, hybrid=$('s7-kw').checked;
+  $('s7-k-v').textContent=k;
+  const R=retrieve(q,k,station,unit,hybrid);
+
+  $('s7-ret').innerHTML = R.length? '<div class="tw tall"><table><thead><tr><th style="width:52px">Score</th>'+
+    '<th>Document</th><th>Type</th><th>Passage retrieved</th></tr></thead><tbody>'+
+    R.map(r=>`<tr><td class="num"><b>${r.sc.toFixed(3)}</b>${r.kwHit?'<br><span class="pill ok">kw ×'+r.kwHit+'</span>':''}</td>`+
+      `<td><b>${r.o.d.id}</b><br><span class="small">${r.o.d.t}<br>${r.o.d.ver} · ${r.o.d.st} · Unit ${r.o.d.u}</span></td>`+
+      `<td><span class="pill nu">${r.o.d.ty}</span></td>`+
+      `<td class="small">${r.o.d.x.slice(0,300)}…</td></tr>`).join('')+'</tbody></table></div>'
+    : '<div class="bad">Nothing in the corpus matched. In a real system this is the moment to say "I do not know" — not to guess.</div>';
+
+  if(!ground){
+    const key = /bearing|fan/i.test(q)?'bearing' : /mill|pulveris/i.test(q)?'mill' :
+                /conductiv|chemistr|cation/i.test(q)?'chem' : /afc|disallow|availab/i.test(q)?'afc' : 'default';
+    $('s7-ans').innerHTML=`<div class="bad"><b>Ungrounded answer — no retrieval, no sources</b><p style="margin:8px 0 0">${HALLUC[key]}</p></div>
+      <p class="small" style="margin-top:8px">Every figure above is invented. They are plausible, they are in the right
+      units, they are in the right order of magnitude, and they are wrong. Nothing in the output tells you that.
+      Compare them against the retrieved passages on the left.</p>`;
+    $('s7-say').innerHTML=`<div class="bad"><b>This is what hallucination looks like.</b> Not gibberish — a confident,
+      well-formatted, technically-shaped answer with specific numbers and no source. An engineer skimming it would
+      have no reason to doubt it. Switch <b>Grounded</b> back on and read the difference.</div>`;
+    return;
+  }
+  if(!R.length){ $('s7-ans').innerHTML='<div class="warn">No grounded answer is possible — nothing relevant was retrieved. A correctly built system answers "I could not find this in the indexed documents", and that is the right answer.</div>'; return; }
+
+  const sents=[];
+  R.forEach(r=>{
+    r.o.d.x.split(/(?<=\.)\s+/).forEach(s=>{
+      const t=tok(s), qt=new Set(tok(q));
+      let hit=0; t.forEach(w=>{ if(qt.has(w)) hit++; });
+      if(hit>0) sents.push({s:s.trim(), score:hit/Math.sqrt(t.length||1)*r.sc, cite:r.o.d});
+    });
+  });
+  sents.sort((a,b)=>b.score-a.score);
+  const use=sents.slice(0,5);
+  $('s7-ans').innerHTML=`<div class="good"><b>Grounded answer — assembled only from the retrieved passages</b>
+    <ul style="margin-top:8px">${use.map(u=>`<li>${u.s} <span class="pill nu">${u.cite.id} · ${u.cite.ver}</span></li>`).join('')}</ul></div>
+    <p class="small" style="margin-top:8px"><b>Sources:</b> ${[...new Set(use.map(u=>u.cite.id+' ('+u.cite.t+', '+u.cite.ver+')'))].join(' · ')}</p>`;
+
+  const filt=(station||unit)?`The corpus was filtered to ${station||'all stations'}${unit?', Unit '+unit:''} before retrieval — that metadata filter is what stops a Unit 4 question returning a Unit 3 answer. `:'';
+  const kwn=R.reduce((a,b)=>a+b.kwHit,0);
+  $('s7-say').innerHTML=`<div class="note"><b>Retrieval ran first, and you can see exactly what it found.</b>
+    ${R.length} passages were scored by TF-IDF cosine similarity${kwn?' with '+kwn+' exact keyword hits added by hybrid search':''}.
+    ${filt}Only those passages were used to answer, and every line carries its source and revision.
+    ${hybrid?'':'<b>Hybrid search is off.</b> Turn it on and search for a specific tag number or document code — pure semantic similarity is poor at exact identifiers, which is precisely what engineers search for.'}</div>
+    <p class="small">The important property is not that the answer is good. It is that the answer is
+    <i>checkable</i>. If it cites SOP-BLR-014 Rev 4, you can open Rev 4 and look.</p>`;
+}
+(function(){
+  buildIndex();
+  const sts=[...new Set(DOCS.map(d=>d.st))].filter(s=>s!=='All');
+  const uns=[...new Set(DOCS.map(d=>d.u))].filter(s=>s!=='All');
+  sts.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;$('s7-station').appendChild(o);});
+  uns.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent='Unit '+s;$('s7-unit').appendChild(o);});
+  const P=['ID fan bearing temperature high — what should I check?',
+           'What is the trip setting and bearing clearance for the ID fan?',
+           'Has an ID fan bearing failed anywhere in the fleet before?',
+           'Why is our auxiliary consumption above normative?',
+           'How does the availability disallowance mechanism work?',
+           'Mill differential pressure is rising — what do I do?',
+           'Can an AI agent close a permit to work?'];
+  $('s7-presets').innerHTML=P.map((p,i)=>`<button class="btn gh" style="margin:3px 0;width:100%;text-align:left;font-size:12px" data-p="${i}">${p}</button>`).join('');
+  $('s7-presets').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ $('s7-q').value=P[+b.dataset.p]; s7run(); }));
+  $('s7-corpus').innerHTML='<div class="tw"><table><thead><tr><th>ID</th><th>Type</th><th>Scope</th></tr></thead><tbody>'+
+    DOCS.map(d=>`<tr><td><b>${d.id}</b><br><span class="small">${d.t}</span></td><td><span class="pill nu">${d.ty}</span></td>`+
+    `<td class="small">${d.st}${d.u!=='All'?' · U'+d.u:''}<br>${d.ver}</td></tr>`).join('')+'</tbody></table></div>';
+  $('s7-go').addEventListener('click',s7run);
+  $('s7-q').addEventListener('keydown',e=>{ if(e.key==='Enter') s7run(); });
+  ['s7-k','s7-station','s7-unit'].forEach(id=>$(id).addEventListener('input',s7run));
+  ['s7-ground','s7-kw'].forEach(id=>$(id).addEventListener('change',s7run));
+  s7run();
+})();
+REDRAW.s7=()=>{};
+
+/* ==========================================================
+   SIM-8  Agentic assistant — reason / act / observe
+   ========================================================== */
+const TOOLS=[
+ ['historian.query','Read process tags over a time range','read'],
+ ['historian.residual','Fetch the load-normalised residual for a tag','read'],
+ ['cmms.search','Search work orders, defects and history','read'],
+ ['docs.search','Retrieval over SOPs, manuals and RCA reports','read'],
+ ['perf.model','Compute heat-rate and availability consequence','read'],
+ ['workorder.draft','Prepare a work order for human review','draft'],
+ ['workorder.create','Create a work order in SAP','WRITE'],
+ ['dcs.write','Write a setpoint to the control system','WRITE']
+];
+const STEPS=[
+ {k:'goal',t:'Goal',b:`Triage the residual advisory on <b>Koradi Unit 8, ID fan A drive-end bearing</b>. Establish whether it is a real developing fault, a sensor problem or an operating-condition artefact. If real, estimate the consequence and prepare an action for engineering approval.`},
+ {k:'plan',t:'Plan',b:`<ol><li>Retrieve the residual history and confirm persistence</li><li>Pull the underlying process tags and check for a sensor fault signature</li><li>Check the CMMS for recent interventions and open defects</li><li>Search the document corpus for the OEM limits and any fleet precedent</li><li>Estimate remaining life and the availability consequence</li><li>Draft a work order and an advisory note for approval</li></ol>`},
+ {k:'tool',t:'historian.residual', q:`tag=KOR8_IDFA_DE_BRG_TEMP, window=120d, model=idfan_a_v3`,
+  o:`Residual crossed +3.0 °C on day 94 and has held above it for 6 consecutive days.<br>Current residual +4.6 °C. Measured 74.2 °C. Expected 69.6 °C. Fixed alarm setpoint 90 °C.<br>EWMA slope +0.21 °C/day, monotonic.`,
+  r:`Persistent and monotonic, not a spike. The measured value is 15.8 °C below the DCS alarm setpoint, so no alarm has operated and none will for some weeks. This has the shape of a real developing fault rather than noise.`},
+ {k:'tool',t:'historian.query', q:`tags=[DE_BRG_TEMP, NDE_BRG_TEMP, LUBE_OIL_OUT_TEMP, CW_FLOW, MOTOR_CURRENT, VIB_DE_H, GAS_FLOW, AMBIENT], window=120d`,
+  o:`DE bearing +4.6 °C residual · NDE bearing +0.4 °C · lube oil cooler outlet 47.8 °C, rising from 41.2 °C over the same period · cooling water flow to cooler down 11 % · motor current normal against gas flow · VIB_DE_H 3.4 mm/s, up from 2.9.`,
+  r:`Two signals moved together with the bearing, and the companion bearing did not. A drifting or failed thermocouple would move alone. The lube oil cooler outlet temperature rising 6.6 °C with cooling water flow down 11 % is a coherent physical story: the cooler is fouling, oil temperature is rising, the oil film is thinning and the bearing is running hot. Vibration is rising but still well within limits.`},
+ {k:'tool',t:'cmms.search', q:`equipment=KOR8-IDF-A, window=24 months, include=[work orders, defects, notifications]`,
+  o:`No bearing intervention on ID fan A in 24 months. Last lube oil change 14 months ago. Oil cooler cleaning last recorded 19 months ago. One open defect: "ID fan A lube oil cooler CW inlet strainer choking frequently" raised 5 weeks ago, priority Low, unassigned. Next planned unit outage in 116 days.`,
+  r:`The open defect matches the physical story exactly, and it has been sitting unassigned for five weeks at Low priority. The cooler has not been cleaned in 19 months. This raises confidence substantially — the analytics and the maintenance record are telling the same story independently.`},
+ {k:'tool',t:'docs.search', q:`"ID fan bearing temperature limit trip clearance" + "lube oil cooler" + precedent across fleet`,
+  o:`<b>OEM-IDF-221</b> — continuous limit 80 °C, alarm 90 °C, trip 100 °C; oil cooler outlet to be held 38–45 °C.<br><b>SOP-BLR-014 Rev 4</b> — response procedure above 85 °C.<br><b>RCA-2023-17</b> — Koradi Unit 9, September 2023: identical mechanism. Oil cooler blockage on the cooling water side, babbitt wear, 62-hour forced outage, 33.9 MU lost. Bearing had trended up for eleven weeks below the fixed alarm setpoint.`,
+  r:`This is not a novel failure. The same mechanism took Unit 9 out for 62 hours in 2023, and the RCA for that event specifically recommended load-normalised trending instead of fixed-threshold alarming. The current oil cooler outlet of 47.8 °C is already above the OEM band of 38–45 °C.`},
+ {k:'tool',t:'perf.model', q:`station=Koradi Units 8-10, event=forced outage 660 MW, duration=[2.5 d forced | 0.5 d in planned outage]`,
+  o:`Koradi Units 8-10: PLF 66.62 %, MOD variable charge ₹3.2840/kWh, cumulative AFC disallowance ₹28.04 crore.<br>Forced outage, 2.5 days: ≈ 26.4 GWh not generated, plus pro-rata fixed-charge exposure. Estimated consequence <b>₹2.4–2.9 crore</b>.<br>Cooler cleaning inside the outage already planned in 116 days: marginal cost <b>under ₹10 lakh</b>.<br>Cleaning at an opportunity outage within 3 weeks: <b>₹35–45 lakh</b>.`,
+  r:`The asymmetry decides it. Doing nothing risks a consequence roughly sixty times the cost of acting. But the degradation trend does not have to reach failure in 116 days for the action to be justified — at this slope it very likely will not survive that long anyway.`},
+ {k:'tool',t:'workorder.draft', q:`equipment=KOR8-IDF-A, type=corrective, priority=High`,
+  o:`<b>Draft work order — for approval</b><br>Equipment: Koradi Unit 8, ID fan A lube oil cooler and drive-end bearing<br>Priority: High (raised from the existing Low defect)<br>Scope: (1) Clean lube oil cooler cooling-water side and inlet strainer; (2) verify CW flow restored to design; (3) sample and analyse lube oil for wear debris and degradation; (4) record bearing housing vibration in three planes; (5) borescope drive-end bearing if oil analysis shows babbitt debris.<br>Window: opportunity outage within 3 weeks, or immediately on any unit shutdown<br>Evidence attached: residual trend, cooler outlet trend, CW flow trend, RCA-2023-17, OEM-IDF-221<br>Linked defect: existing Low-priority notification raised 5 weeks ago`,
+  r:`Prepared as a draft. The agent has linked the existing defect rather than raising a duplicate, attached the evidence an engineer needs to judge it, and specified an oil analysis before any decision to open the bearing.`},
+ {k:'gate',t:'Approval required',b:''}
+];
+const S8={i:0};
+function s8render(){
+  const el=$('s8-trace');
+  if(!S8.i){ el.innerHTML='<p class="small">Press <b>Next step</b> to begin.</p>'; $('s8-gate').style.display='none'; $('s8-say').innerHTML='<p class="small">The explanation appears once the agent reaches the gate.</p>'; return; }
+  let h='';
+  for(let i=0;i<S8.i;i++){
+    const s=STEPS[i];
+    if(s.k==='goal'||s.k==='plan'){
+      h+=`<div class="note" style="margin-bottom:10px"><b>${s.t}</b><div style="margin-top:6px">${s.b}</div></div>`;
+    } else if(s.k==='tool'){
+      h+=`<div class="card" style="margin-bottom:10px;background:#FBFCFD">
+        <div style="font:700 12px ui-monospace,Consolas,monospace;color:#11707F">▸ ${s.t}
+          <span class="pill ok" style="margin-left:6px">read-only</span></div>
+        <pre style="margin:8px 0">${s.q}</pre>
+        <div class="small" style="margin-bottom:8px"><b>Returned:</b><br>${s.o}</div>
+        <div class="good"><b>Agent reasoning:</b> ${s.r}</div></div>`;
+    } else if(s.k==='gate'){
+      h+=`<div class="warn"><b>The agent has stopped.</b> It has drafted an action and will not proceed further
+        without a named human decision. Total elapsed: about 90 seconds.</div>`;
+    }
+  }
+  el.innerHTML=h;
+  if(S8.i>=STEPS.length){
+    $('s8-gate').style.display='';
+    $('s8-gatebody').innerHTML=`<p><b>Decision required from:</b> Deputy Executive Engineer (Mechanical Maintenance), Koradi Unit 8.</p>
+      <p class="small">Before approving, check: does the residual story match anything you know about this machine that
+      the data does not show? Has the cooler already been cleaned without a record? Is the oil analysis worth doing
+      before committing to an outage window? Is High the right priority given the other work in the same window?</p>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn" id="s8-ok">Approve the work order</button>
+        <button class="btn gh" id="s8-rej">Reject — I know something the data does not</button>
+      </div><div id="s8-out" style="margin-top:10px"></div>`;
+    $('s8-ok').onclick=()=>{ $('s8-out').innerHTML=`<div class="good"><b>Work order raised under your name.</b>
+      The agent prepared it; you own it. The audit trail records the evidence it used, the tools it called, the
+      version of each document it cited, and your approval. If the decision turns out to be wrong, every step is
+      reconstructable — which is precisely why the gate exists.</div>`; };
+    $('s8-rej').onclick=()=>{ $('s8-out').innerHTML=`<div class="note"><b>Rejected, with a reason recorded.</b>
+      This is not a failure of the agent — it is the system working. Your rejection reason becomes training signal:
+      if the agent repeatedly misjudges this machine, that is a model problem worth fixing. An agent nobody ever
+      overrules is an agent nobody is really reading.</div>`; };
+    $('s8-say').innerHTML=`<div class="note"><b>What the agent actually did.</b> It called six read-only tools in an
+      order it chose, and at each step it used the result to decide what to ask next. It did not follow a fixed
+      script: when the residual turned out to be persistent, it went looking for a sensor-fault signature; when the
+      process tags told a cooler-fouling story, it went to the CMMS to see whether anyone had already noticed; when
+      the CMMS produced a five-week-old unassigned defect, it went to the document corpus for precedent and found
+      the 2023 Unit 9 RCA describing the identical mechanism.</div>
+      <p><b>What it got right:</b> it distinguished a sensor fault from a machine fault using the companion bearing;
+      it linked the existing defect instead of raising a duplicate; it costed the decision using Koradi's own
+      variable charge and its own AFC position; and it asked for an oil analysis before proposing to open a bearing.</p>
+      <p><b>What it could get wrong:</b> the residual model itself could be stale after an intervention nobody
+      recorded. The RCA precedent is suggestive, not proof — the same symptoms can have different causes. The cost
+      model assumes a 2.5-day forced outage, which is an assumption, not a measurement. And it cannot know that the
+      cooler was cleaned last month by a contractor who never raised a notification.</p>
+      <p><b>Which is why an engineer signs.</b> The agent compressed roughly half a day of investigation into ninety
+      seconds and laid out its evidence. It did not make the decision.</p>`;
+  } else { $('s8-gate').style.display='none'; }
+}
+$('s8-step').onclick=()=>{ if(S8.i<STEPS.length){S8.i++; s8render();} };
+$('s8-all').onclick=()=>{ S8.i=STEPS.length; s8render(); };
+$('s8-reset').onclick=()=>{ S8.i=0; s8render(); };
+$('s8-write').addEventListener('change',()=>{
+  $('s8-writewarn').innerHTML = $('s8-write').checked ?
+   `<div class="bad" style="margin-top:10px"><b>Do not do this.</b> An agent with write access to the CMMS will
+    eventually raise a duplicate work order at 3 a.m. against the wrong equipment number, and nobody will know
+    where it came from. An agent with write access to the DCS is a category error — it puts a statistical model
+    inside the control path of a 660 MW machine, with no deterministic behaviour, no safety rating and no
+    verification. Read-only access costs you almost nothing in capability and removes the entire class of risk.
+    The worst outcome of a read-only agent is bad advice. The worst outcome of a write-capable one is a unit.</div>` : '';
+  s8tools();
+});
+function s8tools(){
+  const w=$('s8-write').checked;
+  $('s8-tools').innerHTML=TOOLS.map(t=>{
+      const on = t[2]!=='WRITE' || w;
+      const pill = t[2]==='WRITE' ? (w?'<span class="pill er">GRANTED</span>':'<span class="pill nu">denied</span>')
+                 : t[2]==='draft' ? '<span class="pill wn">draft</span>' : '<span class="pill ok">read</span>';
+      return `<div class="toolrow" style="${on?'':'opacity:.45'}">
+        <div style="flex:1"><code>${t[0]}</code><div class="tp">${t[1]}</div></div>
+        <div style="flex:0 0 auto;padding-top:1px">${pill}</div></div>`;
+    }).join('');
+}
+s8tools(); s8render();
+REDRAW.s8=()=>{};
+
+/* ==========================================================
+   DATA reference tables
+   ========================================================== */
+function diagnose(s){
+  if(s.hrGap<=0) return 'Already at or better than norm';
+  const auxComp = s.ghrAct*(1/(1-s.aux_act/100) - 1/(1-s.aux_norm/100));
+  const share = auxComp/s.hrGap;
+  if(share>=0.80) return 'Auxiliary power is essentially the whole problem ('+(share*100).toFixed(0)+' %)';
+  if(share>=0.55) return 'Mostly auxiliary power ('+(share*100).toFixed(0)+' %)';
+  if(share<=0.20) return 'Mostly boiler and turbine ('+((1-share)*100).toFixed(0)+' %)';
+  if(share<=0.45) return 'Mainly boiler and turbine ('+((1-share)*100).toFixed(0)+' %)';
+  return 'Both, roughly balanced';
+}
+(function(){
+  const T=(head,rows)=>'<div class="tw"><table><thead><tr>'+head.map((h,i)=>`<th class="${i?'num':''}">${h}</th>`).join('')+
+    '</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map((c,i)=>`<td class="${i?'num':''}">${c}</td>`).join('')+'</tr>').join('')+'</tbody></table></div>';
+  $('d-t1').innerHTML=T(['Station','Cap MW','Avail %','PLF %','Gross MU','Net MU','Net HR','Norm','Gap'],
+    ST.map(s=>[s.station,s.cap,fmt(s.avail,2),fmt(s.plf,2),fmt(s.gross,2),fmt(s.net,2),fmt(s.hr_act,0),fmt(s.hr_norm,0),'+'+fmt(s.hrGap,0)]));
+  $('d-t2').innerHTML=T(['Station','Aux %','Norm %','Gap pp','Gross HR','Norm','Gross gap','Diagnosis'],
+    ST.map(s=>[s.station,fmt(s.aux_act,2),fmt(s.aux_norm,2),'+'+fmt(s.auxGap,2),fmt(s.ghrAct,0),fmt(s.ghrNorm,0),
+      (s.ghrGap>0?'+':'')+fmt(s.ghrGap,0),
+      diagnose(s)]));
+  $('d-t3').innerHTML=T(['Station','MOD VC ₹/kWh','Bill rate ₹/kWh','As-fired GCV','₹/kcal','Implied coal ₹/t'],
+    ST.map(s=>[s.station,fmt(s.vc_mod,4),fmt(s.vc_bill,3),fmt(s.gcv_fired,0),s.rsKcal.toFixed(6),fmt(s.coalRsT,0)]));
+  $('d-t4').innerHTML=T(['Station','Net HR gap ₹cr/mth','Aux excess MU','Aux excess ₹cr/mth','AFC disallowance ₹cr'],
+    ST.map(s=>[s.station,fmt(s.hrGapCr,2),fmt(Math.max(0,s.auxMU),2),fmt(Math.max(0,s.auxCr),2),fmt(s.afc_cr,2)]));
+})();
+
+/* first paint */
+s1(); s2(); s3(); s4(); s5(); s6();
+
+</script>
+</body>
+</html>

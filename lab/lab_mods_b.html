@@ -1,0 +1,233 @@
+<!-- ================= SIM-5 ================= -->
+<section class="mod" id="m-s5">
+  <div class="hd"><div class="kick">SIM-5 · Monitoring &amp; maintenance</div>
+    <h2>Predictive maintenance and remaining useful life</h2>
+    <p>Availability shortfall cost MAHAGENCO ₹100.87 crore of disallowed fixed charge. This module turns a
+    degradation trend into the only question a planner actually needs answered: will it reach the next planned
+    outage, and what does it cost if it does not?</p></div>
+
+  <div class="prob"><b>The problem.</b> A point estimate of remaining life is almost useless — "the bearing has
+  62 days left" invites either complacency or panic. What a maintenance planner needs is a probability: the chance
+  this machine survives to the outage already in the plan. That is a different question, and it has a different answer.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Station and machine</h3>
+        <div class="ctl"><select id="s5-st"></select></div>
+        <div class="ctl"><label>Days of trend observed <span class="v" id="s5-obs-v">70</span></label>
+          <input type="range" id="s5-obs" min="25" max="150" value="70" step="5">
+          <div class="hint">How much history the model has to fit</div></div>
+        <div class="ctl"><label>Degradation rate <span class="v" id="s5-k-v">1.00×</span></label>
+          <input type="range" id="s5-k" min="40" max="220" value="100" step="5"></div>
+        <div class="ctl"><label>Measurement noise <span class="v" id="s5-noise-v">1.0×</span></label>
+          <input type="range" id="s5-noise" min="20" max="300" value="100" step="10"></div>
+        <div class="ctl"><label>Next planned outage in <span class="v" id="s5-out-v">120 days</span></label>
+          <input type="range" id="s5-out" min="30" max="300" value="120" step="10"></div>
+      </div>
+      <div class="card"><h3>Consequence</h3>
+        <div class="ctl"><label>Forced outage duration <span class="v" id="s5-fdur-v">4 days</span></label>
+          <input type="range" id="s5-fdur" min="1" max="14" value="4" step="1"></div>
+        <div class="ctl"><label>Planned intervention <span class="v" id="s5-pdur-v">1.5 days</span></label>
+          <input type="range" id="s5-pdur" min="5" max="40" value="15" step="5">
+          <div class="hint">Taken inside an outage already scheduled</div></div>
+        <button class="btn" id="s5-reseed">New machine</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s5-stats"></div>
+      <div class="card"><h3>Health index — observed, fitted and projected with uncertainty</h3>
+        <canvas id="s5-c1"></canvas>
+        <div class="legend"><span><i style="background:#11707F"></i>Measured health index</span>
+          <span><i style="background:#D96A16"></i>Fitted degradation model</span>
+          <span><i style="background:#A8261E"></i>Functional failure threshold</span>
+          <span class="small">Shaded = 90 % projection band</span></div></div>
+      <div class="card"><h3>The decision, in money</h3><div id="s5-tbl"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s5-say"></div></div>
+      <div class="warn"><b>Where this is simpler than your plant.</b> A single monotonic degradation mode with a
+      known failure threshold. Real machines have several competing damage mechanisms, a threshold nobody has ever
+      measured, step changes at every intervention, and a health index that resets when a sensor is replaced. The
+      uncertainty band here is honest about statistical error only — it says nothing about the model being the
+      wrong model, which is usually the larger risk.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-6 ================= -->
+<section class="mod" id="m-s6">
+  <div class="hd"><div class="kick">SIM-6 · Performance &amp; efficiency</div>
+    <h2>Combustion multi-objective optimiser</h2>
+    <p>Koradi Units 8-10 ran a gross heat rate of 2,272 kcal/kWh against a normative 2,096 — a 176 kcal/kWh gap on
+    964.8 MU, the single largest thermodynamic loss in the fleet in June 2026. Combustion optimisation is the
+    most established closed-loop AI application in thermal generation, and also the one that needs the most
+    engineering around it.</p></div>
+
+  <div class="prob"><b>The problem.</b> There is no single best combustion setting. Lowering excess O₂ improves heat
+  rate and lowers NOx, but raises unburnt carbon and CO and can destabilise the flame. Raising over-fire air lowers
+  NOx but raises unburnt carbon. It is a trade-off surface, and where you choose to sit on it is a management
+  decision about the relative price of fuel, of a NOx penalty and of ash saleability — not a technical one.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Manual setpoints</h3>
+        <div class="ctl"><label>Excess O₂ <span class="v" id="s6-o2-v">3.8 %</span></label>
+          <input type="range" id="s6-o2" min="20" max="60" value="38" step="1"></div>
+        <div class="ctl"><label>Burner tilt <span class="v" id="s6-tilt-v">0°</span></label>
+          <input type="range" id="s6-tilt" min="-20" max="20" value="0" step="1"></div>
+        <div class="ctl"><label>Over-fire air damper <span class="v" id="s6-ofa-v">35 %</span></label>
+          <input type="range" id="s6-ofa" min="0" max="80" value="35" step="1"></div>
+        <div class="ctl"><label>Mill bias — upper elevations <span class="v" id="s6-bias-v">0 %</span></label>
+          <input type="range" id="s6-bias" min="-25" max="25" value="0" step="1"></div>
+        <div class="ctl"><label>Unit load <span class="v" id="s6-load-v">560 MW</span></label>
+          <input type="range" id="s6-load" min="330" max="660" value="560" step="10"></div>
+      </div>
+      <div class="card"><h3>What matters to management</h3>
+        <div class="ctl"><label>Weight on heat rate <span class="v" id="s6-wh-v">0.55</span></label>
+          <input type="range" id="s6-wh" min="0" max="100" value="55" step="5"></div>
+        <div class="ctl"><label>Weight on NOx <span class="v" id="s6-wn-v">0.30</span></label>
+          <input type="range" id="s6-wn" min="0" max="100" value="30" step="5"></div>
+        <div class="ctl"><label>Weight on unburnt carbon <span class="v" id="s6-wu-v">0.15</span></label>
+          <input type="range" id="s6-wu" min="0" max="100" value="15" step="5"></div>
+        <hr class="sep">
+        <label class="tog"><input type="checkbox" id="s6-clamp" checked> <span><b>Clamps enforced</b> — optimiser may only bias within engineered limits</span></label>
+        <label class="tog"><input type="checkbox" id="s6-rate" checked> <span><b>Rate limits enforced</b> — no change faster than an operator would make</span></label>
+        <button class="btn" id="s6-opt">Run the optimiser</button>
+        <button class="btn gh" id="s6-reset">Back to manual</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s6-stats"></div>
+      <div class="card"><h3>The trade-off surface — every feasible setting, and where you are on it</h3>
+        <canvas id="s6-c1"></canvas>
+        <p class="small" style="margin-top:8px">Each point is one feasible combination of O₂, tilt, over-fire air and
+        mill bias. The lower-left frontier is the Pareto set — settings where you cannot improve heat rate without
+        worsening NOx. Everything above and right of it is simply wasteful.</p></div>
+      <div class="card"><h3>Outcome at the current settings</h3><div id="s6-tbl"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s6-say"></div></div>
+      <div class="bad"><b>The engineering that makes this safe.</b> Clamps on every bias the system can write. Rate
+      limits so no change is faster than an operator would make it. A watchdog that returns the DCS to base control
+      if the optimiser stops responding. Bumpless transfer in and out. A clearly marked operator override. If a
+      vendor cannot describe all five for their system, they are not ready to connect to your DCS. Switch the clamps
+      off above and watch what an unconstrained optimiser proposes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-7 ================= -->
+<section class="mod" id="m-s7">
+  <div class="hd"><div class="kick">SIM-7 · Generative AI</div>
+    <h2>RAG — grounding AI in your own documents</h2>
+    <p>Retrieval-augmented generation is the difference between a party trick and a plant tool. This module runs a
+    real retrieval engine over an indexed corpus of plant documents and shows you exactly what the model would be
+    given before it answers.</p></div>
+
+  <div class="prob"><b>The problem.</b> A public chatbot answers from what it half-remembers of the internet. It has
+  never read your OEM manual, your SOPs or your trip reports — and it will not tell you that. It will produce a
+  clearance figure with total confidence and no source. RAG changes the order of operations: search your documents
+  first, then answer only from what was found, and cite it.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Ask the corpus</h3>
+        <div class="ctl"><input type="text" id="s7-q" placeholder="Type a question…" value="ID fan bearing temperature high — what should I check?"></div>
+        <button class="btn" id="s7-go">Search and answer</button>
+        <p class="small" style="margin-top:10px">Try one of these:</p>
+        <div id="s7-presets"></div>
+      </div>
+      <div class="card"><h3>Retrieval settings</h3>
+        <div class="ctl"><label>Passages retrieved (k) <span class="v" id="s7-k-v">4</span></label>
+          <input type="range" id="s7-k" min="1" max="8" value="4" step="1"></div>
+        <div class="ctl"><label>Filter by station</label>
+          <select id="s7-station"><option value="">All stations</option></select></div>
+        <div class="ctl"><label>Filter by unit</label>
+          <select id="s7-unit"><option value="">All units</option></select></div>
+        <label class="tog"><input type="checkbox" id="s7-ground" checked> <span><b>Grounded</b> — answer only from retrieved passages</span></label>
+        <label class="tog"><input type="checkbox" id="s7-kw" checked> <span><b>Hybrid search</b> — keyword matching alongside semantic scoring</span></label>
+      </div>
+      <div class="card"><h3>Indexed corpus</h3><div id="s7-corpus"></div></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Step 1 — retrieval, before any answer is generated</h3><div id="s7-ret"></div></div>
+      <div class="card"><h3>Step 2 — the answer</h3><div id="s7-ans"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s7-say"></div></div>
+      <div class="warn"><b>Honest about this demo.</b> The retrieval is real — TF-IDF term weighting with cosine
+      similarity, plus optional exact keyword matching for tag numbers and equipment codes, running in this browser
+      over an indexed corpus. The <i>answer generation</i> is templated from the retrieved passages, because there is
+      no language model inside this file. In a real deployment a language model writes that paragraph from the same
+      retrieved text. What this demo shows faithfully is the part that determines whether the answer is trustworthy:
+      what gets retrieved, how it is scored, and whether it is cited.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-8 ================= -->
+<section class="mod" id="m-s8">
+  <div class="hd"><div class="kick">SIM-8 · Agentic AI</div>
+    <h2>Agentic engineering assistant</h2>
+    <p>An agent is a model given tools, a goal and permission to decide the order in which to use them. This module
+    walks a real triage scenario step by step, showing every tool call, what came back, and what the agent concluded
+    — and stops at the point where an engineer has to sign.</p></div>
+
+  <div class="prob"><b>The scenario.</b> 06:40. A residual monitoring model raises an advisory on Koradi Unit 8 —
+  ID fan A drive-end bearing, 4.6 °C above expected, sustained for six days. Today that alert lands in an inbox and
+  waits for somebody to have time. Watch what an agent does with it in ninety seconds.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Run the agent</h3>
+        <button class="btn" id="s8-step">Next step</button>
+        <button class="btn alt" id="s8-all" style="margin-top:8px">Run to the approval gate</button>
+        <button class="btn gh" id="s8-reset" style="margin-top:8px">Reset</button>
+        <hr class="sep">
+        <label class="tog"><input type="checkbox" id="s8-write"> <span><b>Grant write access</b> to the CMMS and DCS</span></label>
+        <div id="s8-writewarn"></div>
+      </div>
+      <div class="card"><h3>Tools the agent may call</h3><div id="s8-tools"></div></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Agent trace</h3><div id="s8-trace"><p class="small">Press <b>Next step</b> to begin.</p></div></div>
+      <div class="card" id="s8-gate" style="display:none"><h3>Human approval gate</h3><div id="s8-gatebody"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s8-say"><p class="small">The explanation appears once the agent reaches the gate.</p></div></div>
+      <div class="bad"><b>The rule that does not bend.</b> An agent may hold read-only credentials to the historian,
+      the CMMS and the document store. It must never hold a credential that can write to the DCS, change a protection
+      setting, or close a permit. Every write goes through a named human. Switch on write access above and read what
+      it says.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DATA ================= -->
+<section class="mod" id="m-data">
+  <div class="hd"><div class="kick">Reference</div>
+    <h2>June 2026 dataset</h2>
+    <p>Every figure used anywhere in this lab, with its derivation. Source: MAHAGENCO Regulatory &amp; Commercial
+    Department — June 2026 energy bill (Bills 001/2026 and 35/2026), Provisional Part-I Fuel Surcharge Adjustment
+    bill 43/2026 including the F10 ECR calculation, and the MERC Merit Order Dispatch stack for July 2026 (R0),
+    effective 16.07.2026 to 15.08.2026.</p></div>
+
+  <div class="stats">
+    <div class="stat"><div class="l">Thermal sent out</div><div class="n">4,588 MU</div><div class="s">June 2026</div></div>
+    <div class="stat"><div class="l">Net bill</div><div class="n">₹2,806 cr</div><div class="s">thermal and gas</div></div>
+    <div class="stat"><div class="l">Net heat-rate gap</div><div class="n em">₹56.35 cr</div><div class="s">one month, against norm</div></div>
+    <div class="stat"><div class="l">Auxiliary above norm</div><div class="n em">81.5 MU</div><div class="s">₹32.9 cr — a component of the above</div></div>
+    <div class="stat"><div class="l">Availability disallowance</div><div class="n rd">₹100.87 cr</div><div class="s">cumulative; ₹32.93 cr adjusted in June</div></div>
+    <div class="stat"><div class="l">June FSA</div><div class="n gn">−₹101.44 cr</div><div class="s">withdrawal</div></div>
+  </div>
+
+  <div class="card"><h3>Station performance, June 2026</h3><div id="d-t1"></div></div>
+  <div class="card"><h3>The decomposition — auxiliary power against boiler and turbine</h3><div id="d-t2"></div>
+    <p class="small" style="margin-top:8px"><b>Gross heat rate = net heat rate × (1 − auxiliary fraction).</b>
+    A negative gross gap means the boiler and turbine are beating the norm and the whole penalty is auxiliary power.</p></div>
+  <div class="card"><h3>Fuel economics, derived from each station's own merit-order variable charge</h3><div id="d-t3"></div>
+    <p class="small" style="margin-top:8px">Cost of heat = MOD variable charge ÷ actual net heat rate. Implied
+    as-fired coal cost = cost of heat × as-fired GCV. This is the station's own money, not an assumption.</p></div>
+  <div class="card"><h3>Value at stake, June 2026</h3><div id="d-t4"></div>
+    <p class="small" style="margin-top:8px"><b>Do not add columns 2 and 4.</b> Net heat rate already contains
+    auxiliary power; the auxiliary figure is a component of the heat-rate figure, not an addition to it.</p></div>
+
+  <div class="warn"><b>What this data does not tell you.</b> One month is not a trend, and June is a low-demand-season
+  month. Normative values are regulatory constructs, not thermodynamic optima. The filing does not separate planned
+  overhaul from forced outage inside the availability figure. Heat rate is a monthly average across a group of units,
+  so a single poor unit hides inside a group number. And auxiliary consumption is structurally higher at low PLF,
+  so part of the auxiliary gap at Chandrapur 3-7 and Khaperkheda 1-4 is a consequence of being backed down rather
+  than of inefficiency — separating those two is itself a worthwhile analytics project.</div>
+</section>

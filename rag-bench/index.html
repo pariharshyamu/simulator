@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAHAGENCO — Local RAG Bench</title>
+<style>
+:root{
+  --ink:#1C2530; --ink2:#2A3644; --ink3:#3B4A5A;
+  --paper:#fff; --soft:#F1F4F7; --soft2:#E3EAF0; --line:#D3DDE5;
+  --ember:#D96A16; --ember-bg:#FCEDE0; --teal:#11707F; --teal-bg:#E1EFF1;
+  --red:#A8261E; --red-bg:#F9E7E5; --grn:#256B45; --grn-bg:#E4F0EA;
+  --amb:#9A6408; --amb-bg:#FBF0DC; --muted:#5C6B7A; --vio:#5B4A85; --vio-bg:#F4F1FA;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden}
+body{font:13.5px/1.5 Calibri,Carlito,"Segoe UI",system-ui,sans-serif;color:var(--ink);
+  background:#F7F9FB;display:flex;flex-direction:column}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;margin:0}
+button,input,select,textarea{font-family:inherit}
+
+#top{background:var(--ink);color:#C8D4DE;flex:0 0 auto;border-bottom:2px solid var(--ember)}
+.tb{display:flex;align-items:center;gap:14px;padding:8px 16px}
+.tb h1{font-size:16px;color:#fff;white-space:nowrap}
+.tb .sub{font-size:10.5px;color:#7E8E9C;line-height:1.25}
+.tb .sp{flex:1}
+.chip{background:#22303E;border:1px solid #46586A;border-radius:8px;padding:4px 11px;white-space:nowrap}
+.chip .l{font:700 8.4px/1 inherit;letter-spacing:1.1px;text-transform:uppercase;color:#7E8E9C}
+.chip .v{font:700 12.5px/1.3 ui-monospace,Consolas,monospace;color:#BFD2E0;margin-top:2px}
+.chip.ok .v{color:#7FD6A4} .chip.warn .v{color:#EBBE6A} .chip.er .v{color:#F09A92}
+.chip.air{border-color:#2F7D50;background:rgba(37,107,69,.22)}
+.chip.air .v{color:#7FD6A4}
+
+#tabs{display:flex;background:var(--ink2);border-bottom:1px solid #151E27;overflow-x:auto}
+#tabs .t{padding:8px 18px;cursor:pointer;border-right:1px solid #1E2A36;border-bottom:3px solid transparent;
+  font-size:12.5px;color:#C8D4DE;white-space:nowrap}
+#tabs .t:hover{background:#33455A}
+#tabs .t.on{background:#33455A;border-bottom-color:var(--ember);color:#fff;font-weight:600}
+
+#main{flex:1;min-height:0;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;overflow:auto;display:none}
+.pane.on{display:block}
+.wrap{max-width:1500px;margin:0 auto;padding:16px 20px 70px}
+.split{display:flex;gap:16px;align-items:flex-start}
+.split .lft{flex:1.35;min-width:0}
+.split .rgt{flex:1;min-width:320px}
+@media(max-width:1150px){ .split{flex-direction:column} .split .rgt{width:100%} }
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:14px 16px;margin-bottom:12px}
+.card>h3{font-size:14px;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.card>h3 .tag{font:700 9px/1 inherit;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);
+  background:var(--soft2);border-radius:9px;padding:3px 7px}
+.hd{margin-bottom:12px}
+.hd .k{font:700 10px/1 inherit;letter-spacing:1.3px;text-transform:uppercase;color:var(--ember);margin-bottom:5px}
+.hd h2{font-size:21px;margin-bottom:4px;line-height:1.2}
+.hd p{margin:0;color:var(--muted);font-size:12.5px;max-width:80ch}
+
+.note{background:var(--teal-bg);border:1px solid #C4DEE2;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#1D5A64;margin-bottom:10px}
+.warn{background:var(--amb-bg);border:1px solid #EBD9B4;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#6E4A0C;margin-bottom:10px}
+.bad{background:var(--red-bg);border:1px solid #EBCDCA;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#7A1C16;margin-bottom:10px}
+.good{background:var(--grn-bg);border:1px solid #C9E0D3;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#1B4E32;margin-bottom:10px}
+.vio{background:var(--vio-bg);border:1px solid #D4CBE8;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#4A3B70;margin-bottom:10px}
+
+#qbox{display:flex;gap:9px;align-items:stretch;margin-bottom:9px}
+#q{flex:1;padding:11px 13px;border:2px solid var(--line);border-radius:9px;font-size:15px;
+  font-family:Cambria,Georgia,serif;background:#fff}
+#q:focus{outline:none;border-color:var(--ember)}
+.btn{background:var(--ember);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:13px;
+  font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#C25E10}
+.btn.alt{background:var(--ink2)} .btn.alt:hover{background:#3A4C60}
+.btn.gh{background:#fff;color:var(--ink2);border:1px solid var(--line)} .btn.gh:hover{background:var(--soft)}
+.btn:disabled{background:#B8C4CE;cursor:not-allowed}
+.btn.sm{padding:6px 11px;font-size:12px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:9px}
+.filters .fb{font-size:11.3px;padding:4px 10px;border-radius:7px;border:1px solid var(--line);
+  background:#fff;cursor:pointer;color:var(--muted)}
+.filters .fb b{font-family:ui-monospace,Consolas,monospace;font-weight:700;opacity:.65}
+.filters .fb.on{background:var(--ink2);color:#fff;border-color:var(--ink2)}
+.filters .fb.pre{background:var(--ember-bg);color:var(--ember);border-color:#EBCBA6}
+.filters .fb.pre:hover{background:#F8DCC0}
+.filters .fsep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.sugg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.sugg button{font-size:11.5px;padding:4px 10px;border-radius:13px;border:1px solid var(--line);
+  background:#fff;cursor:pointer;color:var(--ink3);text-align:left}
+.sugg button:hover{background:var(--ember-bg);border-color:var(--ember)}
+
+.ansbox{border:1px solid var(--line);border-radius:9px;background:#fff;margin-bottom:11px;overflow:hidden}
+.ansbox .h{padding:7px 13px;font:700 11px/1.4 inherit;letter-spacing:.7px;text-transform:uppercase;
+  display:flex;justify-content:space-between;gap:10px;align-items:center}
+.ansbox.gnd .h{background:var(--grn-bg);color:var(--grn);border-bottom:1px solid #C9E0D3}
+.ansbox.raw .h{background:var(--red-bg);color:var(--red);border-bottom:1px solid #EBCDCA}
+.ansbox.ext .h{background:var(--teal-bg);color:var(--teal);border-bottom:1px solid #C4DEE2}
+.ansbox .b{padding:12px 14px;font-size:13.4px;line-height:1.62;white-space:pre-wrap;min-height:52px}
+.ansbox .b .cite{background:var(--ember-bg);color:var(--ember);border-radius:4px;padding:0 4px;
+  font-weight:700;font-size:11.5px;cursor:pointer}
+.ansbox .f{padding:6px 13px;border-top:1px solid var(--line);font-size:10.8px;color:var(--muted);
+  font-family:ui-monospace,Consolas,monospace;background:var(--soft)}
+.cursor{display:inline-block;width:7px;height:15px;background:var(--ember);vertical-align:-2px;
+  animation:bl .9s steps(2) infinite}
+@keyframes bl{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+.hit{border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:8px;overflow:hidden}
+.hit .hh{display:flex;gap:9px;align-items:baseline;padding:7px 11px;background:var(--soft);
+  border-bottom:1px solid var(--line);cursor:pointer}
+.hit .hh .n{font:700 11px/1 ui-monospace,Consolas,monospace;color:#fff;background:var(--ember);
+  border-radius:4px;padding:3px 6px;flex:0 0 auto}
+.hit .hh .ti{flex:1;min-width:0;font-size:12.3px;font-weight:600}
+.hit .hh .ti span{display:block;font-weight:400;font-size:10.6px;color:var(--muted)}
+.hit .hh .sc{font:700 11.5px/1 ui-monospace,Consolas,monospace;color:var(--teal);flex:0 0 auto;text-align:right}
+.hit .hb{padding:9px 12px;font-size:12.2px;line-height:1.55;color:#33414F;max-height:190px;overflow:auto;
+  white-space:pre-wrap}
+.hit .hb mark{background:#FCE3C4;color:#6E3B08;border-radius:2px;padding:0 1px}
+.hit.dim{opacity:.55}
+
+table{border-collapse:collapse;width:100%;font-size:11.9px}
+th,td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
+th{background:var(--ink2);color:#fff;font-weight:600;font-size:10.9px}
+tbody tr:nth-child(even){background:#F7FAFC}
+tbody tr.hi{background:var(--ember-bg)!important}
+td.num,th.num{text-align:right;font-family:ui-monospace,Consolas,monospace}
+.tw{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:7px}
+.tw table{border:0} .tw th,.tw td{border-left:0;border-top:0}
+.tw thead th{position:sticky;top:0;z-index:2}
+
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}
+.stat{flex:1;min-width:112px;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.stat .l{font-size:9.4px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.stat .n{font:700 18px/1.2 Cambria,Georgia,serif;color:var(--ink);margin-top:2px}
+.stat .n.em{color:var(--ember)} .stat .n.rd{color:var(--red)} .stat .n.gn{color:var(--grn)}
+.stat .n.tl{color:var(--teal)} .stat .n.sm{font-size:14px}
+.stat .s{font-size:10.4px;color:var(--muted);margin-top:1px;line-height:1.3}
+
+.ctl{margin-bottom:11px}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;margin-bottom:3px}
+.ctl label .v{color:var(--ember);font-family:ui-monospace,Consolas,monospace}
+.ctl input[type=range]{width:100%;accent-color:var(--ember)}
+.ctl select{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:12.5px}
+.ctl .hint{font-size:11px;color:var(--muted);margin-top:3px}
+.tog{display:flex;align-items:flex-start;gap:7px;font-size:12.3px;margin-bottom:8px;cursor:pointer;user-select:none}
+.tog input{width:15px;height:15px;accent-color:var(--ember);cursor:pointer;margin-top:2px;flex:0 0 auto}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.seg button{flex:1;padding:7px 6px;border:0;background:#fff;cursor:pointer;font-size:12px;color:var(--ink3);
+  border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink2);color:#fff;font-weight:600}
+
+.bar{height:8px;background:var(--soft2);border-radius:5px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--ember);width:0%;transition:width .2s}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.small{font-size:11.4px;color:var(--muted)}
+code{background:var(--soft);padding:1px 5px;border-radius:3px;font-family:ui-monospace,Consolas,monospace;font-size:11.5px}
+pre.eq{background:#101A24;color:#D8E4EE;border-radius:8px;padding:11px 13px;font-family:ui-monospace,Consolas,monospace;
+  font-size:11.5px;line-height:1.6;overflow-x:auto;margin:0 0 10px;white-space:pre-wrap}
+ol,ul{margin:6px 0 6px 19px;padding:0} li{margin-bottom:4px}
+hr.sep{border:0;border-top:1px solid var(--line);margin:12px 0}
+canvas.map{display:block;width:100%;background:#0E1620;border-radius:9px;border:1px solid #24333F;cursor:crosshair}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11px;margin-top:7px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+#boot{position:fixed;inset:0;background:var(--ink);color:#C8D4DE;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:11px;z-index:99;font-size:13.5px;text-align:center;padding:24px}
+#boot .t{font:700 22px Cambria,Georgia,serif;color:#fff}
+#boot .bar{width:min(460px,80vw)}
+#boot .er{color:#F09A92;max-width:640px;text-align:left;font-family:ui-monospace,Consolas,monospace;font-size:11.5px}
+</style>
+</head>
+<body>
+<div id="boot">
+  <div class="t">MAHAGENCO — Local RAG Bench</div>
+  <div id="bootMsg">Starting…</div>
+  <div class="bar"><i id="bootBar"></i></div>
+  <div class="small" style="color:#7E8E9C">Everything runs in this browser. No data leaves this machine.</div>
+  <div id="bootErr" class="er"></div>
+</div>
+
+<div id="top"><div class="tb">
+  <div>
+    <h1>Local RAG Bench</h1>
+    <div class="sub">Real embeddings, real retrieval, real answers — on this laptop · AI for Power Plants · MAHAGENCO Training Centre, Nashik</div>
+  </div>
+  <div class="sp"></div>
+  <div class="chip air"><div class="l">Network</div><div class="v" id="netChip">local only</div></div>
+  <div class="chip" id="devChipBox"><div class="l">Compute</div><div class="v" id="devChip">…</div></div>
+  <div class="chip" id="embChipBox"><div class="l">Embedder</div><div class="v" id="embChip">…</div></div>
+  <div class="chip" id="llmChipBox"><div class="l">Language model</div><div class="v" id="llmChip">not loaded</div></div>
+</div></div>
+
+<div id="tabs">
+  <div class="t on" data-p="ask">Ask</div>
+  <div class="t" data-p="retr">Retrieval detail</div>
+  <div class="t" data-p="map">Embedding map</div>
+  <div class="t" data-p="bench">Acceptance bench</div>
+  <div class="t" data-p="setup">Setup &amp; notes</div>
+</div>
+
+<div id="main">
+  <div class="pane on" id="p-ask"><div class="wrap">
+    <div id="qbox">
+      <input id="q" placeholder="Ask anything about the plant, the June 2026 numbers, or today's course…" autocomplete="off">
+      <button class="btn" id="go">Search</button>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="sugg" id="sugg"></div>
+    <div class="split">
+      <div class="lft" id="answers"></div>
+      <div class="rgt">
+        <div class="card" style="padding:11px 13px">
+          <h3 style="margin-bottom:7px">Retrieved context <span class="tag" id="ctxTag">—</span></h3>
+          <div id="hits"><div class="small">Ask a question and the chunks handed to the model appear here.</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="pane" id="p-retr"><div class="wrap">
+    <div class="hd"><div class="k">Retrieval detail</div>
+      <h2>Three rankers on the same question</h2>
+      <p>Dense cosine over real 384-dimension embeddings, BM25 over the words, and the reciprocal-rank fusion of
+      the two. Watch which one finds the tag number and which one finds the paraphrase.</p></div>
+    <div class="split"><div class="lft" id="retrTable"><div class="small">Ask a question first.</div></div>
+      <div class="rgt"><div class="card"><h3>Settings</h3><div id="retrCtl"></div></div></div></div>
+  </div></div>
+
+  <div class="pane" id="p-map"><div class="wrap">
+    <div class="hd"><div class="k">Embedding map</div>
+      <h2>1,302 chunks, projected from 384 dimensions to 2</h2>
+      <p>These are the real vectors the retriever searches — not an illustration. Principal components 1 and 2
+      of the actual embedding matrix. The question lands as an orange cross; what was retrieved is ringed.</p></div>
+    <canvas class="map" id="mapC"></canvas>
+    <div class="legend" id="mapLeg"></div>
+    <div class="card" style="margin-top:12px"><h3>What you are looking at</h3>
+      <p class="small" style="margin:0">Two axes out of 384 keep about <span id="pcaVar">—</span> of the variance,
+      so a great deal of structure is invisible here — two chunks that look adjacent may be far apart in the
+      full space, and the retriever uses the full space. The map is for orientation, not for judging retrieval.</p></div>
+  </div></div>
+
+  <div class="pane" id="p-bench"><div class="wrap">
+    <div class="hd"><div class="k">Acceptance bench</div>
+      <h2>The only test that should decide whether you buy one of these</h2>
+      <p>A fixed set of questions, each with the chunk that genuinely answers it marked by a human. The measure
+      is whether that chunk arrives in the top k. Run it against all three rankers and compare.</p></div>
+    <div class="btnrow">
+      <button class="btn" id="runBench">Run the bench</button>
+      <div class="small" id="benchNote">31 questions · dense, keyword and hybrid · takes a few seconds</div>
+    </div>
+    <div id="benchOut"></div>
+  </div></div>
+
+  <div class="pane" id="p-setup"><div class="wrap" id="setupWrap"></div></div>
+</div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAHAGENCO — Algorithm Anatomy Theatre</title>
+<style>
+:root{
+  --ink:#1C2530; --ink2:#2A3644; --ink3:#3B4A5A; --ink4:#4E5F70;
+  --paper:#fff; --soft:#F1F4F7; --soft2:#E3EAF0; --line:#D3DDE5;
+  --ember:#D96A16; --ember-bg:#FCEDE0; --teal:#11707F; --teal-bg:#E1EFF1;
+  --red:#A8261E; --red-bg:#F9E7E5; --grn:#256B45; --grn-bg:#E4F0EA;
+  --amb:#9A6408; --amb-bg:#FBF0DC; --muted:#5C6B7A; --vio:#5B4A85; --vio-bg:#F4F1FA;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden}
+body{font:13.5px/1.5 Calibri,Carlito,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:#F7F9FB;
+  display:flex;flex-direction:column}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;margin:0}
+button,input,select{font-family:inherit}
+
+/* ---------- top bar ---------- */
+#top{background:var(--ink);color:#C8D4DE;flex:0 0 auto;border-bottom:2px solid var(--ember)}
+.tb{display:flex;align-items:center;gap:16px;padding:8px 16px}
+.tb h1{font-size:16px;color:#fff;white-space:nowrap}
+.tb .sub{font-size:10.5px;color:#7E8E9C;line-height:1.25}
+.tb .sp{flex:1}
+#specChip{background:#22303E;border:1px solid #46586A;border-radius:8px;padding:5px 12px;text-align:right;cursor:pointer}
+#specChip .l{font:700 8.6px/1 inherit;letter-spacing:1.1px;text-transform:uppercase;color:#7E8E9C}
+#specChip .v{font:700 15px/1.2 Cambria,Georgia,serif;color:var(--ember);margin-top:2px}
+#specChip .s{font-size:10px;color:#93A3B2}
+#specChip:hover{background:#2C3C4C}
+
+/* ---------- module rail ---------- */
+#rail{display:flex;background:var(--ink2);border-bottom:1px solid #151E27;overflow-x:auto}
+#rail .st{flex:1;min-width:150px;padding:7px 11px 8px;cursor:pointer;border-right:1px solid #1E2A36;
+  border-bottom:3px solid transparent}
+#rail .st:hover{background:#33455A}
+#rail .st.on{background:#33455A;border-bottom-color:var(--ember)}
+#rail .st .n{font:700 9.5px/1 ui-monospace,Consolas,monospace;color:#6E8095;letter-spacing:.6px}
+#rail .st.on .n{color:var(--ember)}
+#rail .st .t{font-size:11.8px;color:#C8D4DE;margin-top:3px;line-height:1.25}
+#rail .st.on .t{color:#fff;font-weight:600}
+
+/* ---------- body ---------- */
+#body{flex:1;display:flex;min-height:0}
+#view{flex:0 0 55%;min-width:420px;background:#0E1620;position:relative;display:flex;flex-direction:column}
+#gl{flex:1;min-height:0;position:relative;overflow:hidden}
+#gl canvas{display:block;width:100%;height:100%}
+#glhud{position:absolute;z-index:6;left:0;top:0;right:0;padding:10px 13px;pointer-events:none}
+#glhud .ttl{font:700 14px Cambria,Georgia,serif;color:#fff}
+#glhud .sb{font-size:11px;color:#8FA2B4;margin-top:2px;max-width:64%}
+#dimcap{position:absolute;z-index:6;right:12px;top:10px;font-size:10.5px;color:#8195A8;background:rgba(20,30,40,.72);
+  border:1px solid #33475A;border-radius:11px;padding:3px 10px;pointer-events:none}
+#glnum{position:absolute;z-index:6;right:12px;top:40px;text-align:right;pointer-events:none}
+#glnum .k{font:700 8.6px/1 inherit;letter-spacing:1.1px;text-transform:uppercase;color:#7E8E9C}
+#glnum .v{font:700 22px/1.1 Cambria,Georgia,serif;color:var(--ember);margin-top:3px;
+  text-shadow:0 2px 10px rgba(0,0,0,.7)}
+#glnum .s{font-size:10.5px;color:#9CACBC}
+#glfoot{position:absolute;z-index:6;left:0;right:0;bottom:0;padding:8px 12px 10px;
+  background:linear-gradient(transparent,#0A1017 40%)}
+#acts{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
+#acts .a{background:#1D2B39;border:1px solid #35485C;color:#9FB1C2;border-radius:13px;padding:3px 11px;
+  font-size:11px;cursor:pointer;white-space:nowrap}
+#acts .a:hover{background:#27384A;color:#fff}
+#acts .a.on{background:var(--ember);border-color:var(--ember);color:#fff;font-weight:600}
+#acts .a.done{border-color:#3E7A5C;color:#8FCBAC}
+#acts .a.done.on{border-color:var(--ember);color:#fff}
+.rowf{display:flex;align-items:center;gap:9px;color:#A9B8C6;font-size:11.5px}
+#tl{flex:1;accent-color:var(--ember)}
+button.play{background:var(--ember);border:0;color:#fff;border-radius:6px;padding:5px 12px;font-size:12px;
+  font-weight:600;cursor:pointer;white-space:nowrap}
+button.play:hover{background:#C25E10}
+button.ghd{background:#1D2B39;border:1px solid #35485C;color:#A9B8C6;border-radius:6px;padding:5px 10px;
+  font-size:11.5px;cursor:pointer;white-space:nowrap}
+button.ghd:hover{background:#27384A;color:#fff}
+#say{position:absolute;z-index:6;left:12px;bottom:74px;right:12px;background:rgba(15,24,33,.90);border:1px solid #2F4356;
+  border-left:3px solid var(--ember);border-radius:8px;padding:8px 12px;color:#CBD8E4;font-size:12.2px;
+  line-height:1.45;pointer-events:none;max-height:31%;overflow:hidden}
+#say b{color:#fff}
+#say .em{color:#F0A45E;font-weight:700}
+
+/* 3-D floating labels */
+.l3d{position:absolute;z-index:2;transform:translate(0,-50%);background:rgba(15,24,33,.86);border:1px solid #3A4A5A;
+  border-radius:5px;padding:1px 6px;font:600 10.5px/1.35 Calibri,Carlito,"Segoe UI",sans-serif;color:#D6E2EC;
+  white-space:nowrap;pointer-events:none;letter-spacing:.1px}
+.l3d.em{border-color:var(--ember);color:#FBD9B7;background:rgba(69,35,8,.86)}
+.l3d.tl{border-color:#2E7D8B;color:#BDE4EA;background:rgba(8,48,54,.86)}
+.l3d.rd{border-color:#9A392F;color:#F6CBC5;background:rgba(66,16,12,.86)}
+.l3d.gn{border-color:#357E58;color:#BFE6CF;background:rgba(11,48,30,.86)}
+.l3d.ax{border:0;background:none;color:#7F94A8;font-weight:700;font-size:10px;letter-spacing:.7px;
+  text-transform:uppercase}
+.l3d.big{font-size:13px;padding:2px 8px}
+
+/* ---------- panel ---------- */
+#panel{flex:1;min-width:0;overflow-y:auto;background:#F7F9FB}
+.pw{padding:15px 18px 70px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:13px 15px;margin-bottom:11px}
+.card>h3{font-size:14px;margin-bottom:8px}
+.card>h3 .tag{font:700 9px/1 inherit;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);
+  background:var(--soft2);border-radius:9px;padding:3px 7px;margin-left:7px;vertical-align:2px}
+.hd2{margin-bottom:12px}
+.hd2 .k{font:700 10px/1 inherit;letter-spacing:1.3px;text-transform:uppercase;color:var(--ember);margin-bottom:5px}
+.hd2 h2{font-size:20px;margin-bottom:4px;line-height:1.2}
+.hd2 p{margin:0;color:var(--muted);font-size:12.5px}
+.row{display:flex;gap:11px;flex-wrap:wrap}
+.col{flex:1;min-width:200px}
+.note{background:var(--teal-bg);border:1px solid #C4DEE2;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#1D5A64;margin-bottom:10px}
+.warn{background:var(--amb-bg);border:1px solid #EBD9B4;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#6E4A0C;margin-bottom:10px}
+.bad{background:var(--red-bg);border:1px solid #EBCDCA;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#7A1C16;margin-bottom:10px}
+.good{background:var(--grn-bg);border:1px solid #C9E0D3;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#1B4E32;margin-bottom:10px}
+.vio{background:var(--vio-bg);border:1px solid #D4CBE8;border-radius:8px;padding:10px 12px;font-size:12.3px;color:#4A3B70;margin-bottom:10px}
+.note b,.warn b,.bad b,.good b,.vio b{font-weight:700}
+.ctl{margin-bottom:10px}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600;margin-bottom:3px}
+.ctl label .v{color:var(--ember);font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
+.ctl input[type=range]{width:100%;accent-color:var(--ember)}
+.ctl select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:12.5px}
+.ctl .hint{font-size:11px;color:var(--muted);margin-top:2px}
+.tog{display:flex;align-items:flex-start;gap:7px;font-size:12.3px;margin-bottom:7px;cursor:pointer;user-select:none}
+.tog input{width:15px;height:15px;accent-color:var(--ember);cursor:pointer;margin-top:2px;flex:0 0 auto}
+.btn{background:var(--ember);color:#fff;border:0;border-radius:6px;padding:7px 13px;font-size:12.3px;font-weight:600;cursor:pointer}
+.btn:hover{background:#C25E10}
+.btn.alt{background:var(--ink2)} .btn.alt:hover{background:#3A4C60}
+.btn.gh{background:#fff;color:var(--ink2);border:1px solid var(--line)} .btn.gh:hover{background:var(--soft)}
+.btn:disabled{background:#B8C4CE;cursor:not-allowed}
+.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.stats{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.stat{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat .l{font-size:9.3px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.stat .n{font:700 17px/1.2 Cambria,Georgia,serif;color:var(--ink);margin-top:2px}
+.stat .n.em{color:var(--ember)} .stat .n.rd{color:var(--red)} .stat .n.gn{color:var(--grn)}
+.stat .n.tl{color:var(--teal)} .stat .n.vi{color:var(--vio)}
+.stat .s{font-size:10.3px;color:var(--muted);margin-top:1px;line-height:1.3}
+table{border-collapse:collapse;width:100%;font-size:11.8px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+th{background:var(--ink2);color:#fff;font-weight:600;font-size:10.8px}
+tbody tr:nth-child(even){background:#F7FAFC}
+tbody tr.hi{background:var(--ember-bg)!important}
+tbody tr.hi2{background:var(--teal-bg)!important}
+td.num,th.num{text-align:right;font-family:ui-monospace,Consolas,monospace}
+.tw{max-height:290px;overflow:auto;border:1px solid var(--line);border-radius:7px}
+.tw table{border:0} .tw th,.tw td{border-left:0;border-top:0}
+.tw thead th{position:sticky;top:0;z-index:2}
+canvas.ch{display:block;width:100%;background:#fff;border:1px solid var(--line);border-radius:7px}
+.legend{display:flex;gap:11px;flex-wrap:wrap;font-size:10.8px;margin-top:5px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.legend i.d{width:9px;height:9px;border-radius:50%}
+.pill{display:inline-block;font-size:10.3px;font-weight:700;padding:2px 8px;border-radius:11px;white-space:nowrap}
+.pill.ok{background:var(--grn-bg);color:var(--grn)} .pill.wn{background:var(--amb-bg);color:var(--amb)}
+.pill.er{background:var(--red-bg);color:var(--red)} .pill.nu{background:var(--soft2);color:var(--muted)}
+.pill.tl{background:var(--teal-bg);color:var(--teal)} .pill.em{background:var(--ember-bg);color:var(--ember)}
+code{background:var(--soft);padding:1px 4px;border-radius:3px;font-family:ui-monospace,Consolas,monospace;font-size:11.3px}
+.mono{font-family:ui-monospace,Consolas,monospace}
+ol,ul{margin:5px 0 5px 18px;padding:0} li{margin-bottom:3px}
+.small{font-size:11.3px;color:var(--muted)}
+hr.sep{border:0;border-top:1px solid var(--line);margin:11px 0}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px dotted var(--line)}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--muted)} .kv .v{font-family:ui-monospace,Consolas,monospace;font-weight:700}
+.eq{background:#101A24;color:#D8E4EE;border-radius:8px;padding:10px 12px;font-family:ui-monospace,Consolas,monospace;
+  font-size:11.6px;line-height:1.65;overflow-x:auto;margin-bottom:10px;white-space:pre}
+.eq .c{color:#7E93A6} .eq .o{color:#F0A45E} .eq .g{color:#7FD6A4} .eq .r{color:#F09A92} .eq .t{color:#77C6D2}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin:5px 0 9px}
+.chip{font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.chip:hover{background:var(--soft)}
+.chip.on{background:var(--ink2);color:#fff;border-color:var(--ink2);font-weight:600}
+.doclist{max-height:250px;overflow:auto;border:1px solid var(--line);border-radius:7px;background:#fff}
+.docrow{display:flex;gap:8px;padding:7px 9px;border-bottom:1px solid var(--line);font-size:11.6px}
+.docrow:last-child{border-bottom:0}
+.docrow.hi{background:var(--ember-bg)}
+.docrow .sc{font-family:ui-monospace,Consolas,monospace;font-weight:700;min-width:44px;text-align:right;color:var(--ember)}
+.docrow .bd{flex:1;min-width:0}
+.docrow .bd b{display:block;font-size:11.3px;color:var(--ink2)}
+.docrow .bd span{color:var(--muted)}
+#loading{position:fixed;inset:0;background:var(--ink);color:#C8D4DE;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:9px;z-index:99;font-size:14px}
+#modal{position:fixed;inset:0;background:rgba(12,18,25,.72);display:none;align-items:center;justify-content:center;z-index:80}
+#modal.on{display:flex}
+#modalbox{background:#fff;border-radius:12px;max-width:640px;width:92%;max-height:84%;overflow:auto;padding:20px 24px}
+#modalbox h2{font-size:19px;margin-bottom:8px}
+@media(max-width:1100px){ #view{flex:0 0 48%;min-width:340px} }
+</style>
+</head>
+<body>
+<div id="loading">
+  <div style="font:700 21px Cambria,Georgia,serif;color:#fff">Algorithm Anatomy Theatre</div>
+  <div>Opening the machine…</div>
+</div>
+
+<div id="top">
+  <div class="tb">
+    <div>
+      <h1>Algorithm Anatomy Theatre</h1>
+      <div class="sub">What actually happens between input and output · AI for Power Plants · MAHAGENCO Training Centre, Nashik</div>
+    </div>
+    <div class="sp"></div>
+    <div id="specChip">
+      <div class="l">The specimen — follow this number</div>
+      <div class="v" id="specV">74.2 °C</div>
+      <div class="s" id="specS">ID fan A, DE bearing · day 96</div>
+    </div>
+  </div>
+</div>
+<div id="rail"></div>
+
+<div id="body">
+  <div id="view">
+    <div id="gl">
+      <div id="glhud"><div class="ttl" id="glTitle">—</div><div class="sb" id="glSub">—</div></div>
+      <div id="dimcap"></div>
+      <div id="glnum"><div class="k" id="numK"></div><div class="v" id="numV"></div><div class="s" id="numS"></div></div>
+      <div id="say"></div>
+      <div id="glfoot">
+        <div id="acts"></div>
+        <div class="rowf">
+          <button class="play" id="play">▶ Play</button>
+          <input type="range" id="tl" min="0" max="1000" value="0" step="1">
+          <button class="ghd" id="resetCam">Reset view</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="panel"><div class="pw" id="pw"></div></div>
+</div>
+
+<div id="modal"><div id="modalbox"></div></div>
+
+<script>__THREE__</script>
+<script>__APP__</script>
+</body>
+</html>

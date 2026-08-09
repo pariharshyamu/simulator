@@ -1,0 +1,12 @@
+# ---- large binaries fetched by script, never committed --------------------
+rag-bench/models/**/*.onnx
+rag-bench/models/**/*.onnx_data
+rag-bench/vendor/ort/
+node_modules/
+__pycache__/
+*.pyc
+
+# ---- scratch ---------------------------------------------------------------
+*.part
+.DS_Store
+rag-bench/vendor/transformers.min.js

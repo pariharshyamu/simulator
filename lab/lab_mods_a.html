@@ -1,0 +1,289 @@
+<section class="mod on" id="m-home">
+  <div class="hd">
+    <div class="kick">MAHAGENCO Training Centre, Nashik</div>
+    <h2>AI Simulation Lab</h2>
+    <p>Eight working machine-learning models you can run, break and argue with — built around the pain points
+    that MAHAGENCO's own June 2026 regulatory filing exposes. Everything runs in this browser. No internet,
+    no installation, no login. The algorithms are real; the plant data is either the actual June 2026 figures
+    or physics-based synthetic data whose generating equations are stated in each module.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="l">Net heat-rate gap</div><div class="n em">₹56 cr</div><div class="s">in June 2026 alone, against MERC norms</div></div>
+    <div class="stat"><div class="l">Auxiliary above norm</div><div class="n em">81.5 MU</div><div class="s">one month · ₹33 cr at own variable charge</div></div>
+    <div class="stat"><div class="l">Availability penalty</div><div class="n rd">₹100.87 cr</div><div class="s">cumulative fixed-charge disallowance</div></div>
+    <div class="stat"><div class="l">Thermal sent out</div><div class="n tl">4,588 MU</div><div class="s">June 2026 · net bill ₹2,806 cr</div></div>
+  </div>
+
+  <div class="prob"><b>Read this first.</b> These are teaching instruments. They run genuine algorithms on realistic
+  data at small scale. They are not plant models, they are not validated, and no output from them should ever
+  influence an operating decision. What they are good for is understanding <i>how</i> these methods behave — where
+  they help, and exactly how they fail.</div>
+
+  <div class="card">
+    <h3>The eight modules</h3>
+    <div class="tw"><table>
+      <thead><tr><th style="width:62px">ID</th><th>Module</th><th>Pain point it addresses</th><th>Algorithm actually running</th></tr></thead>
+      <tbody>
+        <tr><td><b>SIM-1</b></td><td>Residual anomaly detection — ID fan bearing</td><td>Forced outages; alarms that arrive last</td><td>k-nearest-neighbour similarity model on a healthy-history memory matrix, with persistence logic</td></tr>
+        <tr><td><b>SIM-2</b></td><td>Heat rate loss attribution</td><td>₹56 crore/month net heat-rate gap</td><td>Gross/net decomposition and sensitivity-weighted loss allocation on the real June 2026 data</td></tr>
+        <tr><td><b>SIM-3</b></td><td>Auxiliary power optimiser</td><td>81.5 MU/month above norm</td><td>Exhaustive combinatorial search with constraint checking and a heat-rate trade-off</td></tr>
+        <tr><td><b>SIM-4</b></td><td>Coal GCV soft sensor</td><td>As-fired GCV spread 2,733–3,270 kcal/kg</td><td>Ridge regression trained live by gradient descent, with a time-based train/test split</td></tr>
+        <tr><td><b>SIM-5</b></td><td>Predictive maintenance and RUL</td><td>₹100.87 crore availability disallowance</td><td>Exponential degradation model with recursive parameter update and uncertainty bands</td></tr>
+        <tr><td><b>SIM-6</b></td><td>Combustion multi-objective optimiser</td><td>Koradi 8-10 gross heat-rate gap of 176 kcal/kWh</td><td>Response-surface model with weighted-sum optimisation, clamps and rate limits</td></tr>
+        <tr><td><b>SIM-7</b></td><td>RAG over plant documents</td><td>Knowledge loss; slow precedent search</td><td>TF-IDF retrieval with cosine similarity over an indexed corpus, plus citation rendering</td></tr>
+        <tr><td><b>SIM-8</b></td><td>Agentic engineering assistant</td><td>Slow alert triage</td><td>Reason–act–observe planner calling simulated historian, CMMS and performance tools</td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="row">
+    <div class="col"><div class="note"><b>How to work through the lab.</b> Each module opens in its default state
+    showing the problem as it exists today. Move one control at a time and watch the numbers. Every module has a
+    <b>What just happened</b> panel that explains the mechanism in engineering language, and a
+    <b>Where this is simpler than your plant</b> panel that tells you what has been left out.</div></div>
+    <div class="col"><div class="warn"><b>On the money figures.</b> Rupee values are computed from each station's own
+    MERC merit-order variable charge divided by its own actual net heat rate, giving a station-specific cost of heat.
+    Nashik's heat is worth ₹0.002133/kcal; Khaperkheda Unit 5's is ₹0.001337/kcal. The same technical improvement is
+    worth roughly sixty per cent more at Nashik than at Khaperkheda.</div></div>
+  </div>
+</section>
+
+<!-- ================= SIM-1 ================= -->
+<section class="mod" id="m-s1">
+  <div class="hd"><div class="kick">SIM-1 · Monitoring &amp; maintenance</div>
+    <h2>Residual anomaly detection — ID fan bearing</h2>
+    <p>Why a model that knows what the bearing <i>should</i> be running at finds a fault weeks before a fixed
+    threshold does — and what destroys that advantage.</p></div>
+
+  <div class="prob"><b>The problem.</b> A DCS alarm fires at a fixed number. That number has to be set high enough
+  not to nuisance-trip at full load on a May afternoon, which makes it blind at forty per cent load on a January
+  night. By the time it operates, most of the P–F interval is gone. Availability shortfall cost MAHAGENCO
+  ₹100.87 crore of disallowed fixed charge; a large part of that is unplanned.</p></div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card">
+        <h3>Fault and plant</h3>
+        <div class="ctl"><label>Fault onset <span class="v" id="s1-onset-v">day 45</span></label>
+          <input type="range" id="s1-onset" min="20" max="100" value="45" step="1">
+          <div class="hint">When the bearing begins to degrade</div></div>
+        <div class="ctl"><label>Degradation rate <span class="v" id="s1-rate-v">1.00×</span></label>
+          <input type="range" id="s1-rate" min="30" max="250" value="100" step="5">
+          <div class="hint">How fast it develops once started</div></div>
+        <div class="ctl"><label>Sensor noise <span class="v" id="s1-noise-v">0.45 °C</span></label>
+          <input type="range" id="s1-noise" min="10" max="150" value="45" step="5"></div>
+        <div class="ctl"><label>Load variability <span class="v" id="s1-var-v">normal</span></label>
+          <input type="range" id="s1-var" min="0" max="100" value="55" step="5">
+          <div class="hint">Two-shifting and low-load running widen the operating envelope</div></div>
+      </div>
+      <div class="card">
+        <h3>Detection settings</h3>
+        <div class="ctl"><label>DCS alarm setpoint <span class="v" id="s1-alarm-v">90 °C</span></label>
+          <input type="range" id="s1-alarm" min="80" max="105" value="90" step="1"></div>
+        <div class="ctl"><label>Residual threshold <span class="v" id="s1-thr-v">3.0 °C</span></label>
+          <input type="range" id="s1-thr" min="10" max="80" value="30" step="1">
+          <div class="hint">How far from expected before it counts</div></div>
+        <div class="ctl"><label>Persistence required <span class="v" id="s1-pers-v">5 days</span></label>
+          <input type="range" id="s1-pers" min="1" max="20" value="5" step="1">
+          <div class="hint">A spike is a sensor. A slope is a machine.</div></div>
+        <div class="ctl"><label>Neighbours (k) <span class="v" id="s1-k-v">12</span></label>
+          <input type="range" id="s1-k" min="3" max="40" value="12" step="1"></div>
+        <label class="tog"><input type="checkbox" id="s1-dirty"> <span><b>Train on contaminated history</b> — let the training window run past fault onset</span></label>
+        <button class="btn" id="s1-reseed">New random plant</button>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="stats">
+        <div class="stat"><div class="l">Model advisory</div><div class="n em" id="s1-mday">—</div><div class="s" id="s1-mday-s">residual exceeded threshold</div></div>
+        <div class="stat"><div class="l">DCS alarm</div><div class="n rd" id="s1-aday">—</div><div class="s">fixed setpoint crossed</div></div>
+        <div class="stat"><div class="l">Lead time gained</div><div class="n gn" id="s1-lead">—</div><div class="s">warning the model bought you</div></div>
+        <div class="stat"><div class="l">False alarms</div><div class="n" id="s1-fa">—</div><div class="s">per model-month, healthy period</div></div>
+      </div>
+      <div class="card"><h3>Bearing temperature — measured against what the model expected</h3>
+        <canvas id="s1-c1"></canvas>
+        <div class="legend"><span><i style="background:#D96A16"></i>Measured</span>
+          <span><i style="background:#11707F"></i>Model expected</span>
+          <span><i style="background:#A8261E"></i>DCS setpoint</span>
+          <span class="small">Shaded band = model training window</span></div></div>
+      <div class="card"><h3>Residual — measured minus expected, load and ambient already removed</h3>
+        <canvas id="s1-c2"></canvas>
+        <div class="legend"><span><i style="background:#5C6B7A"></i>Raw residual</span>
+          <span><i style="background:#D96A16"></i>Smoothed (EWMA)</span>
+          <span><i style="background:#256B45"></i>Threshold</span></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s1-say"></div></div>
+      <div class="warn"><b>Where this is simpler than your plant.</b> One bearing, four input signals and a clean
+      physical relationship. A real ID fan model uses thirty to sixty tags, has to cope with a second fan starting
+      and stopping, damper and blade-pitch changes, an APH that fouls over the same period, and a historian whose
+      compression settings may already have thrown away the slow drift you are trying to see.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-2 ================= -->
+<section class="mod" id="m-s2">
+  <div class="hd"><div class="kick">SIM-2 · Performance &amp; efficiency</div>
+    <h2>Heat rate loss attribution</h2>
+    <p>The June 2026 net heat-rate gap was worth ₹56 crore in one month. This module splits that gap into the part
+    that belongs to the boiler and turbine and the part that belongs to the auxiliary switchgear — and shows that
+    the answer is completely different at different stations.</p></div>
+
+  <div class="prob"><b>The identity everything rests on.</b>
+  Generated (gross) heat rate = net heat rate × (1 − auxiliary fraction). Rearranged, it tells you whether a station's
+  heat-rate penalty is a combustion problem or an electrical one. Nashik's boiler and turbine are <i>beating</i> the norm;
+  its entire penalty is auxiliary power. Koradi Units 8-10 are the opposite.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Station</h3>
+        <div class="ctl"><select id="s2-st"></select></div>
+        <div id="s2-facts"></div></div>
+      <div class="card"><h3>Controllable parameters</h3>
+        <p class="small" style="margin:0 0 10px">Move these to the values an optimiser would hold, and see what comes back.
+        Sensitivities are indicative for this class of unit.</p>
+        <div class="ctl"><label>Excess O₂ above optimum <span class="v" id="s2-o2-v">1.2 %</span></label>
+          <input type="range" id="s2-o2" min="0" max="30" value="12" step="1"></div>
+        <div class="ctl"><label>Main steam temp below design <span class="v" id="s2-mst-v">8 °C</span></label>
+          <input type="range" id="s2-mst" min="0" max="30" value="8" step="1"></div>
+        <div class="ctl"><label>Back pressure above achievable <span class="v" id="s2-bp-v">8 mmHg</span></label>
+          <input type="range" id="s2-bp" min="0" max="30" value="8" step="1"></div>
+        <div class="ctl"><label>Unburnt carbon above target <span class="v" id="s2-ubc-v">0.8 %</span></label>
+          <input type="range" id="s2-ubc" min="0" max="30" value="8" step="1"></div>
+        <div class="ctl"><label>APH leakage above design <span class="v" id="s2-aph-v">5 %</span></label>
+          <input type="range" id="s2-aph" min="0" max="20" value="5" step="1"></div>
+        <div class="ctl"><label>Auxiliary power reduction <span class="v" id="s2-aux-v">0.00 pp</span></label>
+          <input type="range" id="s2-aux" min="0" max="300" value="0" step="5">
+          <div class="hint">How much of the auxiliary gap you close</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s2-stats"></div>
+      <div class="card"><h3>Where the net heat-rate gap actually sits</h3>
+        <canvas id="s2-c1"></canvas>
+        <div class="legend"><span><i style="background:#D96A16"></i>Auxiliary power component</span>
+          <span><i style="background:#11707F"></i>Boiler and turbine component</span>
+          <span><i style="background:#256B45"></i>Better than norm</span></div></div>
+      <div class="card"><h3>Attributed losses at the current settings</h3><div id="s2-tbl"></div></div>
+      <div class="card"><h3>Whole fleet, June 2026 — where the gap sits station by station</h3>
+        <canvas id="s2-c2"></canvas>
+        <p class="small" style="margin-top:8px">Positive bar = the boiler and turbine are worse than the norm.
+        Negative bar = they are better, and the whole penalty is auxiliary power.</p></div>
+      <div class="bad"><b>Never add these two together.</b> Net heat rate already contains auxiliary power. The
+      ₹56 crore net gap and the ₹33 crore auxiliary gap are not additive — the second is a component of the first.
+      Adding them double-counts about ₹33 crore, and any business case that does so will not survive the first
+      conversation with the finance department.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-3 ================= -->
+<section class="mod" id="m-s3">
+  <div class="hd"><div class="kick">SIM-3 · Performance &amp; efficiency</div>
+    <h2>Auxiliary power optimiser</h2>
+    <p>MAHAGENCO burned 81.5 million units above normative auxiliary consumption in June 2026 — worth about
+    ₹33 crore at each station's own variable charge. Much of it is a scheduling problem, not an equipment problem.</p></div>
+
+  <div class="prob"><b>The problem.</b> How many mills, how many CW pumps, which fan control mode, how many ESP
+  fields? On most shifts the answer is "whatever the last shift left running". Every combination has a different
+  auxiliary power draw <i>and</i> a different effect on heat rate — more CW pumps cost auxiliary power but improve
+  back pressure. It is a small optimisation problem that a computer solves exactly and habit solves badly.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Operating point</h3>
+        <div class="ctl"><label>Unit load <span class="v" id="s3-load-v">330 MW</span></label>
+          <input type="range" id="s3-load" min="200" max="500" value="330" step="5">
+          <div class="hint">500 MW class unit</div></div>
+        <div class="ctl"><label>CW inlet temperature <span class="v" id="s3-cw-v">32 °C</span></label>
+          <input type="range" id="s3-cw" min="24" max="38" value="32" step="1"></div>
+        <div class="ctl"><label>As-fired GCV <span class="v" id="s3-gcv-v">3,150 kcal/kg</span></label>
+          <input type="range" id="s3-gcv" min="2700" max="3400" value="3150" step="10"></div>
+        <div class="ctl"><label>Ash content <span class="v" id="s3-ash-v">36 %</span></label>
+          <input type="range" id="s3-ash" min="28" max="46" value="36" step="1">
+          <div class="hint">Drives the ESP field requirement</div></div>
+        <div class="ctl"><label>Variable charge <span class="v" id="s3-vc-v">₹3.65/kWh</span></label>
+          <input type="range" id="s3-vc" min="300" max="600" value="365" step="5"></div>
+      </div>
+      <div class="card"><h3>What the shift is running now</h3>
+        <div class="ctl"><label>Mills in service <span class="v" id="s3-mill-v">5</span></label>
+          <input type="range" id="s3-mill" min="3" max="7" value="5" step="1"></div>
+        <div class="ctl"><label>CW pumps <span class="v" id="s3-cwp-v">3</span></label>
+          <input type="range" id="s3-cwp" min="2" max="4" value="3" step="1"></div>
+        <div class="ctl"><label>ESP fields energised <span class="v" id="s3-esp-v">24</span></label>
+          <input type="range" id="s3-esp" min="12" max="24" value="24" step="1"></div>
+        <div class="ctl"><label>Draft fan control <span class="v" id="s3-fan-v">damper</span></label>
+          <input type="range" id="s3-fan" min="0" max="2" value="0" step="1">
+          <div class="hint">0 damper · 1 IGV · 2 variable speed</div></div>
+        <button class="btn" id="s3-apply">Adopt the optimiser's answer</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s3-stats"></div>
+      <div class="card"><h3>Auxiliary power by equipment — as run against optimised</h3>
+        <canvas id="s3-c1"></canvas></div>
+      <div class="card"><h3>The search</h3><div id="s3-tbl"></div>
+        <p class="small" style="margin-top:8px">Every feasible combination is evaluated on total cost — auxiliary
+        power plus the heat-rate consequence — and ranked. Infeasible combinations are rejected by constraint,
+        not by preference.</p></div>
+      <div class="card"><h3>What just happened</h3><div id="s3-say"></div></div>
+      <div class="warn"><b>Where this is simpler than your plant.</b> Real constraints include mill maintenance
+      schedules, coal quality varying between bunkers, CW pump changeover restrictions, ESP hopper heater loads,
+      ash handling cycles, and the fact that a mill start is not free. This model assumes changeovers are costless
+      and instantaneous. They are not — a real optimiser must include switching cost or it will chatter.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIM-4 ================= -->
+<section class="mod" id="m-s4">
+  <div class="hd"><div class="kick">SIM-4 · Fuel</div>
+    <h2>Coal GCV soft sensor</h2>
+    <p>As-fired GCV across MAHAGENCO's stations ranged from 2,733 to 3,270 kcal/kg in June 2026, and between
+    619 and 941 kcal/kg was lost between the loading and unloading ends. The lab result arrives after the shift
+    has already made its decisions. A soft sensor fills the gap.</p></div>
+
+  <div class="prob"><b>The problem.</b> You cannot control what you learn about a day late. A soft sensor is a model
+  trained on the lab results you already have, which then estimates as-fired GCV every minute from signals the plant
+  already measures. It does not replace the laboratory — it interpolates between laboratory results.</div>
+
+  <div class="row">
+    <div class="col" style="max-width:330px">
+      <div class="card"><h3>Training data</h3>
+        <div class="ctl"><label>Laboratory samples available <span class="v" id="s4-n-v">180</span></label>
+          <input type="range" id="s4-n" min="30" max="500" value="180" step="10">
+          <div class="hint">One year of daily composite samples is about 350</div></div>
+        <div class="ctl"><label>Laboratory measurement scatter <span class="v" id="s4-lab-v">60 kcal/kg</span></label>
+          <input type="range" id="s4-lab" min="10" max="200" value="60" step="5">
+          <div class="hint">Sampling and analysis repeatability</div></div>
+        <div class="ctl"><label>Process signal noise <span class="v" id="s4-noise-v">1.0×</span></label>
+          <input type="range" id="s4-noise" min="20" max="300" value="100" step="10"></div>
+        <div class="ctl"><label>Ridge penalty λ <span class="v" id="s4-lam-v">1.00</span></label>
+          <input type="range" id="s4-lam" min="0" max="200" value="100" step="1">
+          <div class="hint">Restrains the model from chasing noise</div></div>
+      </div>
+      <div class="card"><h3>Input signals</h3>
+        <div id="s4-feats"></div>
+        <button class="btn" id="s4-train" style="margin-top:8px">Retrain the model</button>
+        <button class="btn gh" id="s4-reseed" style="margin-top:8px">New coal year</button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="stats" id="s4-stats"></div>
+      <div class="card"><h3>Predicted against laboratory GCV — hold-out period only</h3>
+        <canvas id="s4-c1"></canvas>
+        <p class="small" style="margin-top:8px">The orange line is perfect agreement. Points are the hold-out
+        samples the model never saw during training.</p></div>
+      <div class="card"><h3>Estimated GCV every shift, against the laboratory results it interpolates</h3>
+        <canvas id="s4-c2"></canvas>
+        <div class="legend"><span><i style="background:#11707F"></i>Soft sensor, continuous</span>
+          <span><i style="background:#D96A16"></i>Laboratory result</span>
+          <span class="small">Shaded = training period</span></div></div>
+      <div class="card"><h3>What the model learned</h3><div id="s4-tbl"></div></div>
+      <div class="card"><h3>What just happened</h3><div id="s4-say"></div></div>
+      <div class="warn"><b>Where this is simpler than your plant.</b> Real coal changes source, and a model trained
+      on one supply will mislead you on another — this is the single biggest failure mode of a GCV soft sensor.
+      Real sampling has its own bias. Real mills wear, which changes the relationship the model learned. Any deployed
+      soft sensor needs a standing comparison against the laboratory and a retraining trigger when the source changes.</div>
+    </div>
+  </div>
+</section>

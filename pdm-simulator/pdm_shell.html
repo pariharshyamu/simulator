@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAHAGENCO — Predictive Maintenance End-to-End Simulator</title>
+<style>
+:root{
+  --ink:#1C2530; --ink2:#2A3644; --ink3:#3B4A5A; --ink4:#4E5F70;
+  --paper:#fff; --soft:#F1F4F7; --soft2:#E3EAF0; --line:#D3DDE5;
+  --ember:#D96A16; --ember-bg:#FCEDE0; --teal:#11707F; --teal-bg:#E1EFF1;
+  --red:#A8261E; --red-bg:#F9E7E5; --grn:#256B45; --grn-bg:#E4F0EA;
+  --amb:#9A6408; --amb-bg:#FBF0DC; --muted:#5C6B7A; --vio:#5B4A85; --vio-bg:#F4F1FA;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden}
+body{font:13.5px/1.5 Calibri,Carlito,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:#F7F9FB;
+  display:flex;flex-direction:column}
+h1,h2,h3{font-family:Cambria,Georgia,serif;margin:0}
+button,input,select{font-family:inherit}
+
+/* ---------- top bar ---------- */
+#top{background:var(--ink);color:#C8D4DE;flex:0 0 auto;border-bottom:2px solid var(--ember)}
+.tb{display:flex;align-items:center;gap:16px;padding:9px 16px}
+.tb h1{font-size:16px;color:#fff;white-space:nowrap}
+.tb .sub{font-size:10.5px;color:#7E8E9C;line-height:1.25}
+.tb .sp{flex:1}
+.caseSel{display:flex;gap:5px;flex-wrap:wrap}
+.caseSel button{background:#22303E;border:1px solid #3A4A5A;color:#B9C6D2;border-radius:7px;
+  padding:6px 11px;font-size:12px;cursor:pointer;white-space:nowrap}
+.caseSel button:hover{background:#2C3C4C;color:#fff}
+.caseSel button.on{background:var(--ember);border-color:var(--ember);color:#fff;font-weight:600}
+
+/* ---------- stage rail ---------- */
+#rail{display:flex;background:var(--ink2);border-bottom:1px solid #1A242E;overflow-x:auto}
+#rail .st{flex:1;min-width:118px;padding:8px 10px 9px;cursor:pointer;border-right:1px solid #1E2A36;
+  border-bottom:3px solid transparent;position:relative}
+#rail .st:hover{background:#33455A}
+#rail .st.on{background:#33455A;border-bottom-color:var(--ember)}
+#rail .st .n{font:700 9.5px/1 ui-monospace,Consolas,monospace;color:#6E8095;letter-spacing:.6px}
+#rail .st.on .n{color:var(--ember)}
+#rail .st .t{font-size:11.8px;color:#C8D4DE;margin-top:3px;line-height:1.25}
+#rail .st.on .t{color:#fff;font-weight:600}
+#rail .st.done .n:after{content:' ✓';color:#5FBF8B}
+
+/* ---------- body ---------- */
+#body{flex:1;display:flex;min-height:0}
+#view{flex:0 0 46%;min-width:380px;background:#0F1720;position:relative;display:flex;flex-direction:column}
+#gl{flex:1;min-height:0;position:relative}
+#gl canvas{display:block;width:100%;height:100%}
+#glhud{position:absolute;left:0;top:0;right:0;padding:10px 13px;pointer-events:none}
+#glhud .ttl{font:700 13px Cambria,Georgia,serif;color:#fff}
+#glhud .sb{font-size:11px;color:#8FA2B4;margin-top:2px}
+#glbadge{position:absolute;right:12px;top:10px;text-align:right}
+.hpill{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;margin-left:5px}
+.hpill.ok{background:rgba(37,107,69,.28);color:#7FD6A4;border:1px solid #2F7D50}
+.hpill.wn{background:rgba(154,100,8,.28);color:#EBBE6A;border:1px solid #8A6420}
+.hpill.er{background:rgba(168,38,30,.30);color:#F09A92;border:1px solid #8E3630}
+#glfoot{position:absolute;left:0;right:0;bottom:0;padding:9px 13px 11px;background:linear-gradient(transparent,#0B1219 42%)}
+#glfoot .rowf{display:flex;align-items:center;gap:10px;color:#A9B8C6;font-size:11.5px}
+#scrub{flex:1;accent-color:var(--ember)}
+#glfoot .day{font:700 12.5px ui-monospace,Consolas,monospace;color:var(--ember);min-width:74px}
+#glfoot .lg{display:flex;gap:12px;font-size:10.5px;color:#7E8E9C;margin-top:6px;flex-wrap:wrap}
+#glfoot .lg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+button.play{background:var(--ember);border:0;color:#fff;border-radius:6px;padding:5px 12px;font-size:12px;
+  font-weight:600;cursor:pointer}
+button.play:hover{background:#C25E10}
+
+#panel{flex:1;min-width:0;overflow-y:auto;background:#F7F9FB}
+.pw{padding:16px 20px 60px}
+
+/* ---------- generic ---------- */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:14px 16px;margin-bottom:12px}
+.card>h3{font-size:14px;margin-bottom:9px}
+.hd2{margin-bottom:12px}
+.hd2 .k{font:700 10px/1 inherit;letter-spacing:1.3px;text-transform:uppercase;color:var(--ember);margin-bottom:6px}
+.hd2 h2{font-size:21px;margin-bottom:4px}
+.hd2 p{margin:0;color:var(--muted);font-size:13px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.col{flex:1;min-width:230px}
+.note{background:var(--teal-bg);border:1px solid #C4DEE2;border-radius:8px;padding:11px 13px;font-size:12.5px;color:#1D5A64;margin-bottom:10px}
+.warn{background:var(--amb-bg);border:1px solid #EBD9B4;border-radius:8px;padding:11px 13px;font-size:12.5px;color:#6E4A0C;margin-bottom:10px}
+.bad{background:var(--red-bg);border:1px solid #EBCDCA;border-radius:8px;padding:11px 13px;font-size:12.5px;color:#7A1C16;margin-bottom:10px}
+.good{background:var(--grn-bg);border:1px solid #C9E0D3;border-radius:8px;padding:11px 13px;font-size:12.5px;color:#1B4E32;margin-bottom:10px}
+.vio{background:var(--vio-bg);border:1px solid #D4CBE8;border-radius:8px;padding:11px 13px;font-size:12.5px;color:#4A3B70;margin-bottom:10px}
+.ctl{margin-bottom:11px}
+.ctl label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:3px}
+.ctl label .v{color:var(--ember);font-family:ui-monospace,Consolas,monospace}
+.ctl input[type=range]{width:100%;accent-color:var(--ember)}
+.ctl select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:12.5px}
+.ctl .hint{font-size:11px;color:var(--muted);margin-top:2px}
+.tog{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;margin-bottom:7px;cursor:pointer;user-select:none}
+.tog input{width:15px;height:15px;accent-color:var(--ember);cursor:pointer;margin-top:2px;flex:0 0 auto}
+.btn{background:var(--ember);color:#fff;border:0;border-radius:6px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer}
+.btn:hover{background:#C25E10}
+.btn.alt{background:var(--ink2)} .btn.alt:hover{background:#3A4C60}
+.btn.gh{background:#fff;color:var(--ink2);border:1px solid var(--line)} .btn.gh:hover{background:var(--soft)}
+.btn:disabled{background:#B8C4CE;cursor:not-allowed}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}
+.stat{flex:1;min-width:112px;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.stat .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.stat .n{font:700 18px/1.2 Cambria,Georgia,serif;color:var(--ink);margin-top:3px}
+.stat .n.em{color:var(--ember)} .stat .n.rd{color:var(--red)} .stat .n.gn{color:var(--grn)} .stat .n.tl{color:var(--teal)}
+.stat .s{font-size:10.5px;color:var(--muted);margin-top:2px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
+th{background:var(--ink2);color:#fff;font-weight:600;font-size:11px}
+tbody tr:nth-child(even){background:#F7FAFC}
+tbody tr.hi{background:var(--ember-bg)!important}
+td.num,th.num{text-align:right;font-family:ui-monospace,Consolas,monospace}
+.tw{max-height:330px;overflow:auto;border:1px solid var(--line);border-radius:7px}
+.tw table{border:0} .tw th,.tw td{border-left:0;border-top:0}
+canvas.ch{display:block;width:100%;background:#fff;border-radius:7px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;margin-top:6px;color:var(--muted)}
+.legend i{display:inline-block;width:13px;height:3px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.pill{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:11px;white-space:nowrap}
+.pill.ok{background:var(--grn-bg);color:var(--grn)} .pill.wn{background:var(--amb-bg);color:var(--amb)}
+.pill.er{background:var(--red-bg);color:var(--red)} .pill.nu{background:var(--soft2);color:var(--muted)}
+.pill.tl{background:var(--teal-bg);color:var(--teal)}
+code{background:var(--soft);padding:1px 4px;border-radius:3px;font-family:ui-monospace,Consolas,monospace;font-size:11.5px}
+ol,ul{margin:5px 0 5px 19px;padding:0} li{margin-bottom:3px}
+.small{font-size:11.5px;color:var(--muted)}
+hr.sep{border:0;border-top:1px solid var(--line);margin:12px 0}
+.navbtns{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.navbtns .sp{flex:1}
+.sensrow{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
+.sensrow:last-child{border-bottom:0}
+.sensrow .nm{flex:1}
+.sensrow .nm b{font-size:12.5px} .sensrow .nm div{font-size:11px;color:var(--muted)}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}
+.chip{font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.chip.on{background:var(--ink2);color:#fff;border-color:var(--ink2);font-weight:600}
+#loading{position:fixed;inset:0;background:var(--ink);color:#C8D4DE;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:10px;z-index:99;font-size:14px}
+</style>
+</head>
+<body>
+<div id="loading"><div style="font:700 20px Cambria,Georgia,serif;color:#fff">Predictive Maintenance Simulator</div>
+  <div>Building the machine…</div></div>
+
+<div id="top">
+  <div class="tb">
+    <div>
+      <h1>Predictive Maintenance — End to End</h1>
+      <div class="sub">From sensor to signed work order · MAHAGENCO Training Centre, Nashik</div>
+    </div>
+    <div class="sp"></div>
+    <div class="caseSel" id="caseSel"></div>
+  </div>
+</div>
+<div id="rail"></div>
+
+<div id="body">
+  <div id="view">
+    <div id="gl">
+      <div id="glhud"><div class="ttl" id="glTitle">—</div><div class="sb" id="glSub">—</div></div>
+      <div id="glbadge"></div>
+      <div id="glfoot">
+        <div class="rowf">
+          <button class="play" id="play">▶ Run</button>
+          <input type="range" id="scrub" min="0" max="199" value="0" step="1">
+          <div class="day" id="dayLbl">Day 0</div>
+        </div>
+        <div class="lg" id="glLegend"></div>
+      </div>
+    </div>
+  </div>
+  <div id="panel"><div class="pw" id="pw"></div></div>
+</div>
+
+<script>__THREE__</script>
+<script>__APP__</script>
+</body>
+</html>

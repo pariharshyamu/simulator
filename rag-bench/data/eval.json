@@ -1,0 +1,270 @@
+[
+ {
+  "q": "What is the tightening torque for the ID fan bearing housing bolts?",
+  "must": "320 Nm",
+  "gold": [
+   1283
+  ]
+ },
+ {
+  "q": "What shell crush should be set when replacing ID fan bearing shells?",
+  "must": "0.03–0.05 mm",
+  "gold": [
+   1283
+  ]
+ },
+ {
+  "q": "How much water was found in the ID fan A bearing oil when it was opened?",
+  "must": "1,240 ppm",
+  "gold": [
+   1247
+  ]
+ },
+ {
+  "q": "Which oil was the ID fan A bearing recharged with?",
+  "must": "Servoprime 46",
+  "gold": [
+   1247
+  ]
+ },
+ {
+  "q": "What is the part number for the ID fan DE bearing shells and where are they held?",
+  "must": "3-FN-BRG-118",
+  "gold": [
+   1256
+  ]
+ },
+ {
+  "q": "What is the journal spring assembly torque on a bowl mill 803XRP?",
+  "must": "640 Nm",
+  "gold": [
+   1259
+  ]
+ },
+ {
+  "q": "At what metal temperature does the ID fan bearing alarm and trip?",
+  "must": "Alarm at 85 °C metal temperature",
+  "gold": [
+   1249
+  ]
+ },
+ {
+  "q": "When was the ID fan A drive-end bearing thermocouple last calibrated?",
+  "must": "11-Feb-2026",
+  "gold": [
+   1285
+  ]
+ },
+ {
+  "q": "What water content in bearing oil must be reported to the Superintending Engineer?",
+  "must": "500 ppm",
+  "gold": [
+   1253
+  ]
+ },
+ {
+  "q": "Why did the ID fan A bearing keep failing between 2021 and 2023?",
+  "must": "oil cooler fouling on the CW side",
+  "gold": [
+   1254
+  ]
+ },
+ {
+  "q": "What did the April 2026 thermography survey find on the unit 8 draught plant?",
+  "must": "cold spot consistent with partial tube blockage",
+  "gold": [
+   1284
+  ]
+ },
+ {
+  "q": "How many alarms are configured on the unit 8 DAS and how many stand at any time?",
+  "must": "1,840 configured alarms",
+  "gold": [
+   1286
+  ]
+ },
+ {
+  "q": "What is MSET and how does it relate to nearest neighbours?",
+  "must": "MSET",
+  "gold": [
+   707
+  ]
+ },
+ {
+  "q": "Which standard covers reliability data collection for equipment?",
+  "must": "ISO 14224",
+  "gold": [
+   257,
+   258,
+   368,
+   369,
+   377,
+   378,
+   388,
+   389,
+   544,
+   597,
+   641,
+   642
+  ]
+ },
+ {
+  "q": "Which standard covers alarm management?",
+  "must": "EEMUA 191",
+  "gold": [
+   327,
+   328,
+   366,
+   367,
+   368,
+   388,
+   389
+  ]
+ },
+ {
+  "q": "What framework should we use to govern AI risk?",
+  "must": "NIST AI RMF",
+  "gold": [
+   388,
+   389
+  ]
+ },
+ {
+  "q": "What does the DPDP Act mean for plant data?",
+  "must": "DPDP",
+  "gold": [
+   585,
+   665,
+   666,
+   667,
+   668,
+   687,
+   688,
+   689,
+   690,
+   1197,
+   1198
+  ]
+ },
+ {
+  "q": "What is the mill outlet temperature limit and why?",
+  "must": "mill fire",
+  "gold": [
+   1260
+  ]
+ },
+ {
+  "q": "What were Koradi units 8 to 10 heat rate and auxiliary figures in June 2026?",
+  "must": "Koradi Units 8-10 — June 2026 performance",
+  "gold": [
+   1300
+  ]
+ },
+ {
+  "q": "What were the Nashik units 3 to 5 figures for June 2026?",
+  "must": "Nashik Units 3-5 — June 2026 performance",
+  "gold": [
+   1293
+  ]
+ },
+ {
+  "q": "What were the Paras units 3 to 4 figures for June 2026?",
+  "must": "Paras Units 3-4 — June 2026 performance",
+  "gold": [
+   1296
+  ]
+ },
+ {
+  "q": "What is the total fleet heat rate and auxiliary gap for June 2026?",
+  "must": "thermal fleet — June 2026 totals",
+  "gold": [
+   1301
+  ]
+ },
+ {
+  "q": "Why must the heat rate gap and the auxiliary excess not be added together?",
+  "must": "double-count",
+  "gold": [
+   11,
+   12
+  ]
+ },
+ {
+  "q": "What is a data diode and why would we need one?",
+  "must": "data diode",
+  "gold": [
+   314,
+   315,
+   316
+  ]
+ },
+ {
+  "q": "What is shadow mode and why run a model in it first?",
+  "must": "shadow mode",
+  "gold": [
+   346,
+   347
+  ]
+ },
+ {
+  "q": "Which standard covers vibration measurement on rotating machines?",
+  "must": "ISO 20816",
+  "gold": [
+   368,
+   369,
+   377,
+   378,
+   388,
+   389
+  ]
+ },
+ {
+  "q": "Which standard covers substation communication?",
+  "must": "IEC 61850",
+  "gold": [
+   368,
+   369,
+   379,
+   380
+  ]
+ },
+ {
+  "q": "What has JSW Energy published about AI in its thermal plants?",
+  "must": "JSW",
+  "gold": [
+   843,
+   844,
+   845,
+   858,
+   889,
+   890
+  ]
+ },
+ {
+  "q": "What is the false alarm rate and why does it decide whether a system survives?",
+  "must": "false alarm rate",
+  "gold": [
+   161,
+   162,
+   167,
+   880,
+   881,
+   885,
+   886
+  ]
+ },
+ {
+  "q": "What is required before opening a bearing housing?",
+  "must": "zero energy",
+  "gold": [
+   1274
+  ]
+ },
+ {
+  "q": "What happened in the 2024 near miss during a fan bearing inspection?",
+  "must": "barring gear key",
+  "gold": [
+   1276
+  ]
+ }
+]
