@@ -78,6 +78,15 @@ QA scripts live beside each artefact — `node theatre/qa-screenshots.js` and fr
 drive the built file through Playwright, capture every state, and fail on any console
 error. They expect the built file in the working directory.
 
+`node pdm-simulator/qa-geometry.js` is a different kind of test: it checks the
+**mechanics**, in world space, rather than the picture. For every rotating part it
+measures the world direction of the part's own axis before and after animating, and
+fails if that direction moves — a part that is tumbling rather than turning looks
+perfectly correct in a screenshot and is obvious only in motion. It also asserts that
+the transformer never moves at all, that each machine's cut-away actually faces the
+camera (measured from the vertices, not from the angle arithmetic), and that every
+sensor dot sits on the geometry it names.
+
 ## Before publishing
 
 ```
