@@ -1,6 +1,6 @@
 # Course material and source data
 
-`course_material.md` is the full 308-page participant handout and delivery script;
+`course_material.md` is the full 378-page participant handout and delivery script;
 the `handout-*.md` files are the chapter drafts it was assembled from, kept because
 they are easier to edit.
 

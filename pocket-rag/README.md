@@ -102,7 +102,7 @@ copy until they clear storage.
 
 ## What is measured, on an emulated Pixel 7
 
-- 308-page Word document (617,000 characters) → **1,018 passages in 1.8 s**
+- 378-page Word document (617,000 characters) → **1,018 passages in 1.8 s**
 - 7-page financial PDF → 59 passages in 1.0 s
 - Question embedded in **35–70 ms**, whole-document search in **under a millisecond**
 - Offline reload restores the document from IndexedDB and answers with no network

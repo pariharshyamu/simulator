@@ -106,7 +106,7 @@ fall back to the CPU and be too slow to demonstrate.
 
 | Source | Chunks | What it is |
 |---|---:|---|
-| Course material | 1,230 | The 308-page participant handout and delivery script for the session |
+| Course material | 1,230 | The 378-page participant handout and delivery script for the session |
 | Plant document library | 41 | Work orders, OEM manual sections, SOPs, shift logs, lab reports, spares register |
 | June 2026 station data | 14 | One fact sheet per station from the audited June 2026 filing |
 | June 2026 data brief | 17 | The verified brief the whole course is built on |

@@ -341,6 +341,34 @@ try {
   fail('tools/build.js did not run cleanly: ' + String(e.message).split('\n')[0]);
 }
 
+/* ==================================================================== 9b */
+group('9b. Participant documents are not behind their source');
+
+/* The Word file went three days and a whole chapter stale once, silently,
+   because it had no build step. Now it has one, and the gate checks it. */
+try {
+  cp.execSync('python3 tools/build_docs.py --check', { cwd: ROOT, stdio: 'pipe' });
+  pass('dist/ Word and PDF are newer than course/*.md and the figures');
+} catch (e) {
+  fail('dist/ is behind course/ — run: python3 tools/build_docs.py');
+  (e.stdout || '').toString().split('\n').filter(l => l.includes('STALE'))
+    .forEach(l => note(l.trim()));
+}
+
+/* Every figure referenced from the markdown must exist in both forms: SVG for
+   the web, PNG for Word. */
+{
+  const figs = new Set();
+  for (const f of tracked.filter(f => f.startsWith('course/') && f.endsWith('.md')))
+    for (const m of read(f).matchAll(/\(figures\/([\w.-]+)\.svg\)/g)) figs.add(m[1]);
+  const miss = [];
+  for (const g2 of figs)
+    for (const ext of ['.svg', '.png'])
+      if (!fs.existsSync(p('course/figures', g2 + ext))) miss.push(g2 + ext);
+  miss.length ? miss.forEach(m => fail(`course/figures/${m} is referenced but missing`))
+              : pass(`${figs.size} figures present as both SVG and PNG`);
+}
+
 /* ==================================================================== 10 */
 group('10. The deployed site, driven in a real browser');
 

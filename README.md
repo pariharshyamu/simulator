@@ -50,8 +50,8 @@ pdm-simulator/        source for the predictive-maintenance simulator
 lab/                  source for the simulation lab
 rag-bench/            the local WebGPU RAG bench (its own README inside)
 pocket-rag/           the on-device PWA: open your own document on a phone
-deck/                 slides.json and the pptxgenjs generator for the 117-slide deck
-course/               the 308-page course material, the handouts, and the June 2026 data
+deck/                 slides.json and the pptxgenjs generator for the 118-slide deck
+course/               the 378-page course material, the handouts, and the June 2026 data
 docs/                 screenshots
 vendor/               three.js, bundled as a global for inlining
 tools/build.js        assembles dist/ from source

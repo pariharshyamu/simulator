@@ -1,6 +1,6 @@
 # The deck
 
-`slides.json` holds all 117 slides as data — layout name plus content — and
+`slides.json` holds all 118 slides as data — layout name plus content — and
 `build_deck.js` renders them with pptxgenjs into a 13.33 × 7.5 inch deck with speaker
 notes on every slide.
 
