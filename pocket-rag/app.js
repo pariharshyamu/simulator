@@ -481,12 +481,62 @@ async function llmModels(){
     .filter(m => S.device.f16 ? true : !/f16/.test(m.model_id))
     .sort((a,b) => (a.vram_required_MB||0) - (b.vram_required_MB||0));
 }
+/* Some MLC model configs ship with BOTH a rolling KV cache window and a
+   sliding-attention window set, and the engine will not start with both:
+
+     WindowSizeConfigurationError: Only one of context_window_size and
+     sliding_window_size can be positive. Got: context_window_size: 4096,
+     sliding_window_size: 512
+
+   Gemma 3 is the case that bites, because it really does use sliding-window
+   attention — 512 locally, with periodic global layers — and its config also
+   carries the 4096 rolling window. Only one may survive.
+
+   Which one to drop is not obvious, so this does not guess. It tries the
+   model as shipped, and if the engine refuses, retries with each window
+   disabled in turn, preferring the full 4096 context first because retrieval
+   answers need room for several passages plus the question. Each attempt
+   gets a fresh worker: an engine that threw during reload is not reusable. */
+const WINDOW_FALLBACKS = [
+  { label: 'full 4096-token context, sliding attention off', opts: { sliding_window_size: -1 } },
+  { label: 'sliding attention as designed, rolling window off', opts: { context_window_size: -1 } },
+];
+
 async function loadLLM(modelId, onProg){
   if (!webllmMod) webllmMod = await import(/* @vite-ignore */ await vendorURL('webllm'));
-  const worker = new Worker(new URL('./worker-llm.js', import.meta.url), { type:'module' });
-  S.llm = await webllmMod.CreateWebWorkerMLCEngine(worker, modelId, {
-    initProgressCallback: r => onProg && onProg(r.progress ?? 0, r.text || '')
-  });
+
+  const attempt = async (chatOpts, note) => {
+    const worker = new Worker(new URL('./worker-llm.js', import.meta.url), { type:'module' });
+    try {
+      return await webllmMod.CreateWebWorkerMLCEngine(worker, modelId, {
+        initProgressCallback: r => onProg && onProg(r.progress ?? 0,
+          (note ? note + ' — ' : '') + (r.text || ''))
+      }, chatOpts);
+    } catch (err) {
+      try { worker.terminate(); } catch (e) {}
+      throw err;
+    }
+  };
+
+  let engine = null, lastErr = null;
+  try {
+    engine = await attempt(undefined, '');
+  } catch (err) {
+    lastErr = err;
+    if (!/window.?size/i.test(String(err && (err.name + err.message)))) throw err;
+    for (const f of WINDOW_FALLBACKS) {
+      try {
+        /* Weights are already in the browser cache by now, so a retry costs
+           seconds rather than another download. */
+        engine = await attempt(f.opts, f.label);
+        S.llmWindow = f.label;
+        break;
+      } catch (e2) { lastErr = e2; }
+    }
+  }
+  if (!engine) throw lastErr;
+
+  S.llm = engine;
   S.llmId = modelId;
   setChips();
 }
@@ -846,11 +896,27 @@ async function openSheet(){
     try {
       await loadLLM(id, (p, txt) => { $('llmBar').style.width = Math.round(p*100) + '%';
         $('llmMsg').textContent = txt || `${Math.round(p*100)}%`; });
-      $('llmMsg').innerHTML = '<b style="color:#256B45">Ready.</b> Close this and ask a question.';
+      $('llmMsg').innerHTML = '<b style="color:#256B45">Ready.</b> Close this and ask a question.'
+        + (S.llmWindow ? `<br><span class="small">Loaded with ${esc(S.llmWindow)} — this model ships two `
+          + `conflicting attention-window settings and the engine accepts only one.</span>` : '');
       renderDoc();
     } catch(e) {
       console.error(e);
-      $('llmMsg').innerHTML = `<b style="color:#A8261E">Could not load.</b> ${esc(e.message||e)}`;
+      /* Say what went wrong in words the person can act on, and keep the raw
+         exception underneath for whoever is going to fix it. */
+      const raw = String(e && (e.message || e));
+      let plain = 'Something went wrong loading this model.';
+      if (/window.?size/i.test(raw))
+        plain = 'This model ships two conflicting attention-window settings and the engine would not '
+              + 'start with either of them disabled. Try a different model in the list.';
+      else if (/storage buffer|maxStorage|too large|out of memory|OOM/i.test(raw))
+        plain = `This model is larger than this GPU will allow. The device report below shows a maximum `
+              + `storage buffer of ${mb(d.maxStorage)}; pick a smaller model.`;
+      else if (/fetch|network|Failed to load|NetworkError/i.test(raw))
+        plain = 'The weights could not be downloaded. Check the connection and try again — nothing is '
+              + 'lost, the parts already fetched stay cached.';
+      $('llmMsg').innerHTML = `<b style="color:#A8261E">Could not load.</b> ${esc(plain)}`
+        + `<br><span class="small" style="opacity:.7">${esc(raw.slice(0, 220))}</span>`;
     }
     bl.disabled = false;
   };

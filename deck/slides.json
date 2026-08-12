@@ -288,10 +288,10 @@
    "right": {
     "label": "The question a model asks",
     "value": "Is it above what it should be?",
-    "detail": "Given this load, this ambient temperature, this cooling water inlet and this oil flow, the bearing should be at 68 °C. It is at 74 °C. Six degrees are unexplained — and unexplained is the only word that matters."
+    "detail": "Given this load, this ambient, this cooling water inlet and this oil flow, the model says what the bearing should read right now. Subtract that from what it does read. What is left over is the only part that carries information about the machine."
    },
-   "punch": "Actual minus expected is the residual. Every process-data application in this course is built on that one subtraction.",
-   "notes": "[10:18–10:23] Slow right down. This is the single most important slide of the day. If they remember nothing else, they must remember expected versus actual.\n\nUse a bearing everyone knows — an ID fan or a BFP bearing. Say: 'Seventy-four degrees means nothing on its own. Seventy-four at fifty-five per cent load on a January night is a problem. Seventy-four at full load in May is completely normal. Your fixed alarm cannot tell the difference and was never designed to. A model can, because it has seen thousands of hours of what normal looks like at every load and every ambient condition.'\n\nAsk the room directly: 'Who here has raised a defect on something that turned out to be entirely normal for that operating condition? And who has had something fail that never once crossed its alarm limit?' Every experienced engineer has done both. Let the hands stay up a moment.\n\nThis is also the honest answer to 'why not just set a better alarm?' You cannot set one fixed number for a value that legitimately moves with six other variables. The number is not the signal. The gap is the signal.",
+   "punch": "Actual minus expected is the residual. Every process-data application in this course is built on that one subtraction — and Session 2 walks a real bearing through it week by week.",
+   "notes": "[10:18–10:23] Slow right down. This is the single most important slide of the day. If they remember nothing else, they must remember expected versus actual.\n\nUse a bearing everyone knows — an ID fan or a BFP bearing. Say: 'Seventy-four degrees means nothing on its own. Seventy-four at fifty-five per cent load on a January night is a problem. Seventy-four at full load in May is completely normal. Your fixed alarm cannot tell the difference and was never designed to. A model can, because it has seen thousands of hours of what normal looks like at every load and every ambient.'\n\nDO NOT give the week-by-week numbers here. Slide 26 walks the whole degradation through and the five weeks of warning is its reveal. Spend it now and that slide has nothing left to deliver. Set up the idea; let Session 2 pay it off.\n\nFinish on the subtraction and move on. If the room is with you on this one line, everything after lunch lands.",
    "n": 8
   },
   {
@@ -644,7 +644,7 @@
    "title": "Explainability — an alert with its reasons attached",
    "subtitle": "No engineer acts on a number with no justification, and they are right not to",
    "mockup": {
-    "header": "Koradi Unit 9 · ID fan 9B · Advisory · 06:40",
+    "header": "Koradi Unit 9 · BFP 6B · Advisory · 06:40",
     "rows": [
      [
       "Signal",
@@ -653,7 +653,7 @@
      ],
      [
       "Deviation",
-      "74.3 °C measured against 68.1 °C expected — plus 6.2 °C",
+      "68.4 °C measured against 64.9 °C expected — plus 3.5 °C",
       "warn"
      ],
      [
@@ -663,7 +663,7 @@
      ],
      [
       "Largest contributor",
-      "Bearing temperature rise per unit of fan power — 61 % of the deviation",
+      "Thrust bearing temperature rise per unit of fan power — 61 % of the deviation",
       "warn"
      ],
      [
@@ -937,7 +937,7 @@
    "block": "2. Intelligent monitoring",
    "time": "11:28",
    "title": "Why a fixed threshold is structurally late",
-   "subtitle": "ID fan bearing — an illustrative reconstruction, not a MAHAGENCO case study",
+   "subtitle": "ID fan drive-end bearing — an illustrative reconstruction, not a MAHAGENCO case study. Same machine and the same numbers as handout 2.2.",
    "chart": {
     "type": "line",
     "title": "Bearing temperature against model-expected",
@@ -955,39 +955,39 @@
      {
       "name": "Measured (°C)",
       "values": [
-       68,
-       69,
-       72,
        74,
+       75,
        76,
-       79,
-       84,
+       78,
+       80,
+       83,
+       86,
        91
       ]
      },
      {
       "name": "Model expected (°C)",
       "values": [
-       68,
-       68.5,
-       68,
-       69,
-       68.5,
-       69,
-       68.5,
-       69
+       74,
+       74,
+       74,
+       74,
+       74,
+       74,
+       74,
+       74
       ]
      }
     ]
    },
    "items": [
-    "Week 4 — the residual reaches 4 °C and holds. Load and ambient are already accounted for, so this is the machine, not the weather.",
-    "Week 10 — an operator on rounds notices the bearing running warm. The residual has been raised for six weeks by then.",
-    "Week 14 — the DCS alarm at 90 °C. The fan comes out on an emergency basis, on the fan's terms rather than yours.",
-    "The alarm was not wrong. A fixed threshold is simply the last thing in the plant to know."
+    "Week 3 — residual +2 °C. Load and ambient are already removed, so this is the machine and not the weather. Nothing on any screen in the control room has changed.",
+    "Week 5 — residual +4 °C, sustained across several load points. The system alerts. The bearing reads 78 °C, which is 12 °C BELOW the alarm and has happened normally hundreds of times.",
+    "Week 10 — 86 °C on a warm day at full load. An operator finally notices, because now the absolute number looks wrong.",
+    "Week 10+ — the DCS alarm at 90 °C. The fan comes out on the fan's terms rather than yours. The alarm was not wrong; a fixed threshold is simply the last thing in the plant to know."
    ],
-   "punch": "Ten weeks of notice against a few days. That interval buys a planned outage instead of a forced one — the whole business case.",
-   "notes": "[11:28–11:32] Walk the chart left to right and let them watch the gap open.\n\nThe single most important visual point: the expected line stays flat while the measured line climbs. It stays flat because the model has already removed load and ambient effects. Plot raw bearing temperature instead and it would wander with the weather and you would see nothing at all. The whole story is the widening gap, not the rising line.\n\nBe honest about provenance: 'This is an illustrative reconstruction, not a MAHAGENCO case study. But the shape is exactly what these systems produce, and every one of you has seen a bearing behave like this.'\n\nAsk the room: 'At week four, with the residual holding at four degrees and the measured temperature at seventy-two, what would you actually do?' The honest answer is usually 'nothing, it is well within limits' — which is precisely the point being made.\n\nThen the money line. Ten weeks is enough to raise the requisition, get the bearing, and take the fan out on a planned shutdown rather than at three in the morning.",
+   "punch": "Five weeks of notice against a few days. Why not just lower the alarm to 78? Because 78 is normal at full load in May — you would create a nuisance alarm that is inhibited within a fortnight.",
+   "notes": "[11:28–11:32] Walk the chart left to right and let them watch the gap open. These are the same numbers as section 2.2 of the handout, so anyone following along sees one story, not two.\n\nThe single most important visual point: the expected line stays flat while the measured line climbs. It stays flat because the model has already removed load and ambient. Plot raw bearing temperature instead and it would wander with the weather and you would see nothing at all. The whole story is the widening gap, not the rising line.\n\nThis is the payoff for the residual idea you set up in slide 8 — deliver the five weeks here, with weight. Ask the room what they would do with five weeks' notice on an ID fan. Somebody will say 'line up the standby and order the shells' — that is exactly the answer, and it is worth more coming from them than from you.\n\nThen pre-empt the obvious objection before anyone raises it: why not simply lower the alarm? Because a fixed alarm has one number and the plant has many operating conditions. That is not a configuration failing, it is the structural limit of the method.\n\nBe honest about provenance: an illustrative reconstruction, not a MAHAGENCO case study — but the shape is exactly what these failures look like.",
    "n": 26
   },
   {
@@ -1038,7 +1038,7 @@
     "value": "That is the machine",
     "detail": "Bearing temperature, lube oil outlet, vibration and motor current all move together in the direction physics predicts. Not one has crossed an alarm limit. The pattern is the evidence, and it appears weeks before any individual number does."
    },
-   "punch": "A fixed alarm on one tag can never make this distinction, because it has nothing to compare against.",
+   "punch": "Which of the two it is decides who you send: the instrument technician, or the mechanical engineer with a spare bearing. No single-tag alarm can tell you that.",
    "notes": "[11:35–11:38] Three minutes, and this is the discrimination engineers value most once they have it.\n\nSay it as a physical argument rather than a statistical one: 'Nothing physical can raise a bearing temperature and leave the fan power, the lube oil outlet, the vibration and the discharge pressure all exactly where they should be. If one signal has moved and its physical neighbours have not, you have an instrumentation problem, and you should check the transmitter before you touch the machine.'\n\nThen the reverse: 'When four signals move together in the direction physics predicts, and not one of them has crossed an alarm limit, that is the machine telling you something weeks before any single number will.'\n\nAsk the room how much time their station spends chasing single-tag alarms that turn out to be thermocouples. Every station has this problem, and this is the first thing multi-signal monitoring gives back — hours that were being spent on instrumentation, not machines.\n\nLand the punch and move on. They will see this in the lab shortly.",
    "n": 28
   },
@@ -2146,9 +2146,9 @@
      ]
     ]
    },
-   "stat": "₹25.61 crore",
-   "statLabel": "the value of Koradi Units 8-10's heat-rate gap in one month — nearly half the fleet's entire ₹56 crore",
-   "notes": "[14:38–14:40] Two minutes, and it is a pointing slide rather than a reading slide. Give them the top four rows and the bottom row.\n\nThe top four all have a negative gross gap. Four station groups whose boilers and turbines are better than the standard MERC approved for them, and which are nonetheless being penalised on net heat rate. Chandrapur Units 3-7 are sixty-two kilocalories better than their gross norm and carry a three point zero two percentage point auxiliary gap. Every rupee of their heat-rate penalty is electricity consumed inside the fence.\n\nNow the bottom row, which is the opposite case. Koradi Units 8-10 have almost no auxiliary gap at nought point nine five, and a genuine one hundred and seventy-six kilocalorie boiler and turbine gap on 964.8 MU. That is combustion, condenser and air pre-heater work, and it is worth ₹25.61 crore in one month by itself.\n\nOne housekeeping note if anyone is sharp: the minus eighteen for Nashik here and the seventeen quoted on the previous slide are the same figure at two different roundings.\n\nSame table, two opposite programmes. That is why the decomposition comes before the project list.",
+   "stat": "₹22.84 crore",
+   "statLabel": "Koradi 8-10's GROSS gap: 176 kcal/kWh on 964.8 MU generated. Its NET gap of 212 on 897.75 MU sent out is worth ₹25.61 crore. Same station, two questions — and mixing them is the error this whole session is about",
+   "notes": "[14:38–14:40] Two minutes, and it is a pointing slide rather than a reading slide. Give them the top four rows and the bottom row.\n\nThe top four all have a negative gross gap. Four station groups whose boilers and turbines are better than the standard MERC approved for them, and which are nonetheless being penalised on net heat rate. Chandrapur Units 3-7 are sixty-two kilocalories better than their gross norm and carry a three point zero two percentage point auxiliary gap. Every rupee of their heat-rate penalty is electricity consumed inside the fence.\n\nNow the bottom row, which is the opposite case. Koradi Units 8-10 have almost no auxiliary gap at nought point nine five, and a genuine one hundred and seventy-six kilocalorie boiler and turbine gap on 964.8 MU. That is combustion, condenser and air pre-heater work, and it is worth ₹22.84 crore in one month by itself — that is the gross gap valued on gross generation.\n\nOne housekeeping note if anyone is sharp: the minus eighteen for Nashik here and the seventeen quoted on the previous slide are the same figure at two different roundings.\n\nSame table, two opposite programmes. That is why the decomposition comes before the project list.\n\nWatch the stat card, and say this out loud, because it is the discipline the whole session is teaching: the gross gap is 176 kcal/kWh and it is valued on the 964.8 MU the station generated, giving ₹22.84 crore. The net gap is 212 and it is valued on the 897.75 MU it sent out, giving ₹25.61 crore. Both are correct. Multiplying a gross gap by net units, or the reverse, is exactly the mistake that produces the ₹89 crore number nobody can defend.",
    "n": 57
   },
   {
@@ -2550,31 +2550,65 @@
    "n": 67
   },
   {
+   "layout": "table",
+   "block": "5. What others have done",
+   "time": "15:05",
+   "title": "Adani Power — the Indian case, and what it does not tell us",
+   "subtitle": "AVEVA World, Paris, October 2024 — their own slides, their own screenshots",
+   "table": {
+    "head": [
+     "What they showed",
+     "The detail",
+     "Evidence"
+    ],
+    "rows": [
+     [
+      "Scope",
+      "AVEVA PI System across 8 thermal locations, 25 units, about 150,000 tags, one central operations centre at Ahmedabad. Udupi (1,200 MW) is one of the eight.",
+      "Their own conference slides"
+     ],
+     [
+      "Boiler and turbine efficiency",
+      "Every loss itemised on screen on a 15-minute AND a 24-hour window. Live screenshot: boiler efficiency 86.72 % last 15 min against 86.49 % last 24 h; turbine heat rate 1,883 against 1,826 design.",
+      "Screenshots, dated"
+     ],
+     [
+      "Asset Health Index",
+      "Four tiers — station, asset, equipment, sensor. Pumps 69, fans 71, mills 77. Individual BFP, CEP and CWP scored. Motor winding and motor bearing temperature are scored inputs.",
+      "Screenshots, dated"
+     ],
+     [
+      "Is it AI?",
+      "The 15-minute efficiency is a thermodynamic enthalpy–entropy module in PI Asset Framework, with coal quality typed in by hand. The AI/ML is Python health scoring. Predictive analytics was still on the roadmap.",
+      "Stated on their slides"
+     ],
+     [
+      "The published benefit",
+      "None. Not a kcal/kWh, not a percentage point of availability, not a rupee. Their own annual report quantifies heat-rate gains only for air-preheater baskets and water-box cleaning — the mechanical work, not the software.",
+      "Nothing found"
+     ]
+    ]
+   },
+   "punch": "Well-documented capability. Undocumented benefit. Learn to tell those two apart and you can read any vendor case study in this industry.",
+   "notes": "[15:05–15:10] Five minutes, and this is the most useful slide in the block for a MAHAGENCO audience, because it is the nearest neighbour — an Indian state-scale thermal fleet, imported and domestic coal, the same auxiliaries.\n\nGive them the good news first, because it is genuinely impressive and it is real. Eight sites, twenty-five units, a hundred and fifty thousand tags, one operations centre in Ahmedabad. Boiler losses itemised every fifteen minutes. A health index that scores your boiler feed pumps individually. This is not a pilot on one unit, it is a fleet.\n\nThen the two corrections, and take your time over them.\n\nFirst: the fifteen-minute efficiency calculation is NOT machine learning. It is thermodynamics — enthalpy and entropy in PI Asset Framework — with coal quality entered manually. That is a heat balance running continuously, which is a fine thing and something we could do, but it is not AI, and their own slide says so. The AI/ML in that deployment is Python code scoring health parameters.\n\nSecond, and this is the one to sit on: there is no published number. Not in the vendor deck, not on AVEVA's website, not in Adani Power's own annual report. In that annual report the only two heat-rate improvements quantified in kilocalories are credited to replacing air-preheater baskets and cleaning water boxes. The digital programme is listed with no number attached at all.\n\nSo the honest reading is: capability documented, benefit undocumented. That is not an accusation — it is the normal state of this industry's published evidence, and NTPC's PI System presentation has exactly the same shape.\n\nIf somebody asks for an Indian number they can actually stand behind, give them NTPC Talcher Kaniha: station heat rate 2,700 down to 2,614 kcal/kWh over five years, USD 35 million saved, verified under ISO 50001 and the BEE PAT scheme and audited by the CAG. Even there the savings are not decomposed to say what the software contributed. That is how thin the ground is, and it is why we spent this morning on measurement.",
+   "n": 68
+  },
+  {
    "layout": "maturity",
    "block": "5. What others have done",
    "time": "15:10",
    "title": "Reading vendor claims without being taken in",
-   "subtitle": "The same claims, sorted by how much evidence sits behind them",
+   "subtitle": "The weak end of the same list. The three cases above came with named plants and published numbers; these do not.",
    "maturity": [
     [
-     "Vistra fleet heat-rate optimiser",
-     "67 units, 26 plants, 1 % average, US$ 23 million — company and consultant published",
-     "Proven — named plants and a fleet number"
-    ],
-    [
-     "Duke Energy predictive analytics",
-     "87 % of fleet, 11,000 models, a US$ 34 million single catch",
-     "Proven — but the headline is one event"
+     "Adani Power AVEVA PI programme",
+     "8 sites, 25 units, 150,000 tags, live screens — and no published benefit figure anywhere, including their own annual report",
+     "Proven as deployed; benefit unquantified publicly"
     ],
     [
      "NTPC NePPS operator advisory",
      "Named system, named research centre, no published benefit figure",
      "Proven as deployed; benefit unquantified publicly"
-    ],
-    [
-     "SAIL Bokaro combustion chemistry",
-     "₹3.23 crore a year, 1,500 t CO₂ — Indian PSU, published",
-     "Proven — adjacent industry, same physics"
     ],
     [
      "GE Vernova performance software",
@@ -2594,7 +2628,7 @@
    ],
    "punch": "Three questions for any vendor: which plant, what baseline, and who measured it? If any answer is missing, the number is marketing.",
    "notes": "[15:10–15:12] This slide is the most practically useful of the block, because everyone here will sit through vendor presentations in the next year.\n\nGive them the three questions and make them write them down: which plant, what baseline, who measured it. A claim that survives all three is worth engaging with. A claim that fails any one of them is advertising.\n\nPoint out that even the strong references have caveats. Vistra's fleet number is half its pilot number. Duke's US$ 34 million is a single event. NTPC's system is real but publishes no benefit figure. Being able to state the caveat is what makes you credible when you take a proposal to management.\n\nEnd with the honest position: the technology is proven, the benefit is real and smaller than the brochure, and the variable that decides your outcome is your own data and your own follow-through.",
-   "n": 68
+   "n": 69
   },
   {
    "layout": "bignumber-compare",
@@ -2613,8 +2647,8 @@
     "detail": "Vistra's 67-unit rollout averaged 1 per cent against a 2 per cent pilot. GE Vernova claims up to 1 per cent in twelve months. On MAHAGENCO's June 2026 thermal generation, 1 per cent of heat rate is roughly 24 kcal/kWh on a 2,400 kcal/kWh unit — real money, and nothing like the brochure."
    },
    "punch": "Plan on the fleet number, not the pilot number. A business case built on 10 per cent will be shredded, and it will take the credible 1 per cent down with it.",
-   "notes": "[15:11–15:12] Close the block on expectation management, because this is where internal credibility is won or lost.\n\nThe sentence that matters is the punch line. If someone in this room takes a proposal to a director claiming ten per cent and delivers one, the next five proposals from this room will not be read.\n\nRelate it back to Session 4: our identified gap is 212 kcal/kWh at Koradi 8-10. A Vistra-class outcome recovers around 24 of that. That is not a disappointment — it is ₹3 to ₹4 crore a year at that station's own cost of heat, from software and discipline rather than capital works.\n\nThen move straight into Session 5, which is how that 24 kcal/kWh is actually earned.",
-   "n": 69
+   "notes": "[15:11–15:12] Close the block on expectation management, because this is where internal credibility is won or lost.\n\nThe sentence that matters is the punch line. If someone in this room takes a proposal to a director claiming ten per cent and delivers one, the next five proposals from this room will not be read.\n\nRelate it back to Session 4: our identified gap is 212 kcal/kWh at Koradi 8-10. A Vistra-class outcome recovers around 24 of that. That is not a disappointment — it is ₹2.95 crore a MONTH at that station's own cost of heat — about ₹35 crore a year, from software and discipline rather than capital works.\n\nThen move straight into Session 5, which is how that 24 kcal/kWh is actually earned.",
+   "n": 70
   },
   {
    "layout": "section",
@@ -2634,7 +2668,7 @@
    "mins": "33 minutes",
    "lab": "SIM-6 and SIM-3",
    "notes": "[15:12] Section divider. Say the session title, name the two or three things they will be able to do at the end of it, and if there is a lab in this session, say so now so laptops are open. Ten to fifteen seconds — do not talk over a divider.",
-   "n": 70
+   "n": 71
   },
   {
    "layout": "table-stat",
@@ -2712,7 +2746,7 @@
    "stat": "₹14–44 lakh a year",
    "statLabel": "what one kcal/kWh is worth on a 210 to 660 MW unit — indicative, at 65 per cent PLF",
    "notes": "[15:00–15:02] Open the money block with this table up and do not rush it.\n\nSay plainly that these sensitivities are indicative and typical, not measured at your station. Every unit has its own numbers and the OEM heat balance is where they live. What is not indicative is the shape of the table: the two largest single items are excess O₂ and unburnt carbon, and both are influenced by an operator on every shift.\n\nPoint at the supercritical column and make the comparison explicit. A 660 MW supercritical unit is less sensitive in kcal/kWh terms simply because its base heat rate is lower — but the same percentage loss on a bigger machine is more coal.\n\nAsk the room directly: which of these eight does your station measure well enough to act on today, and which do you only ever see in the monthly performance report? The honest answer for most stations is two or three.\n\nLand it on the stat card. One kcal/kWh held for a year is fourteen to forty-four lakh rupees depending on unit size. Across the thirteen groups, the June 2026 net heat-rate gap was fifty-six crore rupees in a single month. This table is the anatomy of that number.",
-   "n": 71
+   "n": 72
   },
   {
    "layout": "bignumber-compare",
@@ -2732,7 +2766,7 @@
    },
    "punch": "A monthly report tells you that you lost the money. An online loss account tells you where it went, and who is still in a position to stop it.",
    "notes": "[15:02–15:04] Two minutes. This is the bridge from the sensitivity table to everything that follows.\n\nThe left panel is not a criticism of the performance engineer. The monthly report is a correct calculation of a dead month. Say it that way — the arithmetic is right, the timing makes it useless for control.\n\nExplain expected heat rate in one sentence: the same idea as the residual from this morning, applied to the whole unit instead of one bearing. Given load, coal, ambient and cooling water temperature, the unit should be at a certain heat rate. It is at another. The difference is the only number worth managing.\n\nThe attribution is the part that changes behaviour. A gap of fifty kcal/kWh means nothing to a shift engineer. Fifty kcal/kWh of which twenty-three is auxiliary power, eleven is back pressure and nine is excess air — that is four separate conversations with four different people, and three of them can act before the shift ends.\n\nAsk the room: how long after a heat-rate excursion does your station currently find out? Let the answer sit before moving on.",
-   "n": 72
+   "n": 73
   },
   {
    "layout": "two-col-list",
@@ -2760,7 +2794,7 @@
    ],
    "punch": "Vendors sell the left column. Your commissioning engineer has to build the right one — and the right one decides whether the benefit still exists in year two.",
    "notes": "[15:04–15:06] Two minutes, and give the right column more of them than the left.\n\nThe left column is genuinely unremarkable engineering: a model fitted to your own data, a search over a handful of manipulated variables, a bias written to the DCS. Say the word bias carefully — it moves an existing setpoint within a bound. It does not take over the control loop and it does not touch a protection.\n\nThe right column is where these projects live or die. Read the availability line aloud and dwell on it: if the optimiser is in service forty per cent of the time, the benefit reported in the contract is a benefit nobody received. Ask the room whether anyone has an advanced control application on their unit that is currently switched off. There will be hands, and there always are.\n\nThe honest line to say: every one of the right-hand items is unglamorous, none of it appears in the sales presentation, and all of it is your responsibility to specify before the purchase order goes out.\n\nSet up the next slide by asking what the optimiser is optimising for. Nobody ever asks.",
-   "n": 73
+   "n": 74
   },
   {
    "layout": "cards",
@@ -2788,7 +2822,7 @@
    ],
    "punch": "The weights in that objective function are a management decision, not a technical one. Somebody senior has to sign what a milligram of NOx is worth in kcal/kWh.",
    "notes": "[15:06–15:08] Two minutes, and make this the slide they argue about.\n\nWalk the four cards quickly, then stop on the punch line and stay there. Every combustion optimiser contains a weighted sum. Somebody chose those weights. In almost every installation that somebody was a commissioning engineer under time pressure, working alone, and nobody in the station has looked at the numbers since.\n\nPut the question to the room in its uncomfortable form: what is one milligram per normal cubic metre of NOx worth to MAHAGENCO in kcal/kWh? Nobody can answer it, and that is exactly the point. It is a policy question about emission compliance margin against fuel cost, and it belongs to management, not to the algorithm.\n\nSay the consequence plainly. If you do not choose the weights, the vendor chooses them for you, and the machine will then optimise faithfully towards somebody else's priorities for the next ten years.\n\nThen hand over to the lab. Tell them they are about to move those weights themselves and watch the recommended operating point slide along the frontier in front of them.",
-   "n": 74
+   "n": 75
   },
   {
    "layout": "lab",
@@ -2816,7 +2850,7 @@
     "why": "Combustion optimisation is a trade-off surface, not a single best answer. Clamps and rate limits are not paperwork — they are the engineering that makes an optimiser safe enough to leave in service."
    },
    "notes": "[15:08–15:20] [LAB] Twelve minutes. Get them into SIM-6 quickly and read the five moves aloud before anyone touches a slider.\n\nFrame it in one sentence: a response-surface model of a boiler with a weighted-sum optimiser on top of it, running in the browser. Same structure as a real combustion optimiser, smaller.\n\nThe first two moves are the teaching. When the NOx weight goes to maximum the recommended operating point moves and the heat-rate gain falls. Nothing has broken. The optimiser is doing exactly what it was told. Stop the room after step two and ask somebody to read out both numbers — the NOx figure and the kcal/kWh they gave up to get it.\n\nMoves four and five are the safety lesson and they land physically. With clamps removed the optimiser proposes an operating point that is arithmetically optimal and operationally unacceptable. It has no concept of a mill, a burner or a tube. It only has the objective function you gave it.\n\nWalk the room. Reconvene at fifteen twenty sharp and ask two people what weights they settled on and why they would defend them.",
-   "n": 75
+   "n": 76
   },
   {
    "layout": "two-col-list",
@@ -2844,7 +2878,7 @@
    ],
    "punch": "A 10 mmHg improvement in back pressure is worth an indicative 8 to 12 kcal/kWh on a subcritical unit. Nothing else on the station is that cheap.",
    "notes": "[15:20–15:22] Two minutes, straight out of the lab and into the most neglected loss on the plant.\n\nThe left column is a diagnosis that most stations never make. Fouling and air ingress both show as poor vacuum and are treated the same way — with a vacuum complaint in the log. They are different faults with different fixes, and the two of them separate cleanly on terminal temperature difference against cooling water rise. Say that this discrimination needs no new instrument, only the arithmetic done continuously on tags you already historise.\n\nThe right column is deliberately practical. Point at the wet bulb line. Back pressure judged against a fixed design figure will look bad every May and good every January, and neither reading tells you anything. Judged against what is achievable at today's wet bulb, it tells you whether you have a problem.\n\nAsk the room: who computes cleanliness factor more often than once a month? Very few hands.\n\nLand the punch. Eight to twelve kcal/kWh for ten millimetres of mercury, indicative, and most of it recoverable with cleaning and a pump schedule rather than capital.",
-   "n": 76
+   "n": 77
   },
   {
    "layout": "cards",
@@ -2880,7 +2914,7 @@
    ],
    "punch": "Chandrapur 3-7 at 11.69 % against a norm of 8.67 %. Parli 6-7 at 12.41 % against 9.30 %. Nashik at 12.96 % against 10.75 %. None of that is a plant defect.",
    "notes": "[15:22–15:24] Two minutes. This is the second-largest controllable loss in the company and the one with the least engineering attention on it.\n\nMake the framing explicit before the cards: auxiliary power is not principally an efficiency problem, it is a combinatorial scheduling problem. At any load there are many valid combinations of mills, fans, pumps and fields. They are not equally expensive. Operations picks a valid one, because that is the job, and a valid one is not the cheapest one.\n\nRead the punch line slowly. Three stations, three gaps of two to three percentage points, sustained over a month. Then say the consequence: 81.5 MU above norm across the fleet in June alone, worth 32.9 crore rupees at each station's own variable charge. That is roughly the annual output of a small unit, consumed behind the gate.\n\nAsk the room: at your station, who decides the CW pump combination on a hot afternoon, and against what document? The answer is almost always a person and a habit, not a calculation.\n\nThen hand straight over to SIM-3, where they will do that calculation themselves.",
-   "n": 77
+   "n": 78
   },
   {
    "layout": "lab",
@@ -2909,7 +2943,7 @@
     "why": "Auxiliary power is a combinatorial scheduling problem, and a computer solves it better than habit does. The 81.5 MU the fleet burned above norm in June 2026 is largely made of exactly these choices."
    },
    "notes": "[15:24–15:34] [LAB] Ten minutes. Insist on step one — their own station's load and cooling water temperature, not the default. The whole value of this module is that the answer is about their unit.\n\nStep two matters as much. Make them enter the configuration they think is running right now, from memory. That is the comparison the module exists to make.\n\nThe teaching moment is step five. Push the cooling water inlet to thirty-eight degrees and the optimum pump count changes. Say aloud what that means: a pump schedule fixed at commissioning is correct on exactly one day of the year, and wrong by some margin on the other three hundred and sixty-four.\n\nStep six is deliberately humbling and takes the sting out of the message. Some engineers will match the optimiser once. Nobody matches it repeatedly across load, ambient and equipment availability. That is not a comment on the engineer. It is a comment on how many combinations there are.\n\nWalk the room and collect two or three rupee figures. Reconvene at fifteen thirty-four and read the best and the worst aloud.",
-   "n": 78
+   "n": 79
   },
   {
    "layout": "flow",
@@ -2972,7 +3006,7 @@
    },
    "punch": "A soft sensor never beats the laboratory it learned from. It interpolates between laboratory results — which is exactly what you need between them.",
    "notes": "[15:30–15:33] The time-alignment box is the one engineers underestimate. A lab result describes coal sampled at a point in the chain, and the coal actually in the furnace at that moment left the bunker hours earlier. Getting that lag wrong destroys the model, and no algorithm recovers from it.\n\nStress 'Deploy with limits'. When the model is asked about an operating point outside anything in its training set, it will still return a number, confidently. A deployed soft sensor must say 'outside my range' instead.\n\nThe feedback arrow is the real-world killer. June 2026 shows imported coal at 4,624 to 4,709 kcal/kg blended with domestic at around 3,000. A model trained on one blend will mislead on another.\n\nHand over to SIM-4 if time allows, or point them to it for the evening.",
-   "n": 79
+   "n": 80
   },
   {
    "layout": "process",
@@ -3004,7 +3038,7 @@
    ],
    "punch": "Timer-based blowing wastes steam on clean surfaces and leaves the dirty ones alone. Both cost heat rate, and one of them also costs tube life.",
    "notes": "[15:34–15:35] One minute. This is a short slide and it should feel like an obvious idea that nobody has implemented.\n\nStart with the current practice: soot blowers on a fixed sequence and a fixed interval, because that is what was commissioned. The furnace does not foul on a timetable. It fouls according to coal, load, ash chemistry and how the mills happen to be running.\n\nThe first step is the one that surprises people, so say it directly: no new instrument is required. Surface effectiveness is computed from gas and steam side temperatures and flows that are already on the DCS. It is arithmetic done continuously, not hardware.\n\nStep four is the one to leave them with. If a blower operates and recovers no heat, that is not a fouling result, it is a defect report — a stuck lance, a blocked nozzle or a starved header. The system finds mechanical faults as a by-product of doing its main job.\n\nOne line to close: less steam consumed, less erosion, cleaner surfaces where it matters. Then move on quickly.",
-   "n": 80
+   "n": 81
   },
   {
    "layout": "cards",
@@ -3032,7 +3066,7 @@
    ],
    "punch": "Coal is the largest line in the bill, and it is also the one number in the plant that almost nobody knows while it is being burnt.",
    "notes": "[15:35–15:37] Two minutes. This slide connects the performance block to the fuel bill.\n\nOpen with the spread. As-fired gross calorific value across our own thirteen groups runs from 2,733 kcal per kilogram at Khaperkheda 5 to 3,270 at Parli 8. That is one company, one procurement function, and a twenty per cent spread in the energy content of the fuel.\n\nExplain the soft sensor in plant language: it is not a laboratory replacement, it is a laboratory extension. It learns the relationship between what the boiler is doing and what the laboratory later reports, then predicts the laboratory result continuously. Its error must be reported honestly and it will be, in the lab module.\n\nThe transit loss card carries the hardest number. Between loading and unloading, GCV falls by 619 to 941 kcal per kilogram. Some of that is sampling method and some of it is real. Nobody currently separates the two, and the separation is worth doing rake by rake before it is argued about in a contract meeting.\n\nAsk: at your station, how many hours old is the GCV figure the operator is working to?",
-   "n": 81
+   "n": 82
   },
   {
    "layout": "mockup",
@@ -3077,7 +3111,7 @@
    },
    "punch": "Advisory means the operator decides. Closed-loop means the system acts within limits you set. Know which one you are buying.",
    "notes": "[15:37–15:39] Two minutes. This is the whole block on one screen.\n\nThe top three rows are Chandrapur 8-9's own June 2026 figures: net heat rate 2,425 against 2,375 normative, gross 2,258 against 2,232, auxiliary 6.90 per cent against a 6.00 per cent norm. Do the decomposition aloud — about twenty-seven kcal/kWh of the fifty is boiler and turbine, about twenty-three is auxiliary power. Say clearly that the split below that line is illustrative of how the screen would present it, not an audited attribution.\n\nThen walk the structure, because the structure is the lesson. A deviation with both numbers. Contributors ranked, each with kcal/kWh against it. One specific action, not a list. A rupee figure for actioning it — eight kcal/kWh on this unit's June generation at its own cost of heat is about twenty-seven lakh rupees a month.\n\nAsk the room whether they would act on this screen. Then read the punch line twice. Advisory and closed-loop are two different purchases with two different safety cases, and vendors routinely blur them in the same presentation.",
-   "n": 82
+   "n": 83
   },
   {
    "layout": "cards",
@@ -3105,7 +3139,7 @@
    ],
    "punch": "₹56 crore of net heat-rate gap and ₹33 crore of excess auxiliary power in a single month. Both are addressable with data this company already owns.",
    "notes": "[15:39–15:40] One minute, then the break. Do not introduce anything new.\n\nThe point of this slide is that there is no fleet answer. Read the first two cards against each other. Nashik's gross heat rate is seventeen kcal/kWh better than its normative figure — the boiler and turbine are doing their job and the entire fifty kcal/kWh penalty is auxiliary consumption at 12.96 per cent against a 10.75 per cent norm. Koradi 8-10 is the mirror image, with a 176 kcal/kWh gross gap on nearly 965 MU of generation.\n\nSay the consequence: if Nashik buys a combustion optimiser it will have bought the wrong thing, and if Koradi 8-10 starts with pump scheduling it will have started in the wrong place. The decomposition costs nothing and it comes first.\n\nEnd on the Monday card, because it is the only one that requires action from them. One unit, one month, one loss account. Everything in this block was built on exactly that.\n\nGive them the exact time to return, and finish early.",
-   "n": 83
+   "n": 84
   },
   {
    "layout": "section",
@@ -3125,7 +3159,7 @@
    "mins": "33 minutes",
    "lab": "SIM-7 and SIM-8",
    "notes": "[15:55] Section divider. Say the session title, name the two or three things they will be able to do at the end of it, and if there is a lab in this session, say so now so laptops are open. Ten to fifteen seconds — do not talk over a divider.",
-   "n": 84
+   "n": 85
   },
   {
    "layout": "bignumber-compare",
@@ -3145,7 +3179,7 @@
    },
    "punch": "A brilliant assistant and a terrible authority. Treat every unsourced answer as a draft written by somebody who has never seen your plant.",
    "notes": "[15:50–15:52] Two minutes, and get the mental model right before anything else in this block.\n\nExplain next-token prediction with a plant sentence. Start 'the boiler feed pump discharge pressure is' and the model will complete it with something entirely plausible. It is completing a pattern, not consulting a record. Everything else it appears to do is that operation, repeated at scale.\n\nThen the honest part, which this audience will respect. There is no database inside it. When it produces a clause number, a setting or a torque value it is completing a pattern that looks like a clause number. Sometimes that pattern happens to be correct. It has no way of knowing which.\n\nAsk the room whether anyone has caught one of these tools inventing something. Usually a few hands, usually with a good story. Let one person tell it.\n\nLand the punch. Brilliant assistant, terrible authority. The rest of this block is entirely about how to keep the assistant and remove the authority — and the answer is not a better model, it is your own documents.",
-   "n": 85
+   "n": 86
   },
   {
    "layout": "cards",
@@ -3181,7 +3215,7 @@
    ],
    "punch": "None of this is a data problem. All of it is a language problem — and language is the one thing this technology is genuinely good at.",
    "notes": "[15:52–15:53] One minute. Move briskly; this slide only has to be recognised, not taught.\n\nRead the cards as a description of their own working day rather than as a list. The test question to put to the room: at two in the morning, with a unit tripped, how long does it take to find the current version of the relevant operating instruction and the last time this same trip happened? Nobody says minutes.\n\nThe RCA card is the one to stop on. Those documents are the most expensive knowledge the station produces — a committee, weeks of work, the truth about a real failure — and they are read once. A failure repeats at another station three years later and nobody knows the report exists.\n\nThe tacit knowledge card lands by itself in this room. Do not over-explain it.\n\nLand the punch. Every item on this slide is text written by engineers for engineers. That is precisely the material this technology handles well, and it is why the generative AI conversation for a power station starts with documents and not with chatbots.",
-   "n": 86
+   "n": 87
   },
   {
    "layout": "table",
@@ -3219,7 +3253,7 @@
    },
    "punch": "Fine-tuning teaches a model how to speak. Retrieval teaches it what is true today. Your revision-control problem is a retrieval problem.",
    "notes": "[15:53–15:55] Two minutes. This is the slide that will save somebody a wasted procurement.\n\nWork across the third column, because it decides everything. With prompting, the knowledge lasts one question. With retrieval, a revised SOP is live the moment it is re-indexed. With fine-tuning, the knowledge is baked into the weights and the only way to change it is to retrain and re-validate.\n\nThen say the sentence they need to carry into a vendor meeting: a power station's documents change constantly — revisions, circulars, modified settings, new trip reports every month. Any approach that requires retraining to reflect a revision is structurally wrong for us, regardless of how impressive the demonstration was.\n\nBe fair to fine-tuning so it does not sound like prejudice. It is genuinely useful for making a model write in a house style or produce a fixed report format. It is not a way to teach it facts that change.\n\nAsk whether anyone has been offered a fine-tuned model trained on their manuals. If yes, the follow-up question is: what happens when the manual is revised?",
-   "n": 87
+   "n": 88
   },
   {
    "layout": "process",
@@ -3251,7 +3285,7 @@
    ],
    "punch": "An answer you cannot trace is an answer you cannot use. The citation is not decoration — it is the entire control.",
    "notes": "[15:55–15:56] One minute, delivered crisply. The four steps are the whole architecture.\n\nThe order is the point, so say it as a sentence: search first, then answer. A plain chatbot answers from memory. A retrieval system finds the passage first and then writes an answer constrained to it. That single reordering is the difference between a novelty and an engineering tool.\n\nStep four contains the instruction that matters most, and it is worth reading aloud: say that you do not know when the passages do not contain the answer. A model that admits ignorance is far more useful than one that always produces something, and that behaviour is configured, not hoped for.\n\nMake the honest caveat now rather than later. Retrieval reduces invention sharply. It does not eliminate it, which is why the citation exists — so an engineer can open the source and check in thirty seconds.\n\nLand the punch and move straight on. An answer you cannot trace is an answer you cannot use, whatever it says and however well it reads.",
-   "n": 88
+   "n": 89
   },
   {
    "layout": "cards",
@@ -3279,7 +3313,7 @@
    ],
    "punch": "Ninety per cent of the engineering in a plant retrieval system is metadata and version control. The model is the easy part.",
    "notes": "[15:56–15:57] One minute. This is the slide that separates people who have built one of these from people who have watched a demonstration.\n\nGo straight to the fourth card and tell it as an incident, because it is the failure everybody eventually meets. An engineer asks about the Unit 4 boiler feed pump. The system retrieves a passage from the Unit 3 manual, because the two documents read almost identically. It answers fluently and cites its source correctly. Every part of the machinery worked. The answer is wrong for that machine, and the citation makes it look more trustworthy, not less.\n\nSay the diagnosis plainly: nothing about the model caused that. It was a missing tag.\n\nThe revision card is the same failure in a different dress, and it is the one that carries safety weight. A superseded procedure retrieves just as well as the current one unless status is on the passage.\n\nLand the punch. When somebody in this company scopes a retrieval project, the effort is in the filing, the tagging and the version control — and that work is done by engineers who know the documents, not by data scientists.",
-   "n": 89
+   "n": 90
   },
   {
    "layout": "lab",
@@ -3307,7 +3341,7 @@
     "why": "The difference between an ungrounded chatbot answer and a retrieval-grounded answer with citations is not a matter of degree. One can be checked in thirty seconds. The other cannot be checked at all."
    },
    "notes": "[15:57–16:07] [LAB] Ten minutes. Read the five moves aloud before they start, and insist on the order in step one — passages first, answer second.\n\nFrame the module honestly: this is real TF-IDF retrieval with cosine similarity over an indexed plant corpus, running in the browser. The retrieval is genuine. The answer generation is simulated so that the module works offline, and the contrast it demonstrates is exactly the one you meet in a real system.\n\nStep three is the moment that lands. Grounded off, the same question produces a fluent, confident, structured answer with no source — and something in it is invented. Stop the room there and ask somebody to read both answers aloud, one after the other. Most people cannot tell which is which from the writing alone. That is the entire lesson.\n\nStep four is the practical one engineers appreciate. Meaning-based search is poor at exact strings, which is why real systems run keyword and semantic search together.\n\nWalk the room. Reconvene at sixteen zero seven and ask what they had to check in the ungrounded answer to catch the invention.",
-   "n": 90
+   "n": 91
   },
   {
    "layout": "flow",
@@ -3380,7 +3414,7 @@
    },
    "punch": "The language model appears in exactly one box, at the very end. Everything that determines whether the answer is trustworthy happens before it.",
    "notes": "[16:05–16:09] This is the most important diagram of the afternoon. It is the answer to 'but it makes things up'.\n\nWalk the top lane and stop at 'Attach metadata'. This is where the Unit 4 versus Unit 3 failure is prevented, and it is the step every rushed implementation skips.\n\nWalk the bottom lane. At 'Hybrid search', explain why pure semantic search fails on tag numbers and equipment codes — the very things engineers actually search for. At 'Answer with citations', make the point that the model is constrained to the retrieved passages and told to say so when they do not contain the answer.\n\nThe punch line is the takeaway: the language model is one box out of 10. Buying a better model does not fix a bad index.\n\nHand over to SIM-7, where they can watch the retrieval happen before the answer appears.",
-   "n": 91
+   "n": 92
   },
   {
    "layout": "cards",
@@ -3424,7 +3458,7 @@
    ],
    "punch": "Every one of these produces a draft for an engineer to check. None of them produces a decision. That distinction is the whole safety case.",
    "notes": "[16:07–16:08] One minute. Do not read all eight — point at three and let them read the rest.\n\nPick the three with the strongest pull for this room. Shift handover, because everybody does it and everybody does it under time pressure. Precedent search across the fleet, because five stations have almost certainly each solved the same failure separately and none of them know it. And the work-order taxonomy, because it is the one that turns text into numbers, and it is the bridge to the next slide.\n\nThe Marathi and English card deserves a sentence of its own. Safety communication that is only understood by people who read English is not safety communication, and translation is something this technology does genuinely well.\n\nAsk the room to pick one card each, silently, that would save them time this week. Then say the constraint out loud, twice if necessary: every one of these produces a draft. An engineer reads it, corrects it and signs it. Nothing here writes to a plant system, nothing here closes a work order, and nothing here decides anything.",
-   "n": 92
+   "n": 93
   },
   {
    "layout": "bignumber-compare",
@@ -3444,7 +3478,7 @@
    },
    "punch": "Structuring that history is a language problem, not a reliability problem. Solve the language problem and the reliability analysis becomes ordinary engineering.",
    "notes": "[16:08–16:09] One minute, and make it the slide that justifies the whole block to a sceptic.\n\nState the position without softening it. Khaperkheda 1-4 at 57.85 per cent availability, the lowest in the fleet. Chandrapur 3-7 at 64.88 per cent. Between them, 45.69 crore rupees of the cumulative fixed-charge disallowance — 21.75 and 23.94 respectively.\n\nThen ask the question everyone assumes has an answer: what are the top five causes, ranked by hours lost, at Khaperkheda 1-4 over the last three years? Nobody in this company can produce that ranking today. Not because the data is missing — it is all there — but because it is in free text written by dozens of people who each described the same failure differently.\n\nSay the reframing clearly, because it is the point of the slide. That is not a reliability engineering problem. It is a text classification problem, and it is exactly what this technology does well. Structure the history and the Pareto chart follows in an afternoon.\n\nOne line to close: we are not short of failure data. We are short of countable failure data.",
-   "n": 93
+   "n": 94
   },
   {
    "layout": "process",
@@ -3476,7 +3510,7 @@
    ],
    "punch": "A chatbot answers. A script follows a fixed path. An agent chooses the path — which is precisely why it must stop at a human gate before anything is actioned.",
    "notes": "[16:09–16:10] One minute. Define the word properly, because it is the most abused term in this year's sales material.\n\nUse the three-way contrast in the punch line as your structure. A chatbot answers from what it was given. A script follows a path an engineer wrote in advance, and does the same thing every time. An agent is given a goal and a set of tools and works out the order of calls for itself.\n\nMake the loop concrete with the case they are about to run. The goal is to find out why Unit 8 ID fan vibration is rising. The agent pulls the trend first, sees it climbing, then looks up the defect history for that fan, then finds the last inspection report. If the trend had been flat, its second call would have been different. Nobody wrote that branch.\n\nThen state the consequence honestly. The flexibility that makes an agent useful is the same property that makes its behaviour impossible to fully test in advance. Which is why step four is not a feature to be configured away — it is the reason the thing is deployable at all.",
-   "n": 94
+   "n": 95
   },
   {
    "layout": "table",
@@ -3520,7 +3554,7 @@
    },
    "punch": "Read-only is safe. Write-capable — a report generator that files the report, a tool that raises the work order or moves a setpoint — is a permission, not a convenience, and it needs a human at the gate every single time.",
    "notes": "[16:10–16:11] One minute. This is the engineering answer to 'is an agent safe', and it is not about the model at all.\n\nMake the principle explicit before the table: the agent's blast radius is defined entirely by the tools you give it, not by how clever or careful it is. A model with four read-only tools cannot do harm to plant no matter what it concludes. The same model with one write-capable tool can.\n\nWalk the fourth column, which is the design reasoning. Each tool is deliberately narrow. The historian tool cannot write. The CMMS tool can read defect history but cannot raise or close a work order. The performance tool computes and holds no credentials.\n\nThen take the punch line slowly, because it names the fifth tool everybody wants. A report generator that drafts is read-only. A report generator that files the report is write-capable, and that is a different safety case entirely — as is anything that raises a work order or moves a setpoint.\n\nOne closing line: specify the access level of every tool in the contract, in writing, before the first demonstration impresses anybody.",
-   "n": 95
+   "n": 96
   },
   {
    "layout": "lab",
@@ -3548,7 +3582,7 @@
     "why": "An agent is a planner that calls tools. The visible trace is what makes it reviewable and the human approval gate is what makes it deployable. Neither of the two is optional."
    },
    "notes": "[16:11–16:21] [LAB] Ten minutes, the last lab of the day. Insist on step one — one call at a time, nobody presses run-all. The value is entirely in watching the plan form.\n\nStep two is the teaching. Reading the reasoning before the result forces them to judge the agent as they would judge a junior engineer: was that the right thing to look at next? Sometimes it is not, and noticing that is the skill they are meant to leave with.\n\nStep three is the one to stop the room on. Make everybody actually decide — approve or refuse — and then ask two people which way they went and why. There is no correct answer. There is only a named engineer who owns the decision, which is the entire point of the gate.\n\nStep four should feel uncomfortable and it is meant to. Read the warning aloud once the room has seen it. Granting write access converts an advisory trace into an instruction that reaches a real system, and it is a decision for a committee, not for a checkbox.\n\nReconvene at sixteen twenty-one. Two slides left, and both matter.",
-   "n": 96
+   "n": 97
   },
   {
    "layout": "flow",
@@ -3611,7 +3645,7 @@
    },
    "punch": "The loop is what makes it an agent. The gate is what makes it acceptable in a power station.",
    "notes": "[16:16–16:19] Contrast this with a script. A script has a fixed sequence somebody wrote. An agent decides its next call based on what the last one returned — that is the entire difference, and it is what makes it useful for triage, where you cannot know in advance which question matters.\n\nPoint at 'Act' and note the words 'read-only credentials'. Every tool in the loop reads. Nothing in the loop writes.\n\nPoint at the gate. Say plainly: 'This box is not a formality and it is not removable. The agent can compress half a day of investigation into ninety seconds and lay out its evidence. It does not make the decision.'\n\nThe logging arrow matters for a public-sector utility — if an action is questioned six months later, every step is reconstructable.\n\nHand over to SIM-8, which is this diagram executed one step at a time.",
-   "n": 97
+   "n": 98
   },
   {
    "layout": "warn",
@@ -3643,7 +3677,7 @@
    ],
    "never": "Never use a language model for: protection settings · clearance and permit decisions · safety-critical procedure changes · statutory returns without verification · anything reaching the plant without an engineer's signature",
    "notes": "[16:21–16:23] Two minutes, and read the band at the bottom slowly. This is the slide that decides whether the room trusts everything else in the block.\n\nTake the arithmetic card seriously, because it surprises people who assume a computer can add. The model predicts text. A heat rate that looks right and is wrong by forty kcal/kWh reads exactly like a heat rate that is correct. Any number must come from a calculation tool and be checked by an engineer.\n\nPrompt injection needs the concrete version. Someone scans a circular. Inside it is a line of text addressed to the model rather than to a reader. The model follows it, because it cannot distinguish an instruction from content. Harmless in an advisory system, serious in an agent with write access — which is another argument for the gate.\n\nThe confidentiality card is a policy point, not a technical one. Protection settings and tender documents pasted into a public service have left the company, and no privacy statement changes that.\n\nRead the never line aloud, word by word. Nothing in this course goes near a protection setting or a permit decision. Nothing reaches the plant without an engineer's signature.",
-   "n": 98
+   "n": 99
   },
   {
    "layout": "cards",
@@ -3671,7 +3705,7 @@
    ],
    "punch": "Retrieval over your own documents is the cheapest, safest and fastest-returning AI project available to this company — and it begins with a filing exercise, not a model.",
    "notes": "[16:23–16:25] Two minutes to close the block. Nothing new, and finish on time.\n\nTake the four cards as instructions rather than suggestions. The first one prevents the commonest failure, which is starting with every document the station owns and producing a system nobody trusts. One package, current documents, version controlled.\n\nThe second card is the honest one. The work is filing and tagging, and it is done by engineers who know which document supersedes which. Say clearly that this is not a data science task and never has been.\n\nThe third card is the one to press hardest, because it is how they hold a vendor to account. Twenty questions with known answers, from their own documents. Count how many come back correctly cited. That count is the acceptance test, and it costs nothing to run.\n\nThe fourth card connects back to the availability numbers. One unit, one year of work orders, classified. The output is a ranked list of what actually stops your machines — and Khaperkheda 1-4 at 57.85 per cent availability is waiting for exactly that list.\n\nThen hand over for the closing session.",
-   "n": 99
+   "n": 100
   },
   {
    "layout": "section",
@@ -3691,7 +3725,7 @@
    "mins": "12 minutes",
    "lab": null,
    "notes": "[16:28] Section divider. Say the session title, name the two or three things they will be able to do at the end of it, and if there is a lab in this session, say so now so laptops are open. Ten to fifteen seconds — do not talk over a divider.",
-   "n": 100
+   "n": 101
   },
   {
    "layout": "cards",
@@ -3727,7 +3761,7 @@
    ],
    "punch": "Monitor zones and equipment, not individuals. Behaviour monitoring raises privacy and industrial-relations issues that will sink the programme before it delivers anything.",
    "notes": "[16:25–16:28] Three minutes, six cards, and one boundary that decides whether the programme lives.\n\nMove quickly through the first five. Thermal on electrical plant is the easiest win in this block — a loose busduct joint shows as heat weeks before it fails, and most stations already own a thermal camera and use it once a quarter. Fixed thermal on the same assets, trended, is a different proposition altogether.\n\nCoal stockpile spontaneous combustion deserves a sentence: thermal sees a hot spot developing inside the pile before anyone smells it.\n\nConveyors and CHP are where the money sits at most stations, because a belt tear stops coal to the bunkers and everything downstream follows.\n\nOn drones, say the DGCA point plainly, because somebody will ask. Permissions are a real constraint, not a formality.\n\nThen stop on card six and say it slowly. Monitor zones and equipment. Do not monitor individual behaviour. The moment a camera project is seen as watching workers rather than watching plant, it acquires a privacy and industrial-relations problem that will sink it, and rightly so.",
-   "n": 101
+   "n": 102
   },
   {
    "layout": "two-col-list",
@@ -3755,7 +3789,7 @@
    ],
    "punch": "A model trained at one station will not transfer to another without re-labelling. Transfer learning shortens that work; it does not remove it.",
    "notes": "[16:28–16:30] Two minutes. This is the reality check that keeps them out of a bad procurement.\n\nSay the headline first: a vision model is not clever software you install. It is a model somebody trained on labelled pictures of your plant, and the labelling is the project.\n\nWork down the left column briefly. Several hundred to a few thousand labelled images, marked by somebody who knows what a healthy idler looks like. Examples of the fault, which are rare by definition. A camera that stays exactly where it was when the images were taken. Consistent lighting, or thermal instead of lighting. And somebody whose job includes cleaning the lens.\n\nThe right column is what goes wrong in procurement. Land the transfer point hard, because it decides the fleet strategy. A model trained at one station will not work at the next without re-labelling — different camera, different angle, different lighting, different equipment.\n\nAsk the room who has been shown a demonstration claiming ninety-nine per cent accuracy. Then ask on whose images it was measured. The answer is never yours.",
-   "n": 102
+   "n": 103
   },
   {
    "layout": "cards",
@@ -3783,7 +3817,7 @@
    ],
    "punch": "The acoustic signal tells you something is leaking. The mass balance tells you how much. Neither on its own justifies pulling a unit off bars.",
    "notes": "[16:30–16:33] Three minutes on the sense we use least and should use most.\n\nBoiler tube leak detection by acoustic emission is the strongest item in this block. Sensors on the waterwall and the second pass hear a leak as a rise in high-frequency energy, often days before the unit trips. That is the difference between a planned shutdown and a forced outage, and forced outages are what produced the hundred crore rupees of fixed-charge disallowance we looked at this afternoon.\n\nCard two is the engineering discipline. An acoustic signal on its own moves people to argue. Pair it with a data-driven makeup water mass balance and you have two independent indications pointing the same way. That combination justifies a decision to pull a unit; neither alone does.\n\nSteam and air leak surveys with ultrasonic detectors are cheap and unglamorous. Compressed air leaks are pure auxiliary power, and they sit inside the auxiliary number from session four.\n\nAcoustic pyrometry is the interesting one — sound across the furnace where no thermocouple survives. Flag it as emerging, and tell them we rate it honestly on the next slide.",
-   "n": 103
+   "n": 104
   },
   {
    "layout": "maturity",
@@ -3830,7 +3864,7 @@
    ],
    "punch": "Buy Proven. Pilot Emerging. Read about Experimental — and be suspicious of anyone selling it to you today.",
    "notes": "[16:33–16:36] Three minutes, and this is the slide they should photograph.\n\nTell them what the table is for: it is a filter to apply to every vendor presentation they will attend for the next two years. Read the right-hand column before the left.\n\nThe top three can be bought today with a straight face. Acoustic tube-leak detection with a mass-balance cross-check. Thermal analytics on electrical plant. Drone and crawler inspection, subject to DGCA permissions. Note carefully that thermal is proven while general video analytics is younger — the distinction matters when a vendor sells both on one slide.\n\nThe middle two are pilots. Acoustic pyrometry has few installations in India. The digital twin is a genuine idea — a calibrated hybrid of physics and data kept live against the running unit — but it is the engineering effort to sustain it that people underestimate.\n\nThe bottom two: agentic assistants are experimental and the human approval gate is not optional. Reinforcement learning for unit control learns by making mistakes, and a live unit is not a place where mistakes are permitted.\n\nLand the punch and pause on the last clause.",
-   "n": 104
+   "n": 105
   },
   {
    "layout": "cards",
@@ -3857,7 +3891,7 @@
     ]
    ],
    "notes": "[16:36–16:38] Two minutes to close the block. Do not add new material.\n\nCard one is the cost correction. Every station in this room can afford cameras. What they must budget for is labelling, mounting, lighting, cleaning and a weekly review of wrong detections through the first months. That is where vision projects die, and it never appears on the quotation.\n\nCard two repeats the transfer point deliberately. If the company decides to roll something out to a second station, budget for re-labelling. A programme that assumes free replication will fail at site two, and site two failing is what gets the whole thing stopped.\n\nCard three is non-negotiable and worth saying aloud one more time: zones and equipment, never individuals.\n\nCard four gives them something to do rather than something to admire. If a station wants to start with this block, there are two defensible starts, both with clear failure modes and both producing a number an engineer can verify by walking to the plant.\n\nThen hand over: everything today only works if it is implemented responsibly, and that is the last twenty minutes.",
-   "n": 105,
+   "n": 106,
    "punch": "Buy Proven. Pilot Emerging. Read about Experimental — and ask any vendor which one they are selling."
   },
   {
@@ -3878,7 +3912,7 @@
    "mins": "20 minutes",
    "lab": null,
    "notes": "[16:40] Section divider. Say the session title, name the two or three things they will be able to do at the end of it, and if there is a lab in this session, say so now so laptops are open. Ten to fifteen seconds — do not talk over a divider.",
-   "n": 106
+   "n": 107
   },
   {
    "layout": "two-col-list",
@@ -3906,7 +3940,7 @@
    ],
    "punch": "Most plant AI projects fail on the asset hierarchy, not on the algorithm.",
    "notes": "[16:38–16:41] Three minutes. This is rule one, so say why it comes first.\n\nLeft column, and be concrete. Historian compression is the one nobody expects: compression and exception deviation settings are chosen to save disk, and they discard precisely the small excursions a model needs. A frozen transmitter reads a flat, plausible number for months and every model downstream believes it. Calibration drift gets learned as normal. And timestamps that differ between DCS and historian will show cause arriving after effect, which no algorithm can repair.\n\nRight column is what a competent station does. Audit the tag list before the first model. Validate every output against first-principles engineering — if the model says the condenser is fouling, the terminal temperature difference should agree. Name an owner for the tag list, because a department is not an owner.\n\nThen land the punch and mean it. Most plant AI projects fail on the asset hierarchy, not on the mathematics. Three systems, three different names for the same pump, and nobody authorised to reconcile them.\n\nAsk the room directly: does your station have one agreed asset hierarchy today?",
-   "n": 107
+   "n": 108
   },
   {
    "layout": "boundary",
@@ -3954,7 +3988,7 @@
     ]
    ],
    "notes": "[16:41–16:44] Three minutes, and this is the most important slide in the deck. Slow down and read the red layer aloud exactly as written.\n\nProtection systems, trip logic, interlocks and any safety instrumented function. No model, no advisory, no exception. If a vendor proposes anything that touches these, the conversation is over.\n\nThe amber layer is where closed-loop optimisation lives. It is legitimate, but only with clamps on the bias, rate limits on how fast it may move, a watchdog that returns control on loss of signal, bumpless transfer, an operator override on the panel and a documented approval. Say clearly that the clamps are the engineering — the model is the easy part.\n\nThe green layer is where every station in this room should start. Advisories, anomaly alerts, performance advisories, knowledge assistants. Validate them, then let the engineer decide.\n\nOn cyber, spend your remaining time on OEM remote access. At most stations it is the largest single OT risk and it belongs to nobody.\n\nFinish on the AI-specific card. Prompt injection hidden inside a document an assistant reads is new, and most of this room has not heard of it.",
-   "n": 108
+   "n": 109
   },
   {
    "layout": "cards",
@@ -3982,7 +4016,7 @@
    ],
    "punch": "Under-trust is visible and recoverable. Over-trust is invisible until the day the model is wrong — and that is the day it matters.",
    "notes": "[16:44–16:46] Two minutes on the human side, and it matters more than it looks.\n\nCard one is the heart of it. There are two ways trust fails. Under-trust is when nobody opens the alerts and the system quietly dies — embarrassing, visible, and recoverable. Over-trust is when the operator stops thinking because the screen is usually right. Say plainly which is more dangerous: the second, because the failure stays invisible until the day the model is wrong.\n\nAlert fatigue is how most systems are killed in the first fortnight. Twenty alerts, three of them useful, and the credibility is spent. Trust is spent once.\n\nWorkflow fit gets designed last and should be designed first. If the output does not appear where the engineer already works, it does not exist.\n\nAccountability closes it. The engineer decides. Record what the system said, what the engineer decided and why — particularly when the two differ, because that record is what protects the engineer afterwards.\n\nAsk the room: who here has stopped reading an alarm list because it cried wolf? Every hand goes up.",
-   "n": 109
+   "n": 110
   },
   {
    "layout": "cards",
@@ -4017,7 +4051,7 @@
     ]
    ],
    "notes": "[16:46–16:48] Two minutes. This is the slide the station head and the IT head need, so tell them to photograph it.\n\nThe usage policy should be one page. Permitted uses, prohibited uses, and who approves an exception.\n\nData classification is the practical one. Everybody in this room has a phone with a public AI assistant on it. The organisation has to say explicitly what may never be pasted into it — tender documents, protection settings, personnel records, anything commercially confidential. If nobody says it, people will guess, and they will guess generously.\n\nVerification is the discipline that keeps all of this defensible. Any AI-produced figure that leaves the station is checked by a named engineer against source data before it reaches a report or a regulatory filing.\n\nRecord keeping matters more in a state utility than in a private one, because decisions are examined years later.\n\nThe DPDP Act applies wherever personal data is involved. That is a legal obligation, not a preference.\n\nRead the six procurement questions aloud. They are worth more in a vendor meeting than any technical evaluation form.",
-   "n": 110
+   "n": 111
   },
   {
    "layout": "flow",
@@ -4080,7 +4114,7 @@
    },
    "punch": "A model is a piece of plant. It degrades, it needs overhauling, and it needs an owner. Budget for it or lose it.",
    "notes": "[16:46–16:49] This is where programmes die, eighteen months after the launch photograph.\n\nThe fourth box of the top lane is the one nobody instruments: is anyone acting on the alerts? Usage telemetry — how many alerts were opened, how many led to an action — tells you whether the system is alive long before the benefit numbers do.\n\nThe feedback arrow is the single most actionable line on the slide. Adding 'retrain the affected models' to the outage checklist costs nothing and prevents the most common post-overhaul failure, where the machine is now a different machine and the model has not been told.\n\nEnd on the punch. Treat the model like plant. It has an owner, a maintenance interval and a failure mode. Anything else and it becomes shelfware with a licence fee attached.",
-   "n": 111
+   "n": 112
   },
   {
    "layout": "fails",
@@ -4124,7 +4158,7 @@
    ],
    "punch": "Every one of these is an organisational failure, not a technical one — which is good news, because you control all of them.",
    "notes": "[16:48–16:51] Three minutes, and lead with the punch rather than saving it.\n\nNot one of these eight is a mathematics problem. Every one is organisational, and every one sits inside the control of the people in this room. That is genuinely good news and it should be said that way.\n\nRow one is the most common. A programme that starts with 'we should do something with AI' has no way of knowing whether it succeeded. Write the problem and its rupee value first — and after this afternoon, every station here can.\n\nRow three kills more programmes than any technical fault. A pilot with no decision date runs until the sponsor changes and then quietly stops. Fix the date and name the person who decides.\n\nRow four turns a success into an argument. If the baseline is agreed after the result is known, finance will not accept the benefit, and they will be right to refuse.\n\nRow seven is the temptation immediately after a good pilot. One machine, one owner, one proven result, then replicate.\n\nAsk each station to pick the row most likely to happen to them.",
-   "n": 112
+   "n": 113
   },
   {
    "layout": "econ",
@@ -4175,7 +4209,7 @@
    "statLabel": "a defensible first-year heat-rate target at 15 to 25 per cent realisation of the June 2026 gap",
    "punch": "These are the values of closing the gap entirely. No programme does that, and a business case built on full closure will not survive the finance department.",
    "notes": "[16:51–16:53] Two minutes, and this slide is what keeps the business case honest.\n\nStart with the evidence, which they have already seen this afternoon. Fifty-six point three five crore rupees a month is the net heat-rate gap across the thirteen thermal groups. Thirty-two point nine crore of auxiliary excess is a component of that gap, not an addition to it — say this twice, because adding the two is the most common error in presentations of this kind and finance will spot it immediately. One hundred point eight seven crore is the cumulative fixed-charge disallowance for availability shortfall, of which thirty-two point nine three crore was adjusted in the June bill.\n\nThen take the honest step. Apply a realisation assumption of fifteen to twenty-five per cent. That gives roughly eight and a half to fourteen crore a month on heat rate, and roughly one hundred to one hundred and seventy crore across a year if June is a typical month.\n\nLand the punch without softening it. These figures are the value of closing the gap entirely. No programme does that, and no credible one claims to.",
-   "n": 113,
+   "n": 114,
    "basis": "Values are the full gap against MERC normative performance for June 2026. No programme closes a gap entirely — apply a realisation assumption before putting any of this in a business case."
   },
   {
@@ -4249,7 +4283,7 @@
     ]
    ],
    "notes": "[16:53–16:56] Three minutes. This is the slide that turns a training day into a project.\n\nRead the seven criteria across the top quickly, then say which matters most: data already historised. Everything else can be arranged. Twelve months of history cannot be created retrospectively.\n\nWork down the candidates. Boiler feed pump or ID fan anomaly detection is the strongest first choice for almost every station here — high value, low risk, no process interference, and the data already exists. Mill health is a close second, because mills hurt availability and heat rate at the same time. Auxiliary power optimisation has one great advantage: the benefit shows on the meter, so nobody argues about the measurement.\n\nThe document assistant carries no process risk at all, so it can run in parallel with the main pilot.\n\nThen be blunt about the last row. Closed-loop combustion optimisation is high value and high risk. It is a station's third or fourth project, never its first, and a vendor proposing it as a first project is telling you something about themselves.\n\nWalk the ninety-day plan and stress the named owner in each phase.",
-   "n": 114
+   "n": 115
   },
   {
    "layout": "table",
@@ -4293,7 +4327,7 @@
    },
    "punch": "Four stations, four different problems, four different first pilots. There is no fleet-wide answer, and anyone selling one has not read your numbers.",
    "notes": "[16:56–16:58] Two minutes. Four stations, four different answers, every one from their own June 2026 figures.\n\nNashik first, because it is the cleanest illustration in the fleet. The gross heat rate is seventeen kilocalories per kilowatt hour better than normative. The boiler and turbine are performing well. The entire fifty kilocalorie net penalty is auxiliary consumption at twelve point nine six per cent against a norm of ten point seven five. A combustion optimisation project at Nashik would be effort in the wrong place.\n\nKoradi 8-10 is the opposite case. A one hundred and seventy-six kilocalorie gross gap on nine hundred and sixty-five million units. That is a boiler and turbine problem, and it is the largest single item in the fleet.\n\nKhaperkheda 1-4 is availability — fifty-seven point eight five per cent, and twenty-one point seven five crore rupees of disallowance. That is a predictive maintenance problem.\n\nChandrapur 3-7 is auxiliary power at eleven point six nine against eight point six seven, with secondary oil at three point two three millilitres per kilowatt hour against a norm of one.\n\nSay it plainly: there is no fleet-wide first pilot.",
-   "n": 115
+   "n": 116
   },
   {
    "layout": "cards",
@@ -4329,7 +4363,7 @@
    ],
    "punch": "None of these six needs a sanction, a vendor or a budget. They need one hour and one engineer who decides to ask.",
    "notes": "[16:58–17:00] Two minutes to close, and finish on time. Say the framing sentence first: every one of these six is free, takes under an hour, and needs nobody's approval.\n\nCard one is the most useful telephone call any of them will make this week. How many tags are historised, and at what compression and exception deviation setting? Most engineers have never asked, and the answer is often uncomfortable.\n\nCard two is the question from ten o'clock this morning: one machine that has hurt you twice in two years.\n\nCard three follows directly. Does twelve months of clean history exist for it? If not, that is the project, and it is a C and I project rather than an AI project.\n\nCard four is the honest test of readiness. If an alert arrived at two in the morning, who opens it? If there is no name, there is no programme yet.\n\nCard five makes the economics theirs rather than mine.\n\nCard six sends them back to the lab with the file they now own. Thank them, and stop.",
-   "n": 116
+   "n": 117
   },
   {
    "layout": "close",
@@ -4347,7 +4381,7 @@
    ],
    "closing": "The mathematics is the easy part. The data, the ownership and the follow-through are the job.",
    "notes": "[16:57–17:00] Close on the four verbs — they are the spine of the day.\n\nRun through the six Monday actions. Every one is free, takes under an hour, and requires no approval from anybody. That is deliberate: the worst outcome of a full day like this is that everyone agrees it was interesting and nothing happens.\n\nRemind them what they are taking away: this deck, the course material with the full handout and the lab guide, and the simulation lab file itself, which runs offline and can be re-run on their own station's data.\n\nFinal line, delivered plainly: 'The mathematics is the easy part. The data, the ownership and the follow-through are the job.'\n\nThank the online stations by name — Koradi, Khaperkheda, Bhusawal, Paras — and open the floor. The FAQ section of the course material covers the twelve questions this audience most often asks.",
-   "n": 117
+   "n": 118
   }
  ]
 }

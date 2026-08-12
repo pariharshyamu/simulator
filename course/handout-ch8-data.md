@@ -132,6 +132,10 @@ Every group in the fleet is above its norm; not one is below. Thirteen out of th
 
 ### 8.3 The decomposition that changes the conversation
 
+![Net heat-rate gap decomposed for Nashik and Koradi 8-10](figures/fig-8-decomposition.svg)
+
+*Figure 8.1 — The same question, opposite answers. The two effects overlap by construction, so the two crore figures must never be added.*
+
 #### 8.3.1 The derivation, in full
 
 Net heat rate is the number MERC uses and the number the F10 sheet reports. It is also a composite of two independent problems, and reporting only the composite is why performance meetings go round in circles.

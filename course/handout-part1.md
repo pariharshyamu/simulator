@@ -115,16 +115,11 @@ and computes, every minute:
 
 > **residual = actual − expected**
 
-At 165 MW, 32 °C ambient and 33 °C cooling water, the model expects 74 °C and the bearing reads 78 °C. The **absolute value is nowhere near any alarm** — 12 °C below it, and nobody will look. But the residual is **+4 °C, it was zero six weeks ago, and it has grown steadily.** Something is either removing heat less effectively or generating heat that was not there. Deciding which — lubrication, cooler fouling, an incipient bearing defect, instrument drift — is engineering work, not AI work. But you now know six weeks early that there is something to diagnose.
+The alarm asks *"is this value beyond a constant?"*. The residual asks *"is this value what it should be, given everything else the machine is telling me right now?"* Those are different questions, and only the second one has a useful answer at part load, in winter, or while something is slowly drifting.
 
-| | Fixed alarm | Residual model |
-|---|---|---|
-| Question answered | "Is the value beyond a constant?" | "Is the value what it should be, given everything else?" |
-| At part load | Poor — a value abnormal at 120 MW is far below the alarm | Good — the expectation moves with load |
-| In winter | Poor — the alarm is set for summer | Good — the expectation moves with ambient |
-| Gradual drift | Not detected | Detected; this is what it is for |
-| Change in relationship between two signals | Not detected | Detected |
-| History required | None — works from day one | Needs a period of known-good history |
+When the residual goes positive and stays positive, something is either removing heat less effectively or generating heat that was not there. Deciding which — lubrication, cooler fouling, an incipient bearing defect, instrument drift — is engineering work, not AI work. The model's entire contribution is to tell you, early, that there is something to diagnose.
+
+> **How early, and how much below the alarm?** Chapter 2.2 walks this exact bearing through a real degradation week by week, with the numbers. Read it before you decide what this is worth.
 
 This is not new to you. It is exactly what the performance engineer does comparing actual condenser back pressure against the expected value from CW inlet temperature and load using OEM correction curves. AI-based monitoring is that idea applied to **several hundred tags at once**, with the expectation learned from your own plant rather than a datasheet, updated every minute rather than every month. The rest is engineering.
 
@@ -157,18 +152,18 @@ The model acts, receives reward or penalty, and learns a policy. Be careful: thi
 | Unsupervised | Healthy operating history only | Anomaly detection, condition monitoring, mode discovery | Proven |
 | Reinforcement | A simulator or plant model, plus a reward definition | Combustion and soot-blowing optimisation | Emerging |
 
-### 1.5 AI-based monitoring versus the DCS alarm you already have
+### 1.5 Where this layer sits: advisory, not protection
 
-| Aspect | Conventional DCS alarm | AI-based monitoring |
+Chapter 2 compares detection timing in detail — when each technique fires, and how much warning it buys. There is one distinction that belongs here instead, because it decides how the whole thing is engineered rather than how well it performs.
+
+| | Conventional DCS alarm and protection | AI-based monitoring |
 |---|---|---|
-| **Basis** | Single tag against a fixed, conservatively chosen constant | Many tags against a learned expectation that moves with load, ambient and operating mode |
-| **When it triggers** | When the value crosses the threshold — i.e. when the condition is already severe | When the relationship between signals changes, well before any absolute limit is approached |
-| **Typical lead time** | Minutes to hours; often alarm and failure are near-simultaneous | Days to weeks for degradation; hours for fast faults (indicative, strongly equipment-dependent) |
-| **False alarms** | Very high in aggregate — most control rooms live with hundreds of standing and nuisance alarms | Must be engineered down; a small number per model per month, and this single factor decides whether the system is used |
-| **What it tells you** | That a number crossed a line | That a group of signals no longer behaves as it used to, which signal contributes most, and how long it has been developing |
-| **What it cannot do** | Cannot see gradual degradation, cannot account for load or ambient, cannot see a fault in the relationship between two normal-looking signals | Cannot diagnose root cause, cannot act on a failure mode absent from training history, cannot work on tags not instrumented or not historised, cannot replace protection |
-| **Response requirement** | Milliseconds — it is part of control and protection | Minutes are fine — it is an advisory layer, deliberately outside the protection path |
-| **If it is wrong** | Potentially a spurious trip | An engineer wastes an hour. **This asymmetry is why AI belongs outside protection** |
+| **Response requirement** | Milliseconds. It is part of control and protection, and it must act whether or not anyone is looking | Minutes are fine. It is an advisory layer, deliberately outside the protection path |
+| **What happens if it is wrong** | A spurious trip. Lost generation, a thermal cycle on the machine, and a report to write | An engineer wastes an hour |
+
+**That asymmetry is the entire argument for where AI belongs.** A protection system must be conservative because the cost of a false positive is a trip and the cost of a false negative is a wrecked machine. An advisory layer can afford to be sensitive, because the worst case is a wasted inspection. Push AI into the protection path and you inherit the protection system's risk budget, which means you must detune it until it detects nothing useful.
+
+So: AI-based monitoring does not replace your alarms, your interlocks or your protection. It sits alongside them, sees things they were never designed to see, and hands the result to a human. Chapter 7 returns to this as a hard rule with a defined boundary.
 
 ### 1.6 What AI is NOT
 
@@ -208,6 +203,10 @@ The model acts, receives reward or penalty, and learns a policy. Be careful: thi
 ## Chapter 2 — From Conventional Monitoring to Intelligent Monitoring
 
 ### 2.1 The P–F curve, in language for this plant
+![The P–F interval and where each detection technique sits along it](figures/fig-2-1-pf-curve.svg)
+
+*Figure 2.1 — Every technique detects somewhere along the P–F interval. You do not choose the interval; you choose how much of it you use.*
+
 
 Consider any component that degrades rather than failing instantaneously. At some point **P (potential failure)** it ceases to be healthy — a micro-crack in a race, a film of deposit, a loosening bolt — and at that moment **no conventional parameter has changed measurably**. Degradation then grows and becomes detectable, first by sensitive techniques and finally by crude ones. At **F (functional failure)** the component can no longer do its job.
 
@@ -226,7 +225,28 @@ Two conclusions. The fixed alarm sits at the far right **by design**; criticisin
 
 ### 2.2 Why a fixed threshold is structurally late — a worked ID fan bearing example
 
-All figures **indicative**, typical of a 210 MW ID fan. DCS high alarm 90 °C, high-high 95 °C. Learned expectation at 165 MW, 32 °C ambient, 33 °C CW: 74 °C.
+This is the bearing from 1.3, followed through an actual degradation. The concept there was one subtraction; here is what that subtraction is worth in weeks.
+
+First, the comparison the rest of this chapter rests on:
+
+| | Fixed alarm | Residual model |
+|---|---|---|
+| Question answered | "Is the value beyond a constant?" | "Is the value what it should be, given everything else?" |
+| Basis | One tag against a conservatively chosen constant | Many tags against an expectation that moves with load, ambient and operating mode |
+| At part load | Poor — a value abnormal at 120 MW is far below the alarm | Good — the expectation moves with load |
+| In winter | Poor — the alarm is set for summer | Good — the expectation moves with ambient |
+| Gradual drift | Not detected | Detected; this is what it is for |
+| Change in the relationship between two signals | Not detected | Detected |
+| What it tells you | That a number crossed a line | Which signals no longer behave as they used to, by how much, and for how long |
+| False alarms | Very high in aggregate — most control rooms live with hundreds of standing and nuisance alarms | Must be engineered down; see 2.5, which decides whether any of this survives |
+| History required | None — works from day one | Needs a period of known-good history |
+
+
+![Measured bearing temperature climbing away from a flat model expectation](figures/fig-2-2-residual.svg)
+
+*Figure 2.2 — The expected line stays flat because load and ambient have already been removed. The whole story is the widening gap, not the rising line: the residual reaches +4 °C in week 5, when the measured value is still 12 °C below the alarm.*
+
+All figures below are **indicative**, typical of a 210 MW ID fan. DCS high alarm 90 °C, high-high 95 °C. Learned expectation at 165 MW, 32 °C ambient, 33 °C CW: 74 °C.
 
 **Week 0.** Healthy. Actual 74 °C, expected 74 °C, residual 0. Nothing anywhere.
 

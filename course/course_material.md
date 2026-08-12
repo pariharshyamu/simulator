@@ -196,16 +196,11 @@ and computes, every minute:
 
 > **residual = actual − expected**
 
-At 165 MW, 32 °C ambient and 33 °C cooling water, the model expects 74 °C and the bearing reads 78 °C. The **absolute value is nowhere near any alarm** — 12 °C below it, and nobody will look. But the residual is **+4 °C, it was zero six weeks ago, and it has grown steadily.** Something is either removing heat less effectively or generating heat that was not there. Deciding which — lubrication, cooler fouling, an incipient bearing defect, instrument drift — is engineering work, not AI work. But you now know six weeks early that there is something to diagnose.
+The alarm asks *"is this value beyond a constant?"*. The residual asks *"is this value what it should be, given everything else the machine is telling me right now?"* Those are different questions, and only the second one has a useful answer at part load, in winter, or while something is slowly drifting.
 
-| | Fixed alarm | Residual model |
-|---|---|---|
-| Question answered | "Is the value beyond a constant?" | "Is the value what it should be, given everything else?" |
-| At part load | Poor — a value abnormal at 120 MW is far below the alarm | Good — the expectation moves with load |
-| In winter | Poor — the alarm is set for summer | Good — the expectation moves with ambient |
-| Gradual drift | Not detected | Detected; this is what it is for |
-| Change in relationship between two signals | Not detected | Detected |
-| History required | None — works from day one | Needs a period of known-good history |
+When the residual goes positive and stays positive, something is either removing heat less effectively or generating heat that was not there. Deciding which — lubrication, cooler fouling, an incipient bearing defect, instrument drift — is engineering work, not AI work. The model's entire contribution is to tell you, early, that there is something to diagnose.
+
+> **How early, and how much below the alarm?** Chapter 2.2 walks this exact bearing through a real degradation week by week, with the numbers. Read it before you decide what this is worth.
 
 This is not new to you. It is exactly what the performance engineer does comparing actual condenser back pressure against the expected value from CW inlet temperature and load using OEM correction curves. AI-based monitoring is that idea applied to **several hundred tags at once**, with the expectation learned from your own plant rather than a datasheet, updated every minute rather than every month. The rest is engineering.
 
@@ -238,18 +233,18 @@ The model acts, receives reward or penalty, and learns a policy. Be careful: thi
 | Unsupervised | Healthy operating history only | Anomaly detection, condition monitoring, mode discovery | Proven |
 | Reinforcement | A simulator or plant model, plus a reward definition | Combustion and soot-blowing optimisation | Emerging |
 
-### 1.5 AI-based monitoring versus the DCS alarm you already have
+### 1.5 Where this layer sits: advisory, not protection
 
-| Aspect | Conventional DCS alarm | AI-based monitoring |
+Chapter 2 compares detection timing in detail — when each technique fires, and how much warning it buys. There is one distinction that belongs here instead, because it decides how the whole thing is engineered rather than how well it performs.
+
+| | Conventional DCS alarm and protection | AI-based monitoring |
 |---|---|---|
-| **Basis** | Single tag against a fixed, conservatively chosen constant | Many tags against a learned expectation that moves with load, ambient and operating mode |
-| **When it triggers** | When the value crosses the threshold — i.e. when the condition is already severe | When the relationship between signals changes, well before any absolute limit is approached |
-| **Typical lead time** | Minutes to hours; often alarm and failure are near-simultaneous | Days to weeks for degradation; hours for fast faults (indicative, strongly equipment-dependent) |
-| **False alarms** | Very high in aggregate — most control rooms live with hundreds of standing and nuisance alarms | Must be engineered down; a small number per model per month, and this single factor decides whether the system is used |
-| **What it tells you** | That a number crossed a line | That a group of signals no longer behaves as it used to, which signal contributes most, and how long it has been developing |
-| **What it cannot do** | Cannot see gradual degradation, cannot account for load or ambient, cannot see a fault in the relationship between two normal-looking signals | Cannot diagnose root cause, cannot act on a failure mode absent from training history, cannot work on tags not instrumented or not historised, cannot replace protection |
-| **Response requirement** | Milliseconds — it is part of control and protection | Minutes are fine — it is an advisory layer, deliberately outside the protection path |
-| **If it is wrong** | Potentially a spurious trip | An engineer wastes an hour. **This asymmetry is why AI belongs outside protection** |
+| **Response requirement** | Milliseconds. It is part of control and protection, and it must act whether or not anyone is looking | Minutes are fine. It is an advisory layer, deliberately outside the protection path |
+| **What happens if it is wrong** | A spurious trip. Lost generation, a thermal cycle on the machine, and a report to write | An engineer wastes an hour |
+
+**That asymmetry is the entire argument for where AI belongs.** A protection system must be conservative because the cost of a false positive is a trip and the cost of a false negative is a wrecked machine. An advisory layer can afford to be sensitive, because the worst case is a wasted inspection. Push AI into the protection path and you inherit the protection system's risk budget, which means you must detune it until it detects nothing useful.
+
+So: AI-based monitoring does not replace your alarms, your interlocks or your protection. It sits alongside them, sees things they were never designed to see, and hands the result to a human. Chapter 7 returns to this as a hard rule with a defined boundary.
 
 ### 1.6 What AI is NOT
 
@@ -289,6 +284,10 @@ The model acts, receives reward or penalty, and learns a policy. Be careful: thi
 ## Chapter 2 — From Conventional Monitoring to Intelligent Monitoring
 
 ### 2.1 The P–F curve, in language for this plant
+![The P–F interval and where each detection technique sits along it](figures/fig-2-1-pf-curve.svg)
+
+*Figure 2.1 — Every technique detects somewhere along the P–F interval. You do not choose the interval; you choose how much of it you use.*
+
 
 Consider any component that degrades rather than failing instantaneously. At some point **P (potential failure)** it ceases to be healthy — a micro-crack in a race, a film of deposit, a loosening bolt — and at that moment **no conventional parameter has changed measurably**. Degradation then grows and becomes detectable, first by sensitive techniques and finally by crude ones. At **F (functional failure)** the component can no longer do its job.
 
@@ -307,7 +306,28 @@ Two conclusions. The fixed alarm sits at the far right **by design**; criticisin
 
 ### 2.2 Why a fixed threshold is structurally late — a worked ID fan bearing example
 
-All figures **indicative**, typical of a 210 MW ID fan. DCS high alarm 90 °C, high-high 95 °C. Learned expectation at 165 MW, 32 °C ambient, 33 °C CW: 74 °C.
+This is the bearing from 1.3, followed through an actual degradation. The concept there was one subtraction; here is what that subtraction is worth in weeks.
+
+First, the comparison the rest of this chapter rests on:
+
+| | Fixed alarm | Residual model |
+|---|---|---|
+| Question answered | "Is the value beyond a constant?" | "Is the value what it should be, given everything else?" |
+| Basis | One tag against a conservatively chosen constant | Many tags against an expectation that moves with load, ambient and operating mode |
+| At part load | Poor — a value abnormal at 120 MW is far below the alarm | Good — the expectation moves with load |
+| In winter | Poor — the alarm is set for summer | Good — the expectation moves with ambient |
+| Gradual drift | Not detected | Detected; this is what it is for |
+| Change in the relationship between two signals | Not detected | Detected |
+| What it tells you | That a number crossed a line | Which signals no longer behave as they used to, by how much, and for how long |
+| False alarms | Very high in aggregate — most control rooms live with hundreds of standing and nuisance alarms | Must be engineered down; see 2.5, which decides whether any of this survives |
+| History required | None — works from day one | Needs a period of known-good history |
+
+
+![Measured bearing temperature climbing away from a flat model expectation](figures/fig-2-2-residual.svg)
+
+*Figure 2.2 — The expected line stays flat because load and ambient have already been removed. The whole story is the widening gap, not the rising line: the residual reaches +4 °C in week 5, when the measured value is still 12 °C below the alarm.*
+
+All figures below are **indicative**, typical of a 210 MW ID fan. DCS high alarm 90 °C, high-high 95 °C. Learned expectation at 165 MW, 32 °C ambient, 33 °C CW: 74 °C.
 
 **Week 0.** Healthy. Actual 74 °C, expected 74 °C, residual 0. Nothing anywhere.
 
@@ -1942,6 +1962,10 @@ Every group in the fleet is above its norm; not one is below. Thirteen out of th
 ---
 
 ### 8.3 The decomposition that changes the conversation
+
+![Net heat-rate gap decomposed for Nashik and Koradi 8-10](figures/fig-8-decomposition.svg)
+
+*Figure 8.1 — The same question, opposite answers. The two effects overlap by construction, so the two crore figures must never be added.*
 
 #### 8.3.1 The derivation, in full
 
@@ -4487,9 +4511,86 @@ Build the case instead on the audited, recurring numbers we hold. The cumulative
 
 ---
 
-### 11.5 Reading a vendor claim
+### 11.5 Adani Power — the Indian case, and the difference between capability and benefit
 
-#### 11.5.1 The three questions
+Vistra and Duke are American. This one is not, and it is the nearest neighbour MAHAGENCO has: an Indian thermal fleet on domestic and imported coal, with the same auxiliaries, the same coal variability and the same regulator-facing heat-rate arithmetic. It is also the single most instructive case in this chapter, and not for the reason you would expect.
+
+#### 11.5.1 What was actually deployed
+
+At AVEVA World in Paris in October 2024, Adani Power presented its own operations monitoring programme, with its own screenshots. The scope is not a pilot:
+
+| Element | What they showed |
+|---|---|
+| Platform | AVEVA PI System (formerly OSIsoft PI), cloud-hosted central server, integrated by CereBulb |
+| Scale | **8 thermal locations, 25 units, approximately 150,000 tags** |
+| Operating model | A single Energy Network Operation Centre at Ahmedabad, watching the whole fleet |
+| Sites named | Mundra, Tiroda, Kawai, **Udupi (1,200 MW)**, Raipur, Raigarh, Mahan, Godda |
+| Predecessor | An earlier fleet-wide deployment for deviation settlement and auxiliary power metering, presented in 2023 — Udupi contributing 24 DSM and 175 APC parameters |
+
+Two capabilities are worth describing precisely, because they are things this fleet could build.
+
+**Boiler and turbine efficiency on a rolling window.** Every boiler loss — dry flue gas, unburnt carbon, radiation and the rest — is itemised on screen against **two windows at once: the last 15 minutes and the last 24 hours.** Their live screenshot shows boiler efficiency of 86.72 % on the last 15 minutes against 86.49 % on the last 24 hours, with total losses of 12.51 % and 12.74 %. The turbine screen does the same for heat rate: 1,883 kcal/kWh actual against 1,826 design, on a 15-minute and a daily average, with an explicit validity floor — the 15-minute figures are only shown above 274 MW, and below that the last good values are held.
+
+That last detail is worth more than the headline. Somebody thought about what the number means at low load and decided not to show a figure they could not defend. That is the discipline this course keeps asking for.
+
+**A four-tier Asset Health Index.** Station, then asset class, then equipment, then sensor:
+
+| Tier | What it shows |
+|---|---|
+| Station | One score per plant — Udupi 84 on the dashboard shown |
+| Asset class | Pumps 69 across 16 pumps, fans 71 across 12, mills 77 across 14. Banded: excellent above 95, good 85–95, satisfactory 70–85, **poor below 70** |
+| Equipment | Individual machines — BFP 1A at 87.41, CEP 1A at 98.01, CWP 1A at 76.81 |
+| Sensor | A radar chart per machine. For an ID fan: fan bearing temperature, fan vibration, fan lube oil, **motor bearing temperature, motor winding temperature** |
+
+![Four tiers of an asset health index: station, asset class, equipment, sensor](figures/fig-11-5-health-index.svg)
+
+*Figure 11.5 — The bottom tier is the reason the top tier is trusted. A score you cannot decompose into tags an engineer recognises will be ignored within a month.*
+
+
+Note the bottom tier, because it answers the question this course has been circling since Chapter 2. A health index is not a mystery number. It is a small set of named parameters, each scored, each traceable back to a tag you already have. When the pump index drops from 87 to 69, you can open it and see which of five things moved.
+
+#### 11.5.2 Two corrections to how this case is usually described
+
+**The 15-minute efficiency calculation is not machine learning.** Their own slides say what it is: a **thermodynamic module — enthalpy and entropy in PI Asset Framework** — with coal quality entered through a manual logger. That is a continuously running heat balance. It is a genuinely valuable thing, and it is the sort of thing a competent performance department can specify. But it is the ASME-style loss calculation your performance engineer already knows, running every 15 minutes instead of every month. Calling it AI misdescribes both the achievement and the effort required to copy it.
+
+The AI/ML in that deployment is narrower and honestly labelled: *"Python platform is leveraged for AI/ML integration"*, and *"Python code developed for health score calculation for each parameter of equipment"*. That is the health index. Their roadmap slide then lists genuine predictive analytics — AVEVA PRiSM — as a **future** item, not a deployed one, as of late 2024.
+
+**It is a fleet programme, not a Udupi programme.** Udupi is one of the eight sites and appears as a single station-level score. Every detailed dashboard in the presentation is labelled Raipur or Mundra. Adani Power's own annual report attributes the integrated Asset Health Index to **Raigarh**. Udupi does have real machine learning of its own — a combustion-optimisation model recommending setpoints, a selective soot-blowing tool built on principal component analysis, and a best-mill-combination predictor — but the annual report does not connect any of them to the PI System, and they are a separate line of work.
+
+#### 11.5.3 The part that matters most: there is no published number
+
+Search the vendor presentation, AVEVA's customer-story page and Adani Power's own integrated annual report, and you will not find a single quantified outcome for this programme. No kcal/kWh. No percentage point of availability or PLF. No rupees. The results panel reads: *improved operational efficiency, enhanced availability and reliability, optimised operational costs, reduction in carbon footprint.* The merit-order tool is credited with a *"significant improvement in the overall station heat rate"* — with no figure, no baseline and no period.
+
+Now put that beside what the same annual report **does** quantify. The only two heat-rate improvements given in kilocalories are **Kawai, 3.5 kcal/kWh from replacing air-preheater baskets**, and **Korba, 15 to 18 kcal/kWh from cleaning water boxes.** Mechanical work, measured. The digital programme — asset performance management, the health index, AVEVA PI, the machine-learning tools — is listed with no number attached to any of it.
+
+Everything that is counted is an *input*: 8 locations, 25 units, 150,000 tags, 171 DSM and 2,358 APC parameters. Nothing is counted as an *output*.
+
+#### 11.5.4 How to hold this case
+
+| | Verdict |
+|---|---|
+| Is the deployment real? | **Yes.** Their own slides, their own dated screenshots, corroborated in their statutory annual report and by a named systems integrator |
+| Is the architecture worth copying? | **Yes.** Fleet-wide historian, central operations centre, continuous loss accounting, a traceable health index — every element is within reach for a five-station fleet |
+| Is the 15-minute efficiency AI? | **No.** It is thermodynamics, and their slides say so |
+| Is the benefit documented? | **No.** Nothing, anywhere, from any source |
+| Is anything independently verified? | **No.** The detail comes from a conference presentation co-authored by the integrator and hosted by the software vendor |
+
+**This is a well-documented capability case study and an undocumented benefit case study, and the skill this chapter is trying to build is telling those two apart.** It is not an accusation. It is the normal condition of published evidence in this industry — NTPC's own PI System presentation has precisely the same shape, six qualitative benefit bullets and 144,000 tags. Once you have seen the pattern twice you will see it in every vendor deck you are shown.
+
+If you need an Indian thermal number you can actually put in front of a director, use **NTPC Talcher Kaniha**: station heat rate from 2,700 to 2,614 kcal/kWh over five years, auxiliary power from 6.85 % to 6.14 %, specific oil from 0.65 to 0.28 mL/kWh, about USD 35 million of energy cost saved against USD 0.056 million of implementation cost — verified under ISO 50001, reported under the BEE PAT scheme, and audited by the Comptroller and Auditor General. Even there, note the caveat honestly: it is an energy-management programme in which monitoring is one component, and the savings are not decomposed to say what the digital layer contributed on its own.
+
+#### 11.5.5 What to take from it for this fleet
+
+1. **The 15-minute loss accounting is the copyable idea, and it is not an AI project.** It needs a historian, a heat-balance model and coal quality data. Chapter 4 sizes what it is worth here; Chapter 8 shows which station it should start at.
+2. **A health index must be openable.** Adani's works because the bottom tier is five named tags. Any index you cannot decompose into tags an engineer recognises will be ignored within a month.
+3. **Somebody decided not to display a number below 274 MW.** Copy that instinct.
+4. **Ask every vendor who cites this case for the outcome number.** There is not one. Their answer to that question will tell you more about them than their slides will.
+
+**Sources.** Adani Power Limited, *Advanced Monitoring and Optimization Strategies for Enhancing Efficiency and Reliability*, AVEVA World, Paris, 15 October 2024 (presentation PDF, with dated dashboard screenshots). Adani Power Limited, *Enhancing Power System Efficiency Through Effective Monitoring*, AVEVA World, San Francisco, 26 October 2023. Adani Power Limited, Integrated Annual Report FY2024-25, operational performance section. NTPC Talcher Kaniha figures: ISO 50001 Energy Management System case study, published via the Lawrence Berkeley National Laboratory 50001 Insights repository.
+
+### 11.6 Reading a vendor claim
+
+#### 11.6.1 The three questions
 
 | # | Question | Why it works |
 |---|---|---|
@@ -4499,7 +4600,7 @@ Build the case instead on the audited, recurring numbers we hold. The cumulative
 
 Applied to **GE Vernova** — which claims organisations can reduce heat rate by up to 1 % within 12 months of deploying its performance intelligence software, with anonymous customer examples of which one recovered 10 MW at part load — the answers are: no plant, no baseline, vendor-measured. **This is a vendor claim with no named plant and must be labelled as such.** Grade D — though note that the market's most conservative vendor claim lands on the same number as the only published fleet result, Vistra's 1 %.
 
-#### 11.5.2 The vendor meeting checklist
+#### 11.6.2 The vendor meeting checklist
 
 Take this into the room, and note which questions the supplier cannot answer without checking.
 
@@ -4522,7 +4623,7 @@ Take this into the room, and note which questions the supplier cannot answer wit
 
 Question 14 is the most powerful and least used — a vendor with a real reference will arrange the call. Question 6 catches the most inflated claims, because the commonest way to produce a spectacular pilot is to install software on a badly tuned unit about to be tuned anyway.
 
-#### 11.5.3 The claims in this chapter, classified
+#### 11.6.3 The claims in this chapter, classified
 
 | Claim | Why not higher | Grade |
 |---|---|---|
@@ -4543,9 +4644,9 @@ Four grade B, one grade C, **none grade A.**
 
 ---
 
-### 11.6 What the evidence actually supports
+### 11.7 What the evidence actually supports
 
-#### 11.6.1 The gap between brochure and record
+#### 11.7.1 The gap between brochure and record
 
 | Source of claim | Heat-rate improvement asserted |
 |---|---|
@@ -4556,7 +4657,7 @@ Four grade B, one grade C, **none grade A.**
 
 Consider what 5 to 15 per cent means at Koradi 8-10, whose actual net heat rate is 2,442 kcal/kWh against a MERC norm of 2,230. Ten per cent is 244 kcal/kWh — more than the entire measured 212 kcal/kWh gap, which would put the station 32 kcal/kWh *better than normative*, from software, without touching the air preheater. **The measured gap against the regulator's norm is the ceiling on what any efficiency intervention can deliver, and software gets a fraction of it.**
 
-#### 11.6.2 Why pilots beat fleets — four mechanisms
+#### 11.7.2 Why pilots beat fleets — four mechanisms
 
 The halving is not dishonesty. It is structural, and every mechanism is visible in advance.
 
@@ -4570,13 +4671,13 @@ The halving is not dishonesty. It is structural, and every mechanism is visible 
 
 To which add that **low-hanging fruit is picked once**: the first twelve months clear a stock of accumulated error that does not regenerate.
 
-#### 11.6.3 The number to plan on
+#### 11.7.3 The number to plan on
 
 **Plan on 1 per cent. Measure honestly. Be pleased if you beat it.** Two independent lines converge on it: the only published fleet result in the industry, and the market's most conservative vendor claim.
 
 Three corollaries. **Approve the business case at 1 %** — if it does not survive at 1 % it should not be approved at 5 %. **Establish the counterfactual before switching anything on** — pick a control unit of similar rating on similar coal and freeze the baseline definition in writing, including period, method and correction basis, before the vendor arrives; mechanism 4 is the one we can defeat, and defeating it would make our result grade A. **Measure in the regulatory return, not the vendor dashboard** — the F10 sheet already reports net heat rate against norm monthly for every station, and a benefit visible there is one nobody can argue with.
 
-#### 11.6.4 What 1 per cent is worth across MAHAGENCO's thermal fleet
+#### 11.7.4 What 1 per cent is worth across MAHAGENCO's thermal fleet
 
 **The assumption, stated before the arithmetic.** Cost of heat varies enormously — ₹0.001337 per kcal at Khaperkheda 5 to ₹0.002133 at Nashik, a spread of about 60 % — so there is no single correct figure. What follows uses a **generation-weighted average across the thirteen thermal groups of Table A**, with the sensitivity shown afterwards.
 
@@ -4615,13 +4716,13 @@ The answer is robust: **1 per cent across MAHAGENCO's thermal generation is wort
 
 **Step 10 — set it against the gap we already measure.** The combined net heat-rate gap across the thirteen groups is worth **₹56.35 crore per month**. A 1 % improvement recovers ₹16.90 crore of that on a like-for-like coal basis — **about 30 per cent of the total heat-rate gap value**.
 
-That 30 % is far larger than the 11.5 % for Koradi 8-10, and the reason is instructive: the fleet's generation-weighted gap is about 84 kcal/kWh, Koradi 8-10's is 212. **A fixed percentage improvement recovers a large share of a small gap and a small share of a large one.** Where the gap is large — Koradi 8-10 at 212, Paras 3-4 at 163, Parli 6-7 at 96 — it is telling you about hardware, and no advisory system substitutes for the outage.
+That 30 % is far larger than the 11.6 % for Koradi 8-10, and the reason is instructive: the fleet's generation-weighted gap is about 84 kcal/kWh, Koradi 8-10's is 212. **A fixed percentage improvement recovers a large share of a small gap and a small share of a large one.** Where the gap is large — Koradi 8-10 at 212, Paras 3-4 at 163, Parli 6-7 at 96 — it is telling you about hardware, and no advisory system substitutes for the outage.
 
 Keep it in proportion. ₹17 crore a month is serious, but it is less than a third of the heat-rate gap, and that gap is one of five pain points: auxiliary consumption above norm alone is 81.5 MU and ₹33 crore in a single month. A heat-rate optimiser is not the programme; it is one project inside it.
 
 ---
 
-### 11.7 What none of these organisations bought
+### 11.8 What none of these organisations bought
 
 Lay the cases side by side and ask of each: *what did they actually have to build?*
 
