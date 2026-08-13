@@ -10,3 +10,7 @@ __pycache__/
 *.part
 .DS_Store
 rag-bench/vendor/transformers.min.js
+
+# QA screenshot output — never ship
+dist/th-m*.png
+dist/pdm-*.png

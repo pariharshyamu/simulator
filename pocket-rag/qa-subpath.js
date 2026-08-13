@@ -27,13 +27,14 @@ const CDN_TO_FILE = {
 const MIME = f => f.endsWith('.mjs') ? 'text/javascript' : 'text/javascript';
 
 /* Two documents from this repository, chosen because they break in different
-   ways: a financial PDF that is mostly a table of figures, and a 308-page Word
-   file with real heading levels. Override with PDF= and DOCX= if you want to
-   try your own. */
+   ways: a financial PDF that is mostly a table of figures, and a Word file
+   with real heading levels — the shipped Koradi course material, so the test
+   document is always one that actually exists in dist/. Override with PDF=
+   and DOCX= if you want to try your own. */
 const REPO = path.resolve(__dirname, '..');
 const PDF  = process.env.PDF  || path.join(REPO, 'course', 'fuel_june2026.pdf');
 const DOCX = process.env.DOCX || path.join(REPO, 'dist',
-                                 'AI_in_Power_Plants_MAHAGENCO_Course_Material.docx');
+                                 'AI_in_Power_Plant_Koradi_Course_Material.docx');
 const SHOTS = process.env.SHOTS || require('os').tmpdir();
 
 let failures = 0;

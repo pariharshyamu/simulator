@@ -23,10 +23,13 @@ DIST = os.path.join(ROOT, 'dist')
 FIGS = os.path.join(COURSE, 'figures')
 
 DOCS = [{
-    'src': 'course_material.md',
-    'out': 'AI_in_Power_Plants_MAHAGENCO_Course_Material',
-    'title': 'AI in Power Plants: From Data to Decisions',
-    'subtitle': 'Course material, handouts and delivery script — MAHAGENCO Training Centre, Nashik',
+    # The Koradi participant handbook replaced the Nashik-era downloads in
+    # August 2026. The Nashik markdown remains in course/ as source material;
+    # only this document ships in dist/.
+    'src': 'koradi_course_material.md',
+    'out': 'AI_in_Power_Plant_Koradi_Course_Material',
+    'title': 'AI in Power Plant: From Data to Decisions',
+    'subtitle': 'Participant course material — internal faculty programme, Koradi TPS (3×660 MW) · S. H. Parihar',
 }]
 
 

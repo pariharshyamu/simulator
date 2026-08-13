@@ -1,0 +1,2646 @@
+{
+ "meta": {
+  "title": "AI in Power Plant: From Data to Decisions",
+  "subtitle": "An internal faculty programme on Artificial Intelligence for plant operation and maintenance",
+  "venue": "Koradi Thermal Power Station · 3×660 MW",
+  "mode": "One-day programme · 10:30–17:00 · six hands-on labs on participants' own phones · all artefacts live at pariharshyamu.github.io/simulator",
+  "theme": "MEASURE  ·  EXPECT  ·  COMPARE  ·  DECIDE",
+  "duration": "Full day",
+  "presenter": {
+   "name": "S. H. Parihar",
+   "role": "Assistant Engineer · internal faculty · AI practitioner",
+   "books": [
+    "Lean AI",
+    "Learn the English that AI Understands",
+    "AI for Busy Parents"
+   ],
+   "years": "16 years",
+   "yearsLabel": "in the power sector"
+  }
+ },
+ "slides": [
+  {
+   "layout": "title",
+   "block": "Opening",
+   "time": "10:30",
+   "title": "AI in Power Plant",
+   "subtitle": "From Data to Decisions",
+   "notes": "[10:30–10:32] Welcome the room. Set the tone in thirty seconds: this is not a computer science lecture and there are no vendor slides. Everything shown today runs in the browser on the phones in this room, and every rupee figure comes from our own June 2026 energy bill. Say plainly that the machine data used in the labs is synthetic — built so the true fault day is known exactly — and that the economics wrapped around it are real. The day has one spine: a single bearing reading, followed from the sensor all the way to a signed work order.",
+   "kicker": "An internal faculty programme on Artificial Intelligence for plant operation and maintenance — hands-on, on your own phone",
+   "footer": "Koradi Thermal Power Station · 3×660 MW",
+   "theme": "MEASURE · EXPECT · COMPARE · DECIDE",
+   "n": 1
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "1 · From plant to data",
+   "time": "10:32",
+   "title": "Two numbers to hold all day",
+   "subtitle": "One is a reading nobody can judge alone. The other is what June cost us.",
+   "notes": "[10:32–10:36] Put both numbers up and let them sit. Ask the room: is 74.2 degrees fine or frightening? Someone will say 'depends' — that is the correct answer, and the whole morning is about making 'depends' computable. Then the second number: our own June gross heat-rate gap, from the bill, not from a consultant. The day's question is how the first kind of number learns to protect the second. No war stories today — every claim gets computed live in front of the room, on their phones.",
+   "left": {
+    "label": "ID fan A · DE bearing · one reading",
+    "value": "74.2 °C",
+    "detail": "On its own it means nothing. At 45% load on a January night it is alarming; at full load on a May afternoon it is ordinary. No fixed threshold can tell the difference — context can."
+   },
+   "right": {
+    "label": "Koradi 8–10 · June 2026 gross heat-rate gap",
+    "value": "₹22.87 crore",
+    "detail": "176 kcal/kWh against the norm, in one month, from our own energy bill. Finding where it physically lives is a data problem — the same kind of problem as the bearing."
+   },
+   "punch": "How does the first kind of number learn to protect the second?",
+   "n": 2
+  },
+  {
+   "layout": "agenda",
+   "block": "1 · From plant to data",
+   "time": "10:36",
+   "title": "The day, hour by hour",
+   "subtitle": "Seven blocks, six hands-on labs, and every block ends on a decision",
+   "notes": "[10:36–10:39] Walk the agenda once. Point out the labs — five of them run on the participants' own phones and one is a live demonstration of a model trained by an engineer at this station. State the contract: no block runs past its decision, tea and lunch are protected, and phones stay OUT — they are the lab bench, not a distraction. The card exercise at the end of Block 5 feeds the pilot discussion at 16:40, so ask people to stay through both.",
+   "agenda": [
+    [
+     "1",
+     "From plant to data",
+     "10:30–11:05"
+    ],
+    [
+     "2",
+     "Neural networks, opened up · Theatre lab",
+     "11:05–12:05"
+    ],
+    [
+     "3",
+     "Data synthesis · Model Builder lab",
+     "12:05–13:00"
+    ],
+    [
+     "·",
+     "Lunch — lab URLs stay on screen",
+     "13:00–13:45"
+    ],
+    [
+     "4",
+     "Predictive maintenance · PdM simulator",
+     "13:45–14:50"
+    ],
+    [
+     "·",
+     "Tea",
+     "14:50–15:05"
+    ],
+    [
+     "5",
+     "Efficiency & optimisation · Simulation Lab",
+     "15:05–16:10"
+    ],
+    [
+     "6",
+     "Computer vision · SafetyNet live",
+     "16:10–16:40"
+    ],
+    [
+     "7",
+     "From data to decisions · pilots",
+     "16:40–17:00"
+    ]
+   ],
+   "stat": "6",
+   "statLabel": "hands-on labs — five on your own phone, one live model demo",
+   "n": 3
+  },
+  {
+   "layout": "lab",
+   "block": "1 · From plant to data",
+   "time": "10:39",
+   "title": "Open the toolkit — two minutes, now",
+   "subtitle": "Everything used today lives at one address and runs on your phone",
+   "notes": "[LAB] [10:39–10:42] Put the QR and the URL up and walk the room through opening it. Everything is a static page — no login, no app install, nothing leaves the phone. It installs as an offline app, so once a page has loaded it keeps working even if the hall Wi-Fi drops. Spend the full two minutes shepherding; it saves ten minutes at every later lab. Anyone without a phone pairs with a neighbour — the labs are designed for pairs anyway.",
+   "lab": {
+    "id": "SETUP",
+    "name": "pariharshyamu.github.io/simulator",
+    "mins": 2,
+    "do": [
+     "Scan the QR code or type the address into any phone browser",
+     "Open the landing page and keep the tab for the whole day",
+     "Tap 'Predictive Maintenance Simulator' once so it caches",
+     "Pair up if a phone is short — every lab works in pairs"
+    ],
+    "see": [
+     "A landing page with five artefacts, all free, all offline-capable",
+     "No login and no upload — nothing you do today leaves the phone"
+    ],
+    "why": "Every model in this course trains and runs on the device in your pocket. That fact is itself the first lesson: none of this needs a data centre."
+   },
+   "n": 4
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "1 · From plant to data",
+   "time": "10:42",
+   "title": "The asset you already own",
+   "subtitle": "The historian has been quietly building our dataset for years",
+   "notes": "[10:42–10:47] The point of this slide is ownership. AI in a plant is 80% this asset and 20% algorithm, and the asset is already bought, installed and collecting. Ask the room how many tags they think one machine carries — then multiply out loud: 40 tags, one reading a minute, one year. Nobody needs to buy data; we need to look after the data we make. Flag the caveat for later: what the historian stores is only as good as the scan rates, compression settings and sensor maintenance behind it — Block 4 returns to this.",
+   "left": {
+    "label": "One machine, one year, one-minute scan",
+    "value": "21 million readings",
+    "detail": "About 40 useful tags on a single fan or pump, sampled every minute, is 21 million numbers a year — already in the historian, already paid for."
+   },
+   "right": {
+    "label": "Additional hardware needed to start",
+    "value": "₹0",
+    "detail": "Every lab today runs on tags a 660 MW unit already historises. The first AI project at this station is an export, not a purchase order."
+   },
+   "punch": "The historian is the project. The algorithm is the cheap part.",
+   "n": 5
+  },
+  {
+   "layout": "chart-text",
+   "block": "1 · From plant to data",
+   "time": "10:47",
+   "title": "A year of one bearing, raw",
+   "subtitle": "Synthetic data, real physics — monthly means of the tag as the historian sees it",
+   "notes": "[10:47–10:53] This is the specimen's home. The orange line is the bearing temperature's monthly mean over a synthetic but physically honest year; the blue line is ambient. Note the shape: the bearing follows load and weather up to a May peak, dips with the monsoon, lifts again in October. Ask: where is the fault? Nobody can tell — and there IS one in the second half of this year. A raw tag hides a growing fault inside its own seasonality. Say clearly that the data is synthetic, generated from a physical model with a known fault day, because that is the only way to mark a model's homework honestly.",
+   "chart": {
+    "type": "line",
+    "title": "Monthly mean of the DE bearing tag (°C)",
+    "min": 50,
+    "max": 80,
+    "yTitle": "Bearing temperature (°C)",
+    "categories": [
+     "Jan",
+     "Mar",
+     "May",
+     "Jun",
+     "Jul",
+     "Sep",
+     "Oct",
+     "Dec"
+    ],
+    "series": [
+     {
+      "name": "This fan — fault begins 20 Jul",
+      "values": [
+       56,
+       59,
+       63,
+       61,
+       58,
+       61,
+       66,
+       74
+      ]
+     },
+     {
+      "name": "Healthy twin, same duty",
+      "values": [
+       56,
+       59,
+       63,
+       61,
+       58,
+       58,
+       59,
+       56
+      ]
+     }
+    ]
+   },
+   "items": [
+    "Both fans ride the same seasons — the swing is bigger than an early fault",
+    "Until September the faulted fan is INSIDE the healthy fan's normal year",
+    "A fixed 90 °C alarm sleeps through all of this, then fires near the end",
+    "The whole morning is about seeing the gap between these two lines early"
+   ],
+   "punch": "For two months the faulted fan looks like a warm summer. That gap is the whole subject.",
+   "n": 6
+  },
+  {
+   "layout": "process",
+   "block": "1 · From plant to data",
+   "time": "10:53",
+   "title": "The one idea of the day",
+   "subtitle": "Everything called 'AI' in this course is one subtraction, dressed four ways",
+   "notes": "[10:53–11:00] Slow down here — this is THE slide. Walk the four steps with the bearing: we measured 74.2; the model, given today's load, ambient and cooling water, expected 71.9; the residual is +2.3; and a residual that stays big and positive for days is a machine asking for attention. Say the sentence the day keeps returning to: a flat residual means a healthy machine, whatever the weather is doing. Every algorithm this afternoon — k-NN, networks, PCA — is just a different way of computing step two.",
+   "steps": [
+    [
+     "1",
+     "Measure",
+     "What the sensor reads now: 74.2 °C on the DE bearing."
+    ],
+    [
+     "2",
+     "Expect",
+     "What history says the reading SHOULD be for this load, ambient and cooling-water temperature: 71.9 °C."
+    ],
+    [
+     "3",
+     "Subtract",
+     "Residual = actual − expected = +2.3 °C. The weather and the duty have been removed; what is left is the machine."
+    ],
+    [
+     "4",
+     "Decide",
+     "A residual that stays outside its band for days is evidence. Evidence goes to a person, who decides."
+    ]
+   ],
+   "punch": "Expected − actual = the residual. Flat residual = healthy machine, whatever the weather.",
+   "n": 7
+  },
+  {
+   "layout": "cards",
+   "block": "1 · From plant to data",
+   "time": "11:00",
+   "title": "Block 1 close — the data was already there",
+   "subtitle": "What we now hold, before any algorithm has been mentioned",
+   "notes": "[11:00–11:05] Recap in four tiles and take questions for two minutes. The block ends on its decision: every participant should be able to name tags on their own unit that could feed a model tomorrow — and the honest blockers, which are scan rates, compression and dead sensors, not algorithms. Bridge to Block 2: the next hour opens the machine that computes 'expected', in 3-D, on their phones, and there is no magic in it — they will watch every multiplication.",
+   "cards": [
+    [
+     "The asset",
+     "21 million readings per machine per year, already in the historian, already paid for."
+    ],
+    [
+     "The problem",
+     "Raw tags hide faults inside load and season. Fixed thresholds are structurally late."
+    ],
+    [
+     "The idea",
+     "Expected minus actual. Remove the duty and the weather; what remains is the machine."
+    ],
+    [
+     "The decision",
+     "Which of OUR tags could feed a model tomorrow — and what data hygiene blocks them today?"
+    ]
+   ],
+   "punch": "Next: the machine that computes 'expected' — opened up, in 3-D, on your phone.",
+   "n": 8
+  },
+  {
+   "layout": "cards",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:05",
+   "title": "Six algorithms, one reading",
+   "subtitle": "The Algorithm Anatomy Theatre — the same 74.2 °C fed through six different machines",
+   "notes": "[11:05–11:09] Introduce the Theatre: six animated modules, each opening up one algorithm, all chewing the same bearing reading. Today the room drives two of them live — gradient descent and the neural network. The other four are homework on the same URL. Land the punchline early: different machines, same conclusion, and that agreement is the point. The algorithm is a means; the residual is the finding. Nobody should leave thinking the choice of algorithm is where the intelligence lives.",
+   "cards": [
+    [
+     "M1 · Nearest neighbours",
+     "The residual made geometric: find the 12 most similar past hours, average them. Homework."
+    ],
+    [
+     "M2 · Principal components",
+     "The plane the healthy data lives on, and the distance off it. Homework."
+    ],
+    [
+     "M3 · Gradient descent",
+     "How every model is actually fitted — a ball rolling downhill. LIVE at 11:15."
+    ],
+    [
+     "M4 · A neural network",
+     "163 dials, opened up, trained in your browser. LIVE at 11:30."
+    ],
+    [
+     "M5 · Retrieval",
+     "How a question finds the right page — returns in Block 7."
+    ],
+    [
+     "M6 · k-means",
+     "The operating regimes nobody labelled. Homework."
+    ]
+   ],
+   "punch": "Different machines, same conclusion. The algorithm is a means; the residual is the finding.",
+   "n": 9
+  },
+  {
+   "layout": "bullets-icon",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:09",
+   "title": "Three ways machines learn",
+   "subtitle": "Ninety seconds of vocabulary, in plant language, then never again",
+   "notes": "[11:09–11:11] Do not linger — this is vocabulary, not theory. One plant example each: supervised is 'predict bearing temperature from load and ambient'; unsupervised is 'group this year into operating regimes nobody named'; reinforcement is 'learn a control policy by trial' — and say plainly that reinforcement learning belongs nowhere near a live unit today. Then the last row: nearly everything in this course is supervised learning of an expected value. The vendor word-cloud collapses to one idea.",
+   "items": [
+    [
+     "1",
+     "Supervised",
+     "Learn a mapping from examples with answers: given load, ambient and CW temperature, predict what this bearing should read."
+    ],
+    [
+     "2",
+     "Unsupervised",
+     "Find structure without answers: cluster a year of operation into regimes — start-up, low load, summer full load — nobody labelled."
+    ],
+    [
+     "3",
+     "Reinforcement",
+     "Learn actions by trial and reward. Powerful, and not for live plant — nothing today, and nothing this year, should use it on a unit."
+    ],
+    [
+     "4",
+     "What today uses",
+     "Almost everything in this course is supervised learning of an expected value, plus honest subtraction. Keep the vocabulary that small."
+    ]
+   ],
+   "n": 10
+  },
+  {
+   "layout": "process",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:11",
+   "title": "The simplest model that works",
+   "subtitle": "k-nearest neighbours: the residual, computed by memory instead of mathematics",
+   "notes": "[11:11–11:15] Before any network: the dumbest honest model. To know what the bearing should read now, find the 12 most similar past hours — similar load, similar ambient, similar cooling water — and average what the bearing read then. That average IS the expected value; subtract and you have a residual. No training, no weights, fully explainable: 'you ran like this on these 12 days, and you were cooler then.' Most commercial condition-monitoring products are exactly this with better packaging. Module 1 shows it in 3-D — homework.",
+   "steps": [
+    [
+     "1",
+     "Take now",
+     "This hour's load, ambient and cooling-water temperature — the operating point."
+    ],
+    [
+     "2",
+     "Search history",
+     "Find the 12 most similar healthy hours in the year. Similarity is just distance."
+    ],
+    [
+     "3",
+     "Average them",
+     "What the bearing read on those 12 hours, averaged, is the expected value."
+    ],
+    [
+     "4",
+     "Subtract",
+     "Actual minus expected — the residual again. A lookup table beat the mystique."
+    ]
+   ],
+   "punch": "Most commercial monitoring systems are this slide, well packaged. Keep that as your baseline.",
+   "n": 11
+  },
+  {
+   "layout": "lab",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:15",
+   "title": "Lab — Theatre Module 3 · Gradient descent",
+   "subtitle": "Twelve minutes: fit a model by rolling a ball downhill, and break it yourself",
+   "notes": "[LAB] [11:15–11:27] Hand over to the phones. The loss surface is drawn as terrain: every position is a candidate model, height is how wrong it is, and training is a ball rolling downhill. The one thing everyone must do is break it: push the learning rate up until the ball overshoots the valley and diverges. Seeing divergence beats reading about it. Walk the room; ask people what their smallest reliable step size was. Close with: every model today — including the 163-dial network next — is fitted by exactly this ball.",
+   "lab": {
+    "id": "THEATRE M3",
+    "name": "Gradient descent — how a model is actually fitted",
+    "mins": 12,
+    "do": [
+     "Open the Theatre from the landing page; pick Module 3",
+     "Play the acts: the terrain, the ball, the step size",
+     "Drag the learning rate UP until training visibly diverges",
+     "Find the largest step that still converges — that tension is real"
+    ],
+    "see": [
+     "The loss falling fast, then flattening — the shape of all training",
+     "Too large a step overshooting the valley and climbing the far wall",
+     "The same loss curve you will meet again in the Model Builder"
+    ],
+    "why": "Training is not mystical: it is descent on an error surface. Once you have personally made it diverge, no vendor can hand-wave 'the model learns' past you."
+   },
+   "n": 12
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:27",
+   "title": "What 'training' means, in one line",
+   "subtitle": "The ball, written as algebra — the only equation the day insists on",
+   "notes": "[11:27–11:30] Freeze the lab and put the line up. w is one dial; the gradient is that dial's share of the blame for the current error; eta is the step size they just tuned by hand. Training is this line, applied to every dial, over every training hour, many times. Say it in plant words: turn each dial a little against its share of the blame, repeat until the error stops falling. This exact line reappears in the Model Builder after lunch, printed live with their model's own numbers.",
+   "left": {
+    "label": "The rule",
+    "value": "w ← w − η · ∂L/∂w",
+    "detail": "One dial at a time: move each weight a small step against its own contribution to the error. η is the step size you just tuned by hand in Module 3."
+   },
+   "right": {
+    "label": "In plant words",
+    "value": "Blame, shared out",
+    "detail": "The error at the output is divided among the dials by the chain rule; each dial moves against its share. Repeat over every hour of history until the error stops falling."
+   },
+   "punch": "You will see this exact line again after lunch, running live with your own model's numbers.",
+   "n": 13
+  },
+  {
+   "layout": "lab",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:30",
+   "title": "Lab — Theatre Module 4 · A neural network, opened up",
+   "subtitle": "Fifteen minutes inside 163 dials, trained live in your browser",
+   "notes": "[LAB] [11:30–11:45] The heart of the block. The network is drawn as a solid 3-D object: 8 inputs, two hidden ranks, one output, 146 weights and 17 biases as visible lines — teal adding, red subtracting, bright where large. Run the acts in order: the wiring, eight numbers arriving, the forward pass, the error, the backward pass, then training — watching random noise become structure. Then the instruction that matters: TAP any sphere. The panel opens that neuron's complete arithmetic at the current hour. Ask the room to find a saturated neuron — output pinned near ±1 — and keep it in mind for the next slide.",
+   "lab": {
+    "id": "THEATRE M4",
+    "name": "A neural network, opened up",
+    "mins": 15,
+    "do": [
+     "Open Module 4; run the six acts in order",
+     "Rotate the network — the weights are a solid volume, not a diagram",
+     "TAP any neuron: its weights, its sum, its output appear with live numbers",
+     "Press 'Train from scratch' and watch noise become structure",
+     "Find a neuron whose output is pinned near ±1 — remember it"
+    ],
+    "see": [
+     "146 weights + 17 biases = 163 dials, each one inspectable",
+     "One neuron's full arithmetic: multiply, add, squash — nothing else",
+     "The loss curve falling exactly like Module 3's ball"
+    ],
+    "why": "Nobody who has tapped a neuron and read its multiplication ever again believes a neural network is magic. That inoculation is worth more than any definition."
+   },
+   "n": 14
+  },
+  {
+   "layout": "mockup",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:45",
+   "title": "What you just tapped",
+   "subtitle": "One neuron of the network, exactly as the panel showed it",
+   "notes": "[11:45–11:48] Mirror the phone on the projector so the room and the slide agree. This is neuron 1 of hidden layer 1 at the specimen hour: three of its eight weighted inputs, the bias, the sum, and tanh of the sum. Read it aloud once: multiply, add, squash — that is the entire operation of a neuron, and a 'layer' is seventeen of these in a row. The numbers are the REAL trained weights from the module, not an illustration.",
+   "mockup": {
+    "header": "Theatre M4 · hidden neuron 1 · day 96, 14:00",
+    "rows": [
+     [
+      "Unit load × w",
+      "0.93 × +0.41 = +0.38",
+      "value"
+     ],
+     [
+      "Ambient × w",
+      "0.55 × +0.29 = +0.16",
+      "value"
+     ],
+     [
+      "Motor current × w",
+      "0.95 × +0.29 = +0.28",
+      "value"
+     ],
+     [
+      "… five more inputs",
+      "(each: reading × its own weight)",
+      "info"
+     ],
+     [
+      "+ bias",
+      "−0.34",
+      "info"
+     ],
+     [
+      "z = sum → a = tanh(z)",
+      "z = +1.52  →  a = +0.91",
+      "action"
+     ]
+    ]
+   },
+   "punch": "Multiply, add, squash. A 'layer' is seventeen of these. That is the whole mystery.",
+   "n": 15
+  },
+  {
+   "layout": "process",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:48",
+   "title": "The backward pass, on the same hour",
+   "subtitle": "Where the weights come from — the chain rule, sharing out the blame",
+   "notes": "[11:48–11:53] The forward pass answered; now the error runs backwards. Walk the four steps with the module's own numbers on screen. Then the detail worth a minute: the derivative of tanh is 1 − a². The saturated neuron they found — output pinned at ±1 — has derivative near zero, so its dials barely move however wrong the answer is. It has stopped learning. That is the vanishing gradient, seen on their own phone rather than asserted from a slide.",
+   "steps": [
+    [
+     "1",
+     "Error at the output",
+     "δ = 2(ŷ − y): how wrong, and in which direction, on this hour."
+    ],
+    [
+     "2",
+     "Share the blame",
+     "The chain rule passes δ backwards; each neuron receives exactly its share."
+    ],
+    [
+     "3",
+     "Gradient per dial",
+     "∂L/∂w = δ × input. A dial fed by a big input carries more of the blame."
+    ],
+    [
+     "4",
+     "Update",
+     "w ← w − η·∂L/∂w — Module 3's line, applied 163 times, once per dial."
+    ]
+   ],
+   "punch": "tanh′ = 1 − a². A neuron pinned at ±1 has stopped learning — you found one yourself.",
+   "n": 16
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:53",
+   "title": "Why the bend matters",
+   "subtitle": "Remove every activation and the whole stack collapses",
+   "notes": "[11:53–11:56] The squash is not decoration. A stack of purely linear layers — any depth — multiplies out to ONE linear map: a straight line, however many millions of weights. The bend at each neuron is what lets the network represent a curve. Plant the seed for Block 3: there is a real curve waiting — a lube-oil cooler that runs out of approach above its design cooling-water temperature — and a straight-line model fitted to winter will be confidently wrong about it all summer.",
+   "left": {
+    "label": "Without activations",
+    "value": "One straight line",
+    "detail": "Ten linear layers multiply out to a single linear regression. Depth adds nothing — the stack collapses."
+   },
+   "right": {
+    "label": "With a bend at each neuron",
+    "value": "Any curve",
+    "detail": "Enough bent units approximate any well-behaved relationship — including the cooler knee you will meet after this block."
+   },
+   "punch": "Hold that thought: Block 3 has a real knee, and a straight line will lie about it.",
+   "n": 17
+  },
+  {
+   "layout": "table",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:56",
+   "title": "The first sanity check on any model",
+   "subtitle": "Sensitivity: what the network actually leans on, at the current operating point",
+   "notes": "[11:56–11:59] Module 4 computes this live by running the backward pass one step further, to the inputs: how many degrees the prediction moves per unit of each tag. Load and ambient dominate — exactly as the physics says they should. That agreement is the check. Give the room the rule: on ANY supplied model, ask for this table first, and if the biggest sensitivity is a tag with no physical route to the target, the model has learned a coincidence of the training window and will betray you the first time the coincidence breaks.",
+   "table": {
+    "head": [
+     "Input",
+     "Prediction moves by",
+     "Physical route to bearing temp",
+     "Verdict"
+    ],
+    "rows": [
+     [
+      "Unit load",
+      "largest",
+      "direct — duty heats the bearing",
+      "expected"
+     ],
+     [
+      "Ambient",
+      "second",
+      "direct — cooling air and CW follow it",
+      "expected"
+     ],
+     [
+      "CW inlet temp",
+      "material",
+      "direct — through the oil cooler",
+      "expected"
+     ],
+     [
+      "Hour of day",
+      "near zero",
+      "none — it only correlates with the others",
+      "correctly ignored"
+     ]
+    ]
+   },
+   "punch": "If the biggest sensitivity has no physical route to the target, the model learned a coincidence.",
+   "n": 18
+  },
+  {
+   "layout": "compare",
+   "block": "2 · Neural networks, opened up",
+   "time": "11:59",
+   "title": "What a neural network is — and is not",
+   "subtitle": "The honest datasheet, before anyone gets romantic",
+   "notes": "[11:59–12:02] Read the pairs briskly and let the last row land hard: for one bearing on one fan, a network this size is usually the WRONG tool — k-NN and PCA are simpler, need less data and fail more visibly. Networks earn their keep where the relationship is strongly non-linear and history is long: combustion, mill throughput, load-following steam temperatures. Choosing the smallest model that works is an engineering decision, not a fashion decision — that sentence is the block's takeaway for anyone who ever meets a vendor.",
+   "compare": {
+    "leftTitle": "It is",
+    "rightTitle": "It is not",
+    "rows": [
+     [
+      "A flexible curve-fitter for real non-linearities",
+      "A model of the machine — it contains no physics"
+     ],
+     [
+      "Inspectable — every weight is a number you can print",
+      "'Explainable' the way a manager means the word"
+     ],
+     [
+      "Trainable in seconds on a phone, at this size",
+      "Reliable outside the range of data it saw"
+     ],
+     [
+      "Retrainable after every overhaul",
+      "Immune to contaminated training data"
+     ],
+     [
+      "Right for combustion, mills, steam temperature",
+      "Needed for most single-machine monitoring"
+     ],
+     [
+      "One tool on the shelf",
+      "The point. The residual is the point"
+     ]
+    ]
+   },
+   "punch": "Choose the smallest model that works. That is engineering, not fashion.",
+   "n": 19
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "2 · Neural networks, opened up",
+   "time": "12:02",
+   "title": "The regimes nobody labelled",
+   "subtitle": "Module 6 in one slide — unsupervised learning as an operating-mode detector",
+   "notes": "[12:02–12:04] One breath on k-means, because it returns in Block 4: give the algorithm a year of operation and no labels at all, and it discovers the unit's operating regimes by itself — start-up, low load, summer full load. Why it matters: a single expected-value model straddling all regimes is mediocre in every one of them. Real monitoring systems fit one model per regime, and this is the machine that finds the regimes. Module 6 is homework on the same URL.",
+   "left": {
+    "label": "Labels the algorithm was given",
+    "value": "0",
+    "detail": "k-means sees only the operating data — load, ambient, flows. Nobody tells it what a regime is."
+   },
+   "right": {
+    "label": "Regimes it finds in our synthetic year",
+    "value": "4",
+    "detail": "Start-up, low-load nights, monsoon operation, summer full load — the modes every operator already knows by feel."
+   },
+   "punch": "One model per regime beats one model for everything. Module 6 shows the machine that finds them.",
+   "n": 20
+  },
+  {
+   "layout": "cards",
+   "block": "2 · Neural networks, opened up",
+   "time": "12:04",
+   "title": "Block 2 close — no magic in the box",
+   "subtitle": "What changed in the last hour",
+   "notes": "[12:04–12:05] Thirty seconds, four tiles, then straight into Block 3 — the timing is deliberate, the room is warm. Bridge with the open question: the Theatre's network trained on data somebody prepared for it. Where does training data come from, what makes it honest, and what happens when it is quietly wrong? That is the next hour, and it ends with every person in the room training their own network on their own phone.",
+   "cards": [
+    [
+     "You watched",
+     "Every multiplication of a working neural network — and tapped its neurons open."
+    ],
+    [
+     "You broke",
+     "Gradient descent, personally, by turning the learning rate up until it diverged."
+    ],
+    [
+     "You learned",
+     "Training = descent on an error surface. The bend is why depth helps. Saturation is why it stalls."
+    ],
+    [
+     "Still open",
+     "Where does training data come from — and what happens when it is quietly wrong?"
+    ]
+   ],
+   "punch": "Next: data synthesis, contamination — and a network you build yourself.",
+   "n": 21
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:05",
+   "title": "Why synthetic data at all",
+   "subtitle": "A teaching fault needs a birthday — real historians never confess one",
+   "notes": "[12:05–12:09] Be direct about the method, because honesty here buys trust all day. Real plant data never tells you the true onset day of a fault, so you can never mark a model's homework with it. The labs therefore run on a synthetic year: generated from a physical model, with the fault injected on a KNOWN day. The machine data is synthetic; the economics around it are from our June bill. Synthetic is not fake — it is the only data against which a detection claim can be checked exactly.",
+   "left": {
+    "label": "A real historian export",
+    "value": "No answer key",
+    "detail": "When did the degradation truly begin? Real data never says — so 'we detected it 40 days early' can never be verified against truth."
+   },
+   "right": {
+    "label": "The synthetic year in today's labs",
+    "value": "Onset: day 200",
+    "detail": "Fault injected on a known day, growing by a known law. Every detection claim today is marked against this answer key, in front of you."
+   },
+   "punch": "Synthetic data is not fake data. It is the only data with an answer key.",
+   "n": 22
+  },
+  {
+   "layout": "table",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:09",
+   "title": "How the year is built",
+   "subtitle": "Three context signals, each with the physics that makes winter unlike May",
+   "notes": "[12:09–12:14] Walk the three rows — this generator is worth two minutes because everything after lunch runs on it. Load is mean-reverting around 80% with night and Sunday dips. Ambient is the important one: monthly means that climb to a May peak of 33.5 °C and then DROP when the monsoon arrives — a shape no sine wave can make, and precisely why a model fitted to one season mis-predicts another. Cooling water follows air with about nine days of lag, because a basin has thermal inertia. Noise on top of all of it.",
+   "table": {
+    "head": [
+     "Signal",
+     "How it moves",
+     "Why it matters"
+    ],
+    "rows": [
+     [
+      "Unit load",
+      "Mean-reverts around 80%; nights −13%, Sundays −10%, season ±6%",
+      "Duty is the biggest driver of every temperature on the machine"
+     ],
+     [
+      "Ambient",
+      "Jan 21 °C → May 33.5 °C → monsoon DROP to 25.5 °C — not a sine wave",
+      "The monsoon shape is why winter-trained models fail in May"
+     ],
+     [
+      "Cooling water",
+      "Follows ambient with ~9 days lag — a basin has thermal inertia",
+      "The knee (next slide) hangs off this signal"
+     ],
+     [
+      "Noise",
+      "Gaussian, per sensor, scaled to each instrument",
+      "So nothing is suspiciously smooth"
+     ]
+    ]
+   },
+   "punch": "One sine wave cannot make an Indian year. Neither can a model that never saw one.",
+   "n": 23
+  },
+  {
+   "layout": "chart-text",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:14",
+   "title": "How a fault is injected",
+   "subtitle": "Severity grows by a power law — and the first third produces almost nothing",
+   "notes": "[12:14–12:18] The fault law: severity = ((t − onset)/ttf)^shape. For the fan, onset day 200, 110 days to failure, shape 1.7. Look at the curve's belly: 30 days in, severity is 11%; at half life it is still around a third. The residual it produces (orange) follows the same convexity. This single curve answers every 'why did detection take so long' question for the rest of the day — the early fault is genuinely quiet, and nobody catches by eyeball what has not yet made a signal.",
+   "chart": {
+    "type": "line",
+    "title": "Fault severity and the residual it produces",
+    "min": 0,
+    "max": 100,
+    "yTitle": "% of final · °C",
+    "categories": [
+     "d200",
+     "d215",
+     "d230",
+     "d245",
+     "d260",
+     "d275",
+     "d290",
+     "d305"
+    ],
+    "series": [
+     {
+      "name": "Severity (% of final)",
+      "values": [
+       0,
+       3,
+       11,
+       22,
+       36,
+       52,
+       71,
+       93
+      ]
+     },
+     {
+      "name": "Residual produced (°C)",
+      "values": [
+       0,
+       0.9,
+       3,
+       6,
+       9.7,
+       14,
+       19,
+       25
+      ]
+     }
+    ]
+   },
+   "items": [
+    "Onset day 200 · 110 days to failure · shape 1.7 — the fan case's actual law",
+    "30 days into the fault: 11% severity. Half-life: barely a third",
+    "Degradation is convex — the early fault is genuinely quiet",
+    "Days of warning are therefore cheap early and expensive late"
+   ],
+   "punch": "The first third of a fault produces almost no signal. Remember this at 14:30.",
+   "n": 24
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:18",
+   "title": "The knee — one line of physics",
+   "subtitle": "Why this dataset must be a year long, in a single equation",
+   "notes": "[12:18–12:22] The lube-oil cooler is sized for a design cooling-water temperature of 27.5 °C. Below it, oil temperature tracks ambient almost linearly. Above it the cooler runs out of approach, and the generator adds 1.35 × (CW − 27.5)^1.45 — a knee. Fit a straight line to January and February, when CW sits at 19–22 °C, and it extrapolates confidently into May and is badly wrong, because it never saw the knee exist. This is the bend from Block 2, now with a nameplate on it — and in twenty minutes everyone reproduces the failure personally.",
+   "left": {
+    "label": "Below 27.5 °C cooling water",
+    "value": "Linear",
+    "detail": "Oil outlet tracks ambient almost perfectly. A straight-line model fitted here looks excellent — on winter."
+   },
+   "right": {
+    "label": "Above 27.5 °C",
+    "value": "+1.35·(CW−27.5)^1.45",
+    "detail": "The cooler runs out of approach and oil temperature climbs far faster than the water. Winter models never learned this term exists."
+   },
+   "punch": "Fit winter, extrapolate May, alarm all summer. You will do exactly this, on purpose, in 20 minutes.",
+   "n": 25
+  },
+  {
+   "layout": "table",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:22",
+   "title": "What synthesis cannot teach — real exports are ugly",
+   "subtitle": "The pathologies a real historian file brings, and what each does to a model",
+   "notes": "[12:22–12:26] Balance the picture: the synthetic year is clean, and real exports never are. Show the row of a genuine file — semicolons, decimal commas, an 'I/O Timeout' where a number should be. Each pathology quietly poisons a model in its own way. The Model Builder they are about to open parses exactly this format, on purpose: drop in your own unit's export tomorrow and it will read it, profile it, and tell you which columns are usable before any training happens.",
+   "table": {
+    "head": [
+     "Pathology",
+     "What it looks like",
+     "What it does to a model"
+    ],
+    "rows": [
+     [
+      "Status strings",
+      "'I/O Timeout', 'Bad', 'Shutdown' inside a number column",
+      "Coerced to zero, they teach the model the machine freezes solid"
+     ],
+     [
+      "Decimal commas",
+      "'61,4' meaning 61.4 — plus semicolon separators",
+      "Silently parsed as thousands — every value 10× wrong"
+     ],
+     [
+      "Flatlines",
+      "A sensor frozen at one value for weeks",
+      "The model learns the tag is a constant — and the machine immortal"
+     ],
+     [
+      "Compression",
+      "Historian dead-banding smoothing real variation away",
+      "Noise floor understated; every alert band too tight"
+     ]
+    ]
+   },
+   "punch": "The Builder reads exactly this mess — bring one of OUR exports tomorrow and see what it says.",
+   "n": 26
+  },
+  {
+   "layout": "lab",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:26",
+   "title": "Lab — the Model Builder",
+   "subtitle": "Twenty minutes: build and train a real neural network, blocks, no code",
+   "notes": "[LAB] [12:26–12:46] The centrepiece lab. Nine blocks are already on the canvas: data, training window, inputs, target, normalise, a hidden layer, train, residual, alert rule. Press Train — about 1.5 seconds for a real 31-parameter network on 8,760 hours, on the phone in their hand. Then the feature that matters: TAP any block and it opens into the arithmetic it performs, with the live model's own numbers — the same formulas from Block 2, now theirs. Run the four guided experiments on the next slides in order. Shepherd hard: the value is in the comparisons, not the first click.",
+   "lab": {
+    "id": "BUILDER",
+    "name": "Drag-and-drop neural networks on the synthetic year",
+    "mins": 20,
+    "do": [
+     "Open the Model Builder; the default model is ready — press Train",
+     "Read the verdict panel: advisory day, band, and why it took that long",
+     "TAP any block — it opens into its own live arithmetic",
+     "Experiment 2: set the window to days 0–45 and retrain",
+     "Experiment 3: set the window to days 0–300, then 0–330",
+     "Experiment 4: tick 'Lube oil cooler outlet' into the inputs"
+    ],
+    "see": [
+     "31 parameters trained in ~1.5 s — on the phone, no cloud",
+     "An advisory on day 255 against a fault that began on day 200",
+     "The maths panel: the same equations as the Theatre, with YOUR numbers"
+    ],
+    "why": "Choosing inputs and windows — not layers — is where models are won and lost, and the only way to believe that is to lose a few yourself in twenty minutes."
+   },
+   "n": 27
+  },
+  {
+   "layout": "mockup",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:46",
+   "title": "Experiment 1 — the honest default",
+   "subtitle": "Duty and weather in, bearing temperature out: read the verdict together",
+   "notes": "[12:46–12:49] Everyone should be looking at this panel on their own phone; read it aloud together. Fault begins day 200; the advisory comes day 255 — 55 days to be sure — one episode all year at 4σ held for 72 hours. And the line that answers the obvious objection: on the day it fired, the fault was only 31% of the way to failure. 55 days sounds slow until you remember the convexity slide: half the fault's LIFE had passed, but only a third of its signal existed.",
+   "mockup": {
+    "header": "Model Builder · verdict · inputs: fan current, gas flow, ambient",
+    "rows": [
+     [
+      "Residual sigma",
+      "2.05 °C — of which sensor noise only 0.89",
+      "info"
+     ],
+     [
+      "Alert band",
+      "±4σ = ±8.2 °C, held for 72 hours",
+      "info"
+     ],
+     [
+      "Fault begins",
+      "day 200 (20 Jul) — known, because synthetic",
+      "value"
+     ],
+     [
+      "Advisory raised",
+      "day 255 (13 Sep) — 55 days later",
+      "action"
+     ],
+     [
+      "Severity that day",
+      "31% of the way to failure",
+      "warn"
+     ],
+     [
+      "Episodes this year",
+      "1 — a triageable rate",
+      "value"
+     ]
+    ]
+   },
+   "punch": "55 days to be sure — and still ~55 days of warning before the machine would have failed.",
+   "n": 28
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:49",
+   "title": "Experiment 2 — the winter-only window",
+   "subtitle": "Train on days 0–45 and the model is confidently wrong all summer",
+   "notes": "[12:49–12:52] The room has just done this. The winter model looks BETTER on its own window — tighter sigma, lovely fit — and then runs +2.4 °C wrong on average through the pre-monsoon, four times its own alert band, nineteen times worse than the season-spanning model. It never met the knee. Name the lesson while their thumbs are still on it: a model that has not seen a season does not know the season exists, and no amount of architecture fixes a training window.",
+   "left": {
+    "label": "Winter window, judged on winter",
+    "value": "σ = 0.61 °C",
+    "detail": "Fits January beautifully — tighter than the honest model. Every bad model looks good on its own training data."
+   },
+   "right": {
+    "label": "Same model, meeting May",
+    "value": "4× its own band",
+    "detail": "Runs +2.4 °C wrong on average before any fault exists — 19× worse than the season-spanning window. It never saw the knee."
+   },
+   "punch": "You just caused seasonal overfitting, on purpose, 90 seconds after being warned about it.",
+   "n": 29
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:52",
+   "title": "Experiment 3 — the cardinal sin",
+   "subtitle": "Let the training window touch the fault, and the model learns the fault is normal",
+   "notes": "[12:52–12:55] Two numbers from their own phones: end the window at day 300 — inside the degradation — and the advisory slides from day 255 to day 315, sixty days of warning gone. End it at day 330 and the advisory never comes at all. Nothing on the loss curve warns you; the model is perfectly happy. This is the single most common way real condition-monitoring programmes die, and the defence is procedural, not clever: the training window ends before the period you intend to judge.",
+   "left": {
+    "label": "Window 0–300 — touches the fault",
+    "value": "Day 315",
+    "detail": "60 days of warning lost. The model absorbed the early degradation as 'normal' and raised its own alert band to match."
+   },
+   "right": {
+    "label": "Window 0–330 — swallows the fault",
+    "value": "Never fires",
+    "detail": "The model now expects the fault. The residual stays inside the band while the machine walks to failure."
+   },
+   "punch": "Train on the fault and the model learns the fault is normal. Nothing on the loss curve tells you.",
+   "n": 30
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:55",
+   "title": "Experiment 4 — buy back 25 days with one tag",
+   "subtitle": "The engineer's tag beats the data scientist's architecture",
+   "notes": "[12:55–12:58] Last experiment: tick the lube-oil cooler outlet temperature into the inputs and retrain. Sigma collapses from 2.05 to 0.60 °C — the knee is now explained, the band tightens from ±8.2 to ±2.4 — and the advisory moves from day 255 to day 230. Twenty-five days of warning, bought by knowing WHERE the failure starts. No layer count achieves this. Input choice beats architecture, which means the person who knows the plant beats the person who knows the library.",
+   "left": {
+    "label": "Duty + weather only",
+    "value": "Day 255",
+    "detail": "σ 2.05 °C, band ±8.2. The model cannot see the cooler, so the knee sits inside its error — as band width."
+   },
+   "right": {
+    "label": "+ lube-oil cooler outlet",
+    "value": "Day 230",
+    "detail": "σ 0.60 °C, band ±2.4. The mechanism tag explains the knee, the band closes, and 25 days of warning appear."
+   },
+   "punch": "Input choice beats architecture. The engineer who knows the plant wins.",
+   "n": 31
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "12:58",
+   "title": "Where the alert band actually comes from",
+   "subtitle": "σ is the model's ignorance, not the instrument's noise",
+   "notes": "[12:58–13:00] One more reading of the same numbers, because it changes how people argue with vendors. The default model's σ of 2.05 °C splits: only 0.89 °C is hour-to-hour sensor noise; the remaining 1.8 °C is structure the model fails to explain — mostly the knee. The alarm band is therefore a property of the MODEL, not the machine: improve the model and the band narrows, and detection days appear out of nowhere. The Builder prints this split on every run. Break for lunch on time.",
+   "left": {
+    "label": "Irreducible sensor noise",
+    "value": "0.89 °C",
+    "detail": "Measured from hour-to-hour differences. No model, however clever, removes this floor."
+   },
+   "right": {
+    "label": "The model's own ignorance",
+    "value": "1.8 °C",
+    "detail": "Structure the inputs cannot explain — mostly the knee. This part is yours to remove, and Experiment 4 just removed it."
+   },
+   "punch": "The alarm band is a property of the model, not the machine. Lunch — leave the Builder open.",
+   "n": 32
+  },
+  {
+   "layout": "process",
+   "block": "3 · Data synthesis and the Model Builder",
+   "time": "13:45",
+   "title": "Three rules for a training window",
+   "subtitle": "Everything Block 3 taught, as procedure — laminate this",
+   "notes": "[13:45–13:48] Reconvene after lunch by compressing the morning into procedure. Three rules plus the standing one: span the seasons, end before the period you judge, feed the model duty rather than symptoms — and retrain after any overhaul, because maintenance legitimately changes what 'normal' is. These four lines are the difference between the honest day-255 model and the silent day-330 one, and they cost nothing but discipline. Then pivot: the afternoon takes this discipline to a full maintenance programme.",
+   "steps": [
+    [
+     "1",
+     "Span the seasons",
+     "A window that has not met May does not know May exists. One full year, minimum, in this climate."
+    ],
+    [
+     "2",
+     "End before the fault",
+     "The window must end before the period you intend to judge — always, procedurally, no exceptions."
+    ],
+    [
+     "3",
+     "Duty in, symptoms out",
+     "Inputs are what drives the machine (load, ambient, CW). A symptom tag as input teaches the model to expect the fault."
+    ],
+    [
+     "4",
+     "Retrain after overhaul",
+     "Maintenance changes 'normal'. A model that remembers the old bearing alarms on the new one."
+    ]
+   ],
+   "punch": "The training window is a decision. Make it deliberately, and write it down.",
+   "n": 33
+  },
+  {
+   "layout": "two-col-list",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "13:48",
+   "title": "From one model to a programme",
+   "subtitle": "The eight stages of the PdM simulator — and where programmes actually die",
+   "notes": "[13:48–13:52] The morning built stage 6 and nothing else. A predictive maintenance PROGRAMME is all eight stages, and the uncomfortable truth is that most failures happen in stages 1–4 — before any algorithm exists. Wrong failure mode, missing sensor, dead data, unexamined quality: no model recovers from these. The simulator the room is about to drive walks all eight in order, on five different machines, and the afternoon follows its structure.",
+   "leftTitle": "Stages 1–4 · where programmes die",
+   "left": [
+    "01 · Asset & failure mode — decide what you are catching",
+    "02 · Instrumentation — what is measured, honestly",
+    "03 · Data acquisition — scan rates, compression, gaps",
+    "04 · Data quality — flatlines, freezes, timeouts",
+    "Most failed programmes never had a chance past this line"
+   ],
+   "rightTitle": "Stages 5–8 · where value appears",
+   "right": [
+    "05 · Feature engineering — normalise, difference, trend",
+    "06 · Model training — the morning's whole story",
+    "07 · Validation — alert budgets, sister machines",
+    "08 · Inference & value — advisory, decision, work order",
+    "The glamour lives here; the leverage lives on the left"
+   ],
+   "punch": "Most PdM programmes die in stages 1–4, before any AI exists to blame.",
+   "n": 34
+  },
+  {
+   "layout": "cards",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "13:52",
+   "title": "Five machines, five failure modes",
+   "subtitle": "The simulator's cases — synthetic datasets, real failure physics",
+   "notes": "[13:52–13:55] Introduce the cast. Five machines, each with a genuine failure mode, realistic instrumentation gaps, and a synthetic year with a known fault day — say the synthetic part out loud again; the honesty is a feature. The ID fan is today's guided case; the other four run the same eight stages and are homework. Each case also carries a deliberate trap — a sensor that is not fitted, a tag that would leak the answer — because real programmes meet exactly these.",
+   "cards": [
+    [
+     "ID fan — DE bearing",
+     "Cooler fouls → oil hot → film thins → babbitt wipes. Today's guided case."
+    ],
+    [
+     "HT motor — rotor bar",
+     "Broken bar sidebands; the tag that matters is rarely historised."
+    ],
+    [
+     "Coal mill — wear",
+     "Grinding capacity walks away slowly; every tag drifts together."
+    ],
+    [
+     "Boiler feed pump",
+     "Seal wear and cavitation — two faults that impersonate each other."
+    ],
+    [
+     "Transformer — cooling",
+     "A static machine: no vibration to lean on, only heat balance."
+    ],
+    [
+     "All five",
+     "One year each, fault day known, traps included — as real programmes have."
+    ]
+   ],
+   "punch": "Five machines, one method. The fan is guided; the rest are homework with answer keys.",
+   "n": 35
+  },
+  {
+   "layout": "process",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "13:55",
+   "title": "Stage 1 — name the failure mode",
+   "subtitle": "A predictive model with no named failure mode is a dashboard",
+   "notes": "[13:55–13:58] Before any data: what exactly are we trying to catch? For the fan the chain is specific — cooling-water side of the lube-oil cooler fouls, oil runs hot, the film thins, the babbitt wipes, and the machine trips at 100 °C metal temperature. Walk the chain and note that each link suggests its own instrument. A programme that skips this stage produces dashboards: colourful, comprehensive, and incapable of answering 'what would we have caught, and when?'",
+   "steps": [
+    [
+     "1",
+     "Mechanism",
+     "Cooling-water side of the oil cooler fouls — slowly, over months."
+    ],
+    [
+     "2",
+     "Consequence",
+     "Oil outlet temperature rises; the oil film in the journal bearing thins."
+    ],
+    [
+     "3",
+     "Damage",
+     "Babbitt wears, metal temperature climbs toward the 100 °C trip."
+    ],
+    [
+     "4",
+     "Failure",
+     "Trip — or a wiped bearing and a forced outage measured in days."
+    ]
+   ],
+   "punch": "Name the failure mode first. Every link in the chain tells you what to measure.",
+   "n": 36
+  },
+  {
+   "layout": "table-stat",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "13:58",
+   "title": "Stage 2 — what is instrumented, honestly",
+   "subtitle": "The fan's eight tags — and the one that is missing",
+   "notes": "[13:58–14:02] The audit that decides everything downstream. Eight tags exist on this fan; the ninth — cooling-water flow through the cooler, the tag closest to the actual mechanism — is not fitted, which is entirely typical. The lesson from Experiment 4 applies in reverse: the mechanism tag is worth 25 days of warning, so a ₹50,000 sensor can outperform a ₹50 lakh analytics platform. Ask the room which tags their own worst actor is missing; every unit has this list.",
+   "table": {
+    "head": [
+     "Tag",
+     "Fitted?",
+     "Role in detection"
+    ],
+    "rows": [
+     [
+      "DE / NDE bearing metal temperature",
+      "yes",
+      "The signal the fault ends up in — and its twin for triage"
+     ],
+     [
+      "Lube-oil cooler outlet temperature",
+      "yes",
+      "Where the failure actually starts — worth 25 days (Exp. 4)"
+     ],
+     [
+      "Bearing housing vibration",
+      "yes",
+      "Late but unambiguous confirmation"
+     ],
+     [
+      "Motor current · gas flow · ambient",
+      "yes",
+      "Duty and weather — the inputs that define 'expected'"
+     ],
+     [
+      "Cooling-water flow through cooler",
+      "NO",
+      "The mechanism tag. Typically never fitted"
+     ]
+    ]
+   },
+   "stat": "1 of 9",
+   "statLabel": "the tag closest to the mechanism is the one not instrumented — entirely typical",
+   "punch": "A ₹50,000 sensor can beat a ₹50 lakh platform. Audit before you model.",
+   "n": 37
+  },
+  {
+   "layout": "pfcurve",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:02",
+   "title": "The P–F curve, with measured days",
+   "subtitle": "Where each technique detects the fan fault — from the simulator, not a textbook",
+   "notes": "[14:02–14:07] The classic curve, except every rung here was MEASURED in the simulator this week, on the synthetic case with the known onset. Potential failure at day 200; the residual with the mechanism tag sees it around day 230; the honest duty-and-weather model at 255; vibration confirms near 280; a fixed 90 °C threshold wakes around 290; functional failure lands near day 310. The gaps between rungs are the value of each improvement, in days, on the same fault. No rung is free — each is a sensor, a model, or a discipline.",
+   "points": [
+    [
+     "Fault begins (P)",
+     "Nothing detectable yet — severity zero",
+     "day 200"
+    ],
+    [
+     "Residual + mechanism tag",
+     "Cooler outlet explains the knee; band is tight",
+     "~day 230"
+    ],
+    [
+     "Residual, duty & weather",
+     "The honest default from the morning",
+     "day 255"
+    ],
+    [
+     "Vibration trend",
+     "Late but unambiguous — confirmation, not warning",
+     "~day 280"
+    ],
+    [
+     "Fixed 90 °C alarm",
+     "Structurally late: it waits for absolute damage",
+     "~day 290"
+    ],
+    [
+     "Trip / failure (F)",
+     "100 °C metal temperature, or a wiped bearing",
+     "~day 310"
+    ]
+   ],
+   "n": 38
+  },
+  {
+   "layout": "lab",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:07",
+   "title": "Lab — scrub the year",
+   "subtitle": "Twelve minutes inside the machine: watch the fault grow in 3-D",
+   "notes": "[LAB] [14:07–14:19] Hand over. Everyone opens the fan case and scrubs the day slider slowly from 0 to 365, watching the 3-D machine: the bearing warms through its palette, the cut-away shows the film thinning, the sensor dots carry live values. The task is written on the slide: decide, by eyeball alone, on which day YOU would have called maintenance. Collect answers from three or four people — the spread is always wide, roughly days 230 to 330, and that spread IS the lesson: eyeballing a trend is a lottery, and the residual's day-255 with one episode is what consistency looks like.",
+   "lab": {
+    "id": "PDM · STAGE 3–4",
+    "name": "The ID fan case, scrubbed end to end",
+    "mins": 12,
+    "do": [
+     "Open the PdM simulator → ID fan case",
+     "Scrub the day slider slowly from day 0 to day 365",
+     "Watch the bearing colour, the cut-away, and the live sensor dots",
+     "Write down the day YOU would have called maintenance",
+     "Try stage 4: inject data-quality faults and watch the tags lie"
+    ],
+    "see": [
+     "A machine that degrades visibly — but only late in the fault",
+     "Sensor values that look ordinary through most of the degradation",
+     "Your own called day, somewhere between 230 and 330 like everyone's"
+    ],
+    "why": "The spread of called days across the room is the argument for residual monitoring: humans eyeball trends inconsistently, especially before the convex fault has produced its signal."
+   },
+   "n": 39
+  },
+  {
+   "layout": "warn",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:19",
+   "title": "Stage 4 — the data-quality gates",
+   "subtitle": "Five ways the data lies before any model sees it",
+   "notes": "[14:19–14:23] Each of these was injectable in the lab they just ran. Walk them quickly — the room has now SEEN a flatlined sensor make the machine look immortal. The gate discipline: every tag gets a quality profile before it is allowed near training — freeze detection, gap census, range checks, timestamp audit. It is unglamorous, it is an AE-level responsibility, and it decides more than the model does.",
+   "warnings": [
+    [
+     "Flatline",
+     "A frozen sensor reads one value for weeks. A model trained on it learns the tag is a constant — and misses everything."
+    ],
+    [
+     "Gaps & timeouts",
+     "'I/O Timeout' and missing hours, silently zero-filled, teach the model the machine periodically freezes solid."
+    ],
+    [
+     "Compression",
+     "Historian dead-banding smooths real variation away; the noise floor is understated and every band is too tight."
+    ],
+    [
+     "Calibration drift",
+     "A sensor drifting 2 °C looks exactly like a machine drifting 2 °C — until the twin tag disagrees."
+    ],
+    [
+     "Clock skew",
+     "Tags stamped by different systems minutes apart smear every relationship the model must learn."
+    ]
+   ],
+   "never": "Never train on: unprofiled tags · zero-filled gaps · a window containing the fault · another unit's data unchecked",
+   "n": 40
+  },
+  {
+   "layout": "two-col-list",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:23",
+   "title": "Stage 5 — features are engineering",
+   "subtitle": "What to hand the model, and the traps that look helpful",
+   "notes": "[14:23–14:27] Features are where plant knowledge enters. The good list: load-normalised temperature, the DE-minus-NDE difference that kills common-mode drift AND separates sensor fault from machine fault in one subtraction, the oil ΔT across the cooler pointing at the mechanism, seven-day slopes. The traps look innocent: hour-of-day correlates with everything and means nothing; day-number ENCODES the answer for a synthetic fault; and any symptom tag as an input is Experiment 4's negative-residual problem waiting to misdirect an investigation.",
+   "leftTitle": "Feed the model",
+   "left": [
+    "Load- and ambient-normalised temperatures",
+    "DE − NDE difference — common-mode drift cancels",
+    "Oil ΔT across the cooler — the mechanism, directly",
+    "7-day rolling mean and slope — shift noise suppressed",
+    "Duty tags: current, flow, ambient — 'expected' lives here"
+   ],
+   "rightTitle": "Traps that look helpful",
+   "right": [
+    "Hour of day — correlates with everything, means nothing",
+    "Day number — encodes the answer outright; leakage",
+    "Any symptom tag as an input — teaches the model the fault",
+    "The twin bearing as input — model copies it and learns nothing",
+    "Kitchen-sink features — more inputs, more coincidences"
+   ],
+   "punch": "DE − NDE is the 30-second triage: a sensor fault moves alone, a machine fault moves both.",
+   "n": 41
+  },
+  {
+   "layout": "cards",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:27",
+   "title": "Stage 6 — model families, honestly",
+   "subtitle": "Three ways to compute 'expected' — all of them the same idea",
+   "notes": "[14:27–14:30] Thirty seconds each, because the room has already met two from the inside. k-NN: memory, no training, fully explainable, what most commercial systems actually run. Regression/networks: the morning's story, interpretable at this size. Autoencoders: compress-and-reconstruct, reconstruction error as the residual — PCA's idea with bends. Then the de-mystifier: all three produce an expected value and a residual. The family matters less than the window, the inputs and the validation — which is why those got the morning and this gets a slide.",
+   "cards": [
+    [
+     "k-NN similarity",
+     "No training, fully explainable, robust. What most commercial CM systems really run under the paint."
+    ],
+    [
+     "Regression / small network",
+     "The morning's entire story. Interpretable at 31–163 parameters; retrain in seconds."
+    ],
+    [
+     "Autoencoder",
+     "Compress and reconstruct; the reconstruction error is the residual. PCA with bends — for many tags at once."
+    ],
+    [
+     "All of them",
+     "Produce expected − actual. Window, inputs and validation decide success; the family mostly decides the brochure."
+    ]
+   ],
+   "punch": "Every family computes the same subtraction. Spend your judgement on windows and inputs, not brand names.",
+   "n": 42
+  },
+  {
+   "layout": "table-stat",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:30",
+   "title": "Stage 7 — validation that means something",
+   "subtitle": "The alert budget: how many pages a year buys how many days of warning",
+   "notes": "[14:30–14:34] Validation is not a accuracy percentage — it is an alert budget. Read the table: at 4σ held 72 hours, one episode a year and 55 days of warning; loosen to 2σ/24h and warning improves marginally while episodes explode into the dozens — and a control room ignores the 41st false page. The budget is a MANAGEMENT decision: how many investigations a month will maintenance actually staff? Pick that number first, then set σ and persistence to spend it.",
+   "table": {
+    "head": [
+     "Rule",
+     "Episodes / year",
+     "Warning on the fan case",
+     "Verdict"
+    ],
+    "rows": [
+     [
+      "4σ · 72 h",
+      "1",
+      "55 days",
+      "Adoptable — the default"
+     ],
+     [
+      "3σ · 24 h",
+      "≈ 4–6",
+      "≈ 60 days",
+      "Only with a named triage owner"
+     ],
+     [
+      "2σ · 24 h",
+      "dozens",
+      "marginally more",
+      "Ignored within a month"
+     ],
+     [
+      "4σ · 72 h + mechanism tag",
+      "1",
+      "80 days",
+      "Where Experiment 4 lands"
+     ]
+    ]
+   },
+   "stat": "2 / month",
+   "statLabel": "a realistic triage budget for one unit's fleet of monitored machines — set it BEFORE tuning σ",
+   "punch": "Decide the alert budget first. Then spend it with σ and persistence.",
+   "n": 43
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:34",
+   "title": "The sister-machine check",
+   "subtitle": "The negative control every claimed detection must pass",
+   "notes": "[14:34–14:37] The simulator runs the same trained model on fan B — identical duty, healthy all year, judged by its own threshold. Result: zero episodes. That is the negative control: if the model alarms on the healthy twin, it learned the weather, not the fault. And the small print that catches real vendors: the threshold must come from the sister's own quiet period — apply machine A's band to machine B and the nuisance rate is silently faked to zero. Ask for the sister-machine run in every vendor demonstration.",
+   "left": {
+    "label": "Fan A — the faulted case",
+    "value": "1 episode",
+    "detail": "Advisory day 255, sustained, single episode. The detection claim."
+   },
+   "right": {
+    "label": "Fan B — healthy twin, own threshold",
+    "value": "0 episodes",
+    "detail": "Same model, same year, zero alarms. If this number is not zero, the model learned the season — not the fault."
+   },
+   "punch": "No sister-machine run, no belief. Ask for it in every vendor demo.",
+   "n": 44
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:37",
+   "title": "Remaining useful life — a band, not a date",
+   "subtitle": "The difference between astrology and engineering",
+   "notes": "[14:37–14:40] When the advisory fires, the next question is always 'how long?' — and a point estimate is the wrong answer to give a planning meeting. Degradation rates vary with load and coal; the honest output is a distribution: 90% confident it survives past the next planned outage window, 10% it does not. Planning can act on a band — advance a window, stage spares, derate on hot afternoons. Nobody can act on a fictional date except by pretending. SIM-5 in the Simulation Lab does the full RUL exercise; homework.",
+   "left": {
+    "label": "What gets asked for",
+    "value": "\"Fails 14 March\"",
+    "detail": "A single confident date. It will be wrong, it will be remembered, and it will cost the programme its credibility."
+   },
+   "right": {
+    "label": "What engineering can honestly say",
+    "value": "P10–P90 band",
+    "detail": "'90% it survives past the outage window; here is what moves the odds.' Planning can act on this — advance, stage spares, derate."
+   },
+   "punch": "A date is astrology. A band with named drivers is engineering.",
+   "n": 45
+  },
+  {
+   "layout": "mockup",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:40",
+   "title": "Stage 8 — the advisory, as it should arrive",
+   "subtitle": "Not an alarm: a claim, with its evidence attached",
+   "notes": "[14:40–14:43] This is what lands on the desk — walk it top to bottom. The claim, the residual behind it, the mechanism hypothesis, the confirming second witness, the RUL band, and the recommended action with its window. Everything is inspectable; nothing says 'the AI decided'. An advisory in this form respects the engineer who receives it, and that respect — more than any accuracy number — is what decides whether the programme survives its first year.",
+   "mockup": {
+    "header": "Unit · ID fan A · advisory · day 255, 14:20",
+    "rows": [
+     [
+      "Claim",
+      "DE bearing running above expected for duty & weather",
+      "warn"
+     ],
+     [
+      "Evidence",
+      "Residual +8.4 °C sustained 72 h · 1st episode this year",
+      "value"
+     ],
+     [
+      "Mechanism",
+      "Oil cooler approach shrinking — CW-side fouling suspected",
+      "info"
+     ],
+     [
+      "Second witness",
+      "Oil outlet ΔT confirms; NDE bearing does NOT follow",
+      "info"
+     ],
+     [
+      "Remaining life",
+      "P10–P90: 40–75 days at current duty",
+      "value"
+     ],
+     [
+      "Recommended",
+      "Inspect cooler CW side at next opportunity ≤ 21 days",
+      "action"
+     ]
+    ]
+   },
+   "punch": "An advisory is a claim with evidence, addressed to an engineer — not an alarm addressed to nobody.",
+   "n": 46
+  },
+  {
+   "layout": "table-stat",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:43",
+   "title": "The availability arithmetic",
+   "subtitle": "Scenario numbers from the simulator — the shape is what matters",
+   "notes": "[14:43–14:46] Run the simulator's scenario arithmetic — labelled as scenario, with our own June availability beside it for scale. A planned intervention on warning: 0.4 days, largely inside merit-order dips. A run-to-failure on the same fault: a 2.5-day forced outage plus replacement energy at market. At our 72.5% June availability, every avoided forced outage is availability we visibly need. The punchline for management: PdM's money is mostly in AVAILABILITY, not in the maintenance budget it is usually asked to justify against.",
+   "table": {
+    "head": [
+     "Path",
+     "Outage",
+     "Direct + energy cost",
+     "Note"
+    ],
+    "rows": [
+     [
+      "Act on day-255 advisory",
+      "0.4 day planned",
+      "≈ ₹35 lakh",
+      "Scheduled into a merit-order dip"
+     ],
+     [
+      "Run to failure",
+      "≈ 2.5 days forced",
+      "≈ ₹4+ crore",
+      "Replacement energy at market, overtime, secondary damage"
+     ],
+     [
+      "The ratio",
+      "—",
+      "≈ 10 : 1",
+      "Typical for bearing-class failures — scenario, not history"
+     ]
+    ]
+   },
+   "stat": "72.5%",
+   "statLabel": "our June 2026 availability — every avoided forced outage buys back a piece of this",
+   "punch": "PdM's money is in availability. The maintenance budget was never the right place to look for it.",
+   "n": 47
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "4 · Predictive maintenance, end to end",
+   "time": "14:46",
+   "title": "The vote",
+   "subtitle": "It is day 255. The advisory is on your desk. Sign, or wait?",
+   "notes": "[14:46–14:50] Put the stage-8 screen up and call the vote — hands, everyone, no abstentions. The room will split, and the split is the teaching moment: 'wait' is a bet that 45%-severity information improves before it costs 10:1; 'sign' spends ₹35 lakh on a machine that has not yet failed. Do the expected-value arithmetic aloud with the scenario numbers. Then the close: this vote — not the model — is the decision layer, and every improvement of the morning (tighter band, earlier day, second witness) exists to make THIS moment easier. Tea after the vote.",
+   "left": {
+    "label": "Sign now",
+    "value": "≈ ₹35 lakh",
+    "detail": "0.4-day planned window, cooler inspection and clean. If the mechanism hypothesis is right, the fault is arrested cheaply."
+   },
+   "right": {
+    "label": "Wait for more evidence",
+    "value": "Risk ≈ ₹4+ cr",
+    "detail": "Severity ~45% and convex. More certainty is coming — but at 10:1 consequence odds and shrinking room to schedule."
+   },
+   "punch": "Vote now, hands up. This moment is the decision layer — everything today serves it.",
+   "n": 48
+  },
+  {
+   "layout": "cards",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:05",
+   "title": "Reading our own bill",
+   "subtitle": "Three documents, zero estimates — where every number in this block comes from",
+   "notes": "[15:05–15:08] Reconvene from tea into money. Establish provenance before any figure: the June 2026 energy bill, the provisional Part-I FSA with the F10 ECR calculation, and the MERC merit-order dispatch stack for July. Nothing in this block is estimated, benchmarked or vendor-supplied; if a number cannot be traced to one of these three documents, it is not on a slide. That rule is what makes the next twenty minutes uncomfortable in a useful way.",
+   "cards": [
+    [
+     "Energy bill · June 2026",
+     "Generation, heat rates, auxiliary consumption, availability — station by station, signed."
+    ],
+    [
+     "Part-I FSA + F10 ECR",
+     "What our coal actually cost, per kcal and per kWh, after quality adjustment."
+    ],
+    [
+     "MERC merit order · July 2026",
+     "Where every MAHAGENCO station ranks against the market, in ₹/kWh."
+    ],
+    [
+     "The rule",
+     "No number without a document. Vendors estimate; bills do not."
+    ]
+   ],
+   "punch": "Everything in this block is on paper the station already signs.",
+   "n": 49
+  },
+  {
+   "layout": "table-stat",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:08",
+   "title": "Koradi 8–10, June 2026, one table",
+   "subtitle": "Our station's month, exactly as filed",
+   "notes": "[15:08–15:12] Let the table sit in silence for ten seconds before speaking. Then walk it: availability 72.5, PLF 66.62, 964.8 MU generated. Net heat rate 2,442 against a norm of 2,230 — a 212 kcal/kWh gap. Auxiliary 6.95 against 6.0. As-fired GCV 3,061. Each number is ordinary until multiplied by a month of coal — the stat card does that multiplication once, and the next slide does the decomposition that tells us what kind of problem we actually have.",
+   "table": {
+    "head": [
+     "Metric",
+     "Actual",
+     "Norm",
+     "Gap"
+    ],
+    "rows": [
+     [
+      "Availability / PLF",
+      "72.5% / 66.62%",
+      "—",
+      "964.8 MU sent out gross"
+     ],
+     [
+      "Net heat rate",
+      "2,442 kcal/kWh",
+      "2,230",
+      "+212 kcal/kWh"
+     ],
+     [
+      "Auxiliary power",
+      "6.95%",
+      "6.0%",
+      "+0.95 pp ≈ 9.2 MU"
+     ],
+     [
+      "As-fired GCV / variable cost",
+      "3,061 kcal/kg · ₹3.378/kWh",
+      "MOD ₹3.284",
+      "94 paise above the stack"
+     ]
+    ]
+   },
+   "stat": "₹25.61 cr",
+   "statLabel": "what the 212 kcal/kWh net heat-rate gap cost in June 2026 alone",
+   "punch": "One month. One unit cluster. Now — what KIND of problem is it?",
+   "n": 50
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:12",
+   "title": "The decomposition that changes the conversation",
+   "subtitle": "Gross HR = net HR × (1 − aux): split the gap before prescribing the medicine",
+   "notes": "[15:12–15:16] The most important arithmetic of the block. Net heat rate already CONTAINS auxiliary power, so decompose before diagnosing: our gross heat-rate gap is 176 kcal/kWh — ₹22.87 crore in June — a genuine boiler-turbine thermodynamic shortfall. The auxiliary excess is 0.95 points — ₹3.01 crore — a separate, smaller, electrical-side problem. Nashik, for contrast, is the exact mirror: turbine BEATING norm, entire penalty in aux. Different disease, different medicine — and any AI effort here must be pointed at the thermodynamic gap, because that is where our money is.",
+   "left": {
+    "label": "Boiler–turbine (gross) gap",
+    "value": "176 kcal · ₹22.87 cr",
+    "detail": "2,272 gross actual against 2,096 norm. A real thermodynamic shortfall — condenser, heaters, sprays, part-load — worth ₹22.87 crore in June."
+   },
+   "right": {
+    "label": "Auxiliary excess",
+    "value": "0.95 pp · ₹3.01 cr",
+    "detail": "6.95% against a 6.0% norm ≈ 9.2 MU of house load. Real, worth chasing — and one-seventh the size of the first number."
+   },
+   "punch": "Same bill, two different diseases. Point the AI at the ₹22.87 crore one.",
+   "n": 51
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:16",
+   "title": "Never add those two numbers",
+   "subtitle": "The most expensive arithmetic error available in a station review",
+   "notes": "[15:16–15:19] Say it as a warning, because someone in every review does it: the ₹25.6 crore net gap and the ₹3.0 crore auxiliary excess must NEVER be added — the net heat rate already contains the auxiliary consumption, so adding them counts the aux twice. The decomposition on the previous slide (22.87 + ~3.0 within the identity) is the correct split. Anyone who quotes 'nearly ₹29 crore of addressable loss' has invented several crore a month out of double counting — and will be found out in front of a regulator.",
+   "left": {
+    "label": "Tempting",
+    "value": "25.6 + 3.0 = ₹28.6 cr",
+    "detail": "Wrong. Net heat rate already contains auxiliary power; this sum counts the same MU twice."
+   },
+   "right": {
+    "label": "Correct",
+    "value": "22.87 + 3.01, decomposed",
+    "detail": "Split via gross HR = net HR × (1 − aux), then the two numbers are independent and may be discussed — separately."
+   },
+   "punch": "Decompose first. Never add a net-side number to an aux-side number.",
+   "n": 52
+  },
+  {
+   "layout": "lab",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:19",
+   "title": "Lab — SIM-2 · Heat rate loss attribution",
+   "subtitle": "Twelve minutes: find plausible homes for OUR 176 kcal/kWh",
+   "notes": "[LAB] [15:19–15:31] Hand over to SIM-2, loaded with the real June figures. The sliders are the classical loss accounts — condenser back pressure, HP heater out-of-service, spray flows, auxiliary — and the task is to find combinations that plausibly explain our 176 kcal gross gap. The point to surface when regrouping: SEVERAL combinations fit. The bill alone cannot distinguish them — which is precisely why continuous, tag-level loss accounting (the AI version of this exercise) beats a monthly argument between departments.",
+   "lab": {
+    "id": "SIM-2",
+    "name": "Heat rate loss attribution — Koradi 8–10, June 2026",
+    "mins": 12,
+    "do": [
+     "Open SIM-2; confirm it is showing the Koradi 8–10 row",
+     "Move condenser back pressure until you have claimed ~60 kcal",
+     "Take one HP heater out of service; watch the attribution shift",
+     "Add spray flow and auxiliary until the 176 kcal gap is 'explained'",
+     "Note YOUR combination — and compare with your neighbour's"
+    ],
+    "see": [
+     "Several different slider combinations that all 'explain' 176 kcal",
+     "The rupee counter converting every kcal to ₹ crore per month",
+     "Why the monthly bill cannot arbitrate between explanations"
+    ],
+    "why": "The gap is real but the bill cannot localise it. Continuous tag-level attribution — this exercise, automated hourly — is the honest AI project this station's numbers are asking for."
+   },
+   "n": 53
+  },
+  {
+   "layout": "table",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:31",
+   "title": "Where 176 kcal/kWh physically lives",
+   "subtitle": "Candidate homes, sized honestly — controllable and structural",
+   "notes": "[15:31–15:35] Ground the lab. The usual suspects, with honest sizes: condenser vacuum and CW performance are the classic largest account; cycle isolation and HP heaters next; spray flows; and then the structural share — running 660 MW units at 66% PLF on merit order costs heat rate that no operational cleverness recovers. The split matters for expectations: AI finds and quantifies the controllable share; it does not repeal thermodynamics on the structural share. Both honesty and the pilot in Block 7 depend on keeping that distinction visible.",
+   "table": {
+    "head": [
+     "Candidate",
+     "Typical share of a gap like ours",
+     "Controllable this quarter?"
+    ],
+    "rows": [
+     [
+      "Condenser vacuum · CW system",
+      "the classic largest single account",
+      "Largely — cleaning, air ingress, CW optimisation"
+     ],
+     [
+      "Cycle isolation · HP heaters",
+      "material when a heater is out or passing",
+      "Yes — find it, fix it, verify the kcal returned"
+     ],
+     [
+      "SH/RH sprays · attemperation",
+      "moderate but chronic",
+      "Partly — control tuning and combustion balance"
+     ],
+     [
+      "Part-load operation at 66% PLF",
+      "significant and real",
+      "No — structural; merit order sets it. Say so honestly"
+     ]
+    ]
+   },
+   "punch": "AI localises the controllable share. It does not repeal thermodynamics — and must not promise to.",
+   "n": 54
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:35",
+   "title": "What we already beat",
+   "subtitle": "Two norms this station outperforms — credibility before the gap-chasing",
+   "notes": "[15:35–15:37] Balance the ledger, briefly, because a room that only hears gaps stops listening: secondary fuel oil at 0.41 ml/kWh against a 0.50 norm, and transit loss at 0.49% against 0.80 — both genuinely good, both from the same bill. The bill is not uniformly bad; it is SPECIFICALLY bad, in one large thermodynamic account. That specificity is good news — a focused problem is an addressable one.",
+   "left": {
+    "label": "Secondary fuel oil",
+    "value": "0.41 vs 0.50",
+    "detail": "ml/kWh, actual against norm. Stable combustion support discipline — already better than the standard."
+   },
+   "right": {
+    "label": "Coal transit loss",
+    "value": "0.49% vs 0.80%",
+    "detail": "Nearly half the normative allowance. The fuel-handling chain is performing."
+   },
+   "punch": "The bill is not uniformly bad — it is specifically bad. Specific problems get solved.",
+   "n": 55
+  },
+  {
+   "layout": "table",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:37",
+   "title": "Auxiliary power is a scheduling problem",
+   "subtitle": "SIM-3's equipment models — the arithmetic under the 0.95 excess points",
+   "notes": "[15:37–15:40] Before the lab, show what the optimiser actually knows: a mill draws 340 kW running plus 2.6 kW per t/h above 30; each CW pump is 1,650 kW; every energised ESP field is 26 kW; the ID fan goes as roughly the cube of flow. Auxiliary excess is therefore mostly a COUNTING problem — how many mills, pumps and fields are running for this load, this coal, this season — under safety and process constraints. That framing is what makes it optimisable at all.",
+   "table": {
+    "head": [
+     "Equipment",
+     "Power model (SIM-3)",
+     "The scheduling question"
+    ],
+    "rows": [
+     [
+      "Coal mill",
+      "340 kW + 2.6 kW per t/h above 30",
+      "How many mills for this load and GCV — with margin?"
+     ],
+     [
+      "CW pump",
+      "1,650 kW each",
+      "Two pumps or three, for this season's CW temperature?"
+     ],
+     [
+      "ESP",
+      "26 kW per energised field",
+      "How many fields for compliance at this load and ash?"
+     ],
+     [
+      "ID fan",
+      "≈ cubic in gas flow",
+      "What does every extra mmWC of draught really cost?"
+     ]
+    ]
+   },
+   "punch": "Auxiliary excess is mostly a counting problem — and counting problems can be optimised.",
+   "n": 56
+  },
+  {
+   "layout": "lab",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:40",
+   "title": "Lab — SIM-3 · Auxiliary power optimiser",
+   "subtitle": "Ten minutes, scoreboard rules: beat the baseline house load",
+   "notes": "[LAB] [15:40–15:50] Scoreboard lab — competitive, fast. Everyone gets the same scenario: a load point, a GCV, a season. Choose mill count, CW pumps and ESP fields; the simulator prices the house load and flags any infeasible choice (insufficient milling margin, condenser limits). Call out the best percentage found. The recurring discovery — one CW pump more than needed at part load in cool months — is exactly the kind of item hiding inside our 0.95 excess points, and it needs no capex to collect.",
+   "lab": {
+    "id": "SIM-3",
+    "name": "Auxiliary power optimiser — 500 MW class",
+    "mins": 10,
+    "do": [
+     "Open SIM-3; take the default load, GCV and season",
+     "Choose mills, CW pumps and ESP fields; watch kW and feasibility",
+     "Try one fewer CW pump in a cool-season scenario",
+     "Push until the simulator flags infeasible — know where the wall is",
+     "Shout out your best % saving — scoreboard rules"
+    ],
+    "see": [
+     "House load responding in real kW to every scheduling choice",
+     "Feasibility flags when milling margin or condenser limits bite",
+     "A recurring finding: one pump too many at part load, off-summer"
+    ],
+    "why": "A 0.95-point auxiliary excess ≈ ₹3 crore a month is largely made of scheduling slack like this — recoverable with discipline and zero capital."
+   },
+   "n": 57
+  },
+  {
+   "layout": "chart-text",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:50",
+   "title": "Combustion is a trade-off, not a setting",
+   "subtitle": "SIM-6's surfaces: excess O₂ against heat rate and NOx, from the model itself",
+   "notes": "[15:50–15:54] The two curves are computed from SIM-6's own model: NOx rises roughly 78 mg/Nm³ per point of excess O₂; heat rate is U-shaped — dry-gas loss punishes high O₂, CO and unburnt carbon punish starving it. There is no single best point, only a frontier of defensible ones, and where you stand on it is POLICY: emissions posture, coal cost, unit condition. That is why the lab next door is multi-objective — and why 'the optimiser says' is never a complete sentence.",
+   "chart": {
+    "type": "line",
+    "title": "Excess O₂ vs ΔHR and NOx (SIM-6 model)",
+    "min": 0,
+    "max": 35,
+    "yTitle": "kcal/kWh · mg/Nm³÷10",
+    "categories": [
+     "2.4%",
+     "2.6%",
+     "2.8%",
+     "3.0%",
+     "3.2%",
+     "3.4%",
+     "3.6%",
+     "3.8%"
+    ],
+    "series": [
+     {
+      "name": "ΔHR (kcal/kWh)",
+      "values": [
+       20,
+       10,
+       4,
+       0,
+       4,
+       10,
+       18,
+       28
+      ]
+     },
+     {
+      "name": "NOx (mg/Nm³ ÷10)",
+      "values": [
+       20.3,
+       21.9,
+       23.4,
+       25,
+       26.6,
+       28.1,
+       29.7,
+       31.2
+      ]
+     }
+    ]
+   },
+   "items": [
+    "NOx climbs ~78 mg/Nm³ per point of excess O₂ — SIM-6's own coefficient",
+    "Heat rate is U-shaped: dry-gas loss right, CO and unburnt carbon left",
+    "Every point on the frontier is defensible; choosing one is policy",
+    "OFA, tilt and bias move the frontier itself — that is the optimiser's job"
+   ],
+   "punch": "'The optimiser says' is not a complete sentence. Weights are policy; policy is yours.",
+   "n": 58
+  },
+  {
+   "layout": "lab",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "15:54",
+   "title": "Lab — SIM-6 · Combustion multi-objective optimiser",
+   "subtitle": "Eight minutes on the Pareto frontier",
+   "notes": "[LAB] [15:54–16:02] Short and pointed. Everyone sets the three weights — heat rate, NOx, unburnt carbon — and watches the recommended operating point move along the frontier. The two mandatory experiments: all-weight-on-heat-rate (watch NOx climb toward its limit) and all-weight-on-NOx (watch heat rate pay for it). Close the lab with the deployment sentence: in real plants this arrives as an ADVISORY — setpoint nudges with reasons — and closed-loop only ever follows years of trusted advisory operation.",
+   "lab": {
+    "id": "SIM-6",
+    "name": "Combustion multi-objective optimiser",
+    "mins": 8,
+    "do": [
+     "Open SIM-6; find the three weight sliders",
+     "Put all weight on heat rate — note NOx and CO",
+     "Put all weight on NOx — note what heat rate pays",
+     "Find a blend you would defend in a morning meeting",
+     "Read the recommended O₂, OFA and tilt for your blend"
+    ],
+    "see": [
+     "The operating point sliding along a frontier, not jumping to 'best'",
+     "Every objective improved only by paying another one",
+     "A recommendation with reasons — the shape advisories should take"
+    ],
+    "why": "Multi-objective is the honest formulation of combustion. Single-number 'optimum' claims hide a weight choice someone else made for you."
+   },
+   "n": 59
+  },
+  {
+   "layout": "mockup",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "16:02",
+   "title": "What the advisory looks like at 14:20",
+   "subtitle": "Optimisation, delivered the same way as the bearing advisory",
+   "notes": "[16:02–16:04] Close the optimisation arc by showing its stage-8: the same advisory discipline as Block 4, applied to efficiency. Setpoint nudges, expected recovery in kcal and rupees, the constraint it respects, and the operator's right to decline with a reason — which feeds the next retraining. One habit, two domains: claims with evidence, addressed to people.",
+   "mockup": {
+    "header": "Unit · combustion advisory · 14:20",
+    "rows": [
+     [
+      "Suggest",
+      "O₂ 3.4 → 3.1% · OFA +4% · tilt −2°",
+      "action"
+     ],
+     [
+      "Expected",
+      "−9 kcal/kWh ≈ ₹1.2 cr/quarter at current load",
+      "value"
+     ],
+     [
+      "Respecting",
+      "NOx ≤ limit − margin · mill margin ≥ 8%",
+      "info"
+     ],
+     [
+      "Evidence",
+      "Similar operating days, last 90 days, this coal band",
+      "info"
+     ],
+     [
+      "Operator",
+      "Accept · Decline (reason) — declines retrain the model",
+      "action"
+     ],
+     [
+      "Never",
+      "Writes to DCS. Advisory only, by design",
+      "warn"
+     ]
+    ]
+   },
+   "punch": "Same discipline as the bearing: a claim, evidence, a human decision. Never a hand on the controls.",
+   "n": 60
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "16:04",
+   "title": "The missing instrument — soft sensors",
+   "subtitle": "SIM-4 in one slide: coal quality every minute instead of every shift",
+   "notes": "[16:04–16:06] One breath on SIM-4, because every optimiser upstream depends on it: the lab GCV arrives once a shift, hours late; a soft sensor infers GCV every minute from mill behaviour — feeder rate against heat output, mill power, air temperatures. Our June as-fired GCV averaged 3,061 kcal/kg; the swing WITHIN a day is what the optimisers never see without this. Homework lab, and the natural third pilot behind the two in Block 7.",
+   "left": {
+    "label": "Laboratory GCV",
+    "value": "1 per shift",
+    "detail": "Accurate, authoritative — and hours late. The optimiser spends the whole shift assuming the morning's coal."
+   },
+   "right": {
+    "label": "Soft-sensor GCV",
+    "value": "every minute",
+    "detail": "Inferred from feeder rate, mill power and heat output. Calibrated against the lab — running between its samples."
+   },
+   "punch": "Every optimiser today is only as good as the coal number it is fed. SIM-4 is homework.",
+   "n": 61
+  },
+  {
+   "layout": "cards",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "16:06",
+   "title": "Adani Udupi — the nearest real deployment",
+   "subtitle": "One industry case, read the way an engineer should read it",
+   "notes": "[16:06–16:08] The single external case worth the room's time, because it maps onto our shape: AVEVA PI historian with ML on top, boiler and turbine efficiency computed on 15-minute windows, health indices on critical pumps and motors — on Indian coal units. Read it honestly in both directions: it proves the architecture works HERE, on plants like ours; it does not publish audited rupee savings, so it cannot size our prize. Proof of architecture, not proof of value — both halves said aloud.",
+   "cards": [
+    [
+     "What it is",
+     "AVEVA PI + ML at Udupi: 15-minute efficiency windows, health indices on key pumps and motors."
+    ],
+    [
+     "What it proves",
+     "The historian-plus-models architecture runs on Indian coal units in production. Feasibility, settled."
+    ],
+    [
+     "What it does not",
+     "No audited ₹ savings published. It cannot size OUR prize — only our bill can (and just did)."
+    ],
+    [
+     "What we take",
+     "The architecture pattern — and the discipline of 15-minute windows over monthly arguments."
+    ]
+   ],
+   "punch": "Proof of architecture, not proof of value. Our value number comes from our own bill.",
+   "n": 62
+  },
+  {
+   "layout": "process",
+   "block": "5 · Operational efficiency and optimisation",
+   "time": "16:08",
+   "title": "Block 5 close — the card",
+   "subtitle": "One candidate, in your handwriting, before tea-less sprint to vision",
+   "notes": "[16:08–16:10] The card exercise, two minutes, non-optional. Every participant writes ONE candidate home for our 176 kcal/kWh on a card — specific, physical, from their own unit knowledge: 'U9 condenser air ingress', 'HPH-6 bypassed since March'. Collect the cards. They get read against the pilot criteria at 16:40 — real names, real candidates, this station. The decomposition gave us the size; the room's own knowledge gives the address list.",
+   "steps": [
+    [
+     "1",
+     "Think",
+     "Where, physically, does OUR 176 kcal sit? Your unit, your knowledge."
+    ],
+    [
+     "2",
+     "Write",
+     "One candidate per card. Specific: equipment, unit, suspicion."
+    ],
+    [
+     "3",
+     "Hand in",
+     "Cards collected now — anonymous is fine, specific is better."
+    ],
+    [
+     "4",
+     "Return",
+     "At 16:40 the cards meet the pilot criteria. The best one may become the pilot."
+    ]
+   ],
+   "punch": "The bill gave the size. Your cards give the addresses.",
+   "n": 63
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:10",
+   "title": "A camera is a very wide sensor",
+   "subtitle": "The modest, true proposition for vision in a plant",
+   "notes": "[16:10–16:12] Reset expectations at the door: computer vision does nothing a good engineer cannot do. It does what a good engineer cannot do a hundred times a day, every day, without getting bored. That is the whole proposition — modest, and true, and it survives contact with reality, which grander claims do not. Then the bridge: everything the morning taught about models applies unchanged; only the sensor got wider.",
+   "left": {
+    "label": "An engineer, once",
+    "value": "1 inspection",
+    "detail": "Expert, contextual, accountable — and finite. Rounds happen once a shift, attention is scarce, fatigue is real."
+   },
+   "right": {
+    "label": "A camera, all day",
+    "value": "100+ / day",
+    "detail": "The same simple check — repeated relentlessly, in heat and dust and at 03:00, without boredom. Volume, not brilliance."
+   },
+   "punch": "Vision is volume, not brilliance. The judgement stays with the engineer.",
+   "n": 64
+  },
+  {
+   "layout": "process",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:12",
+   "title": "How a vision model learns",
+   "subtitle": "The same story as this morning — pixels in, backprop underneath",
+   "notes": "[16:12–16:15] Demystify by reuse: a vision model is the Theatre's network with a million times more dials and pixels for inputs. The one new idea is convolution — a small filter slid across the image, the same few weights reused everywhere, so the network learns 'edge' and 'helmet-curve' once rather than per-pixel. Everything else — forward pass, error, backprop, training windows, contamination — the room ALREADY knows. Say that explicitly; it is why the morning came first.",
+   "steps": [
+    [
+     "1",
+     "Pixels in",
+     "An image is a grid of numbers — brightness per pixel. Nothing more exotic enters."
+    ],
+    [
+     "2",
+     "Convolution",
+     "A small filter slides over the grid, reusing its weights — learns 'edge' once, finds it everywhere."
+    ],
+    [
+     "3",
+     "Same forward pass",
+     "Layers, bends, an output: helmet / no-helmet with a confidence. The Theatre's story, scaled."
+    ],
+    [
+     "4",
+     "Same backprop",
+     "Blame shared by the chain rule across millions of dials. Same rule, same risks, same windows."
+    ]
+   ],
+   "punch": "You already learned vision this morning. Only the sensor got wider.",
+   "n": 65
+  },
+  {
+   "layout": "warn",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:15",
+   "title": "What a vision model needs from you",
+   "subtitle": "The dataset is the project — again — plus glass that stays clean",
+   "notes": "[16:15–16:18] The historian lesson repeats with a lens on it. Labelled images by the thousand, lighting that stays consistent, cameras maintained in a plant that coats everything in coal dust, and retraining when anything changes — uniforms, camera angle, season. A dusty lens is a data-quality failure exactly like a frozen sensor: stage 4 of Block 4, for pixels. The 'never' line matters most and sets up SafetyNet's design next.",
+   "warnings": [
+    [
+     "Labelled data",
+     "Thousands of annotated images per class, covering YOUR site's conditions — not stock photos of clean workers."
+    ],
+    [
+     "Lighting & angle",
+     "A model trained on day shots misses night. Move the camera 2 metres and precision quietly falls."
+    ],
+    [
+     "Lens maintenance",
+     "Coal dust on glass is a frozen sensor. Camera cleaning is now an instrument-maintenance route."
+    ],
+    [
+     "Domain shift",
+     "New uniforms, new season, new contractor PPE colours — retrain triggers, exactly like after an overhaul."
+    ],
+    [
+     "Honest metrics",
+     "Precision AND recall, on your own footage, per class — not a vendor's demo reel."
+    ]
+   ],
+   "never": "Never point a first vision project at: face identification · discipline · protection systems · anything that names a worker",
+   "n": 66
+  },
+  {
+   "layout": "lab",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:18",
+   "title": "Live — SafetyNet",
+   "subtitle": "A PPE model trained by an engineer at this station, run in front of the room",
+   "notes": "[LAB] [16:18–16:28] Your model, your demo — the strongest ten minutes of the block. Setup, BEFORE the session: on the laptop, `pip install gradio` and run `python service/gradio_app.py` from the SafetyNet repo — the 19 MB model auto-downloads on first use, so do that first run on hotel or home Wi-Fi, not in the hall. It serves on localhost; no internet needed during the demo itself. Keep 4–5 plant-style photos in a folder ready, and one pre-run Batch-tab CSV as backup if the live run misbehaves — and if it misbehaves anyway, teach from the failure. In the room: use the Image tab; detections appear alongside PER-WORKER verdicts, deliberately side by side so the room can tell a detector miss from a policy decision. Say what it is: YOLO11s, 120 epochs on a free Colab T4 in ~90 minutes, 2,801 images, 10 classes, 19 MB — trained by an Assistant Engineer with zero procurement.",
+   "lab": {
+    "id": "SAFETYNET",
+    "name": "Per-worker PPE compliance — live",
+    "mins": 10,
+    "do": [
+     "Laptop: python service/gradio_app.py — localhost, offline once weights are cached",
+     "Image tab: run two or three plant-style photos",
+     "Show detections AND per-worker verdicts side by side",
+     "Show one UNKNOWN verdict and explain why it refused to judge",
+     "Change one policy line (required items) and re-run — no retraining",
+     "If anything misfires live, teach from the failure"
+    ],
+    "see": [
+     "Per-worker verdicts, not 'is there a helmet somewhere in this image'",
+     "An honest UNKNOWN on a small or edge-clipped worker",
+     "Policy changes taking effect instantly, with the model untouched"
+    ],
+    "why": "A working model trained by a station engineer on a free GPU collapses the distance between 'AI programme' and 'us'. The barrier was never hardware or budget."
+   },
+   "n": 67
+  },
+  {
+   "layout": "process",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:28",
+   "title": "The question nobody's dataset answers",
+   "subtitle": "From 'is there a hardhat in this image?' to 'is THAT worker wearing one?'",
+   "notes": "[16:28–16:31] The dataset labels PPE as independent boxes, so a detector alone answers a question nobody asked. The site's question is attribution — whose hardhat is that? — and bridging the two is where SafetyNet's real engineering lives: three priors combined — containment, anatomical position, and SCALE, because a worker 30 metres away stands 'inside' the box of a worker 3 metres away, and containment alone happily awards the near worker the far worker's helmet. This is feature engineering, Block 4 stage 5, in pixels — and mAP cannot measure any of it.",
+   "steps": [
+    [
+     "1",
+     "Detect",
+     "10-class YOLO finds people and PPE as independent boxes. The only GPU stage."
+    ],
+    [
+     "2",
+     "Attribute",
+     "Each PPE box matched to at most one worker: containment × anatomy × scale, as a soft AND."
+    ],
+    [
+     "3",
+     "Judge",
+     "Site policy decides what the attribution means — including an honest UNKNOWN."
+    ],
+    [
+     "4",
+     "Debounce",
+     "A violation must persist across frames before it becomes an event. One event, not 400 frames."
+    ]
+   ],
+   "punch": "mAP measures the detector. The site's question is answered two stages later — measure THOSE.",
+   "n": 68
+  },
+  {
+   "layout": "table-stat",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:31",
+   "title": "SafetyNet's honest numbers",
+   "subtitle": "What it measures, what it misses, what it refuses to guess",
+   "notes": "[16:31–16:34] Put the metrics up without varnish. mAP50 0.852, precision 0.921 — when it flags, it is right nine times in ten. Recall 0.787 — it MISSES one violation in five, and anyone deploying it must know that number. Then the design choices that make it deployable: below 64 pixels of worker it returns UNKNOWN rather than guessing; when Hardhat and NO-Hardhat fire on the same head within a 0.10 margin, UNKNOWN again. Absence of evidence is not evidence of a violation — systems that skip abstention get switched off in week two.",
+   "table": {
+    "head": [
+     "Metric",
+     "Value",
+     "What it means on the ground"
+    ],
+    "rows": [
+     [
+      "Precision",
+      "0.921",
+      "When it flags a violation, it is right ~9 times in 10"
+     ],
+     [
+      "Recall",
+      "0.787",
+      "It MISSES ~1 in 5 — a screening aid, not a guarantee"
+     ],
+     [
+      "mAP50 / mAP50-95",
+      "0.852 / 0.620",
+      "Detector quality — necessary, nowhere near sufficient"
+     ],
+     [
+      "Abstention",
+      "UNKNOWN",
+      "<64 px worker, edge-clipped, or ambiguous → refuses to judge"
+     ]
+    ]
+   },
+   "stat": "19 MB",
+   "statLabel": "the entire trained model — YOLO11s, 120 epochs, free Colab T4, ~90 minutes, zero procurement",
+   "punch": "It misses one in five and says so. A system that cannot say UNKNOWN cannot be trusted to say NO.",
+   "n": 69
+  },
+  {
+   "layout": "compare",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:34",
+   "title": "Policy out of the model",
+   "subtitle": "compliance.yaml — the same argument as the alert-rule block, in pixels",
+   "notes": "[16:34–16:36] The architecture slide, and it rhymes with the whole day: the detector reports what it sees; a policy FILE decides what it means. Required items, minimum worker size, ambiguity margin, persistence — all deployment-time text, changeable per area with zero retraining. Enclosed space needs masks? One line. This is exactly the Builder's alert-rule block: σ and persistence outside the model, owned by engineers, auditable on paper. One principle, both worlds.",
+   "compare": {
+    "leftTitle": "Lives in the model (retrain to change)",
+    "rightTitle": "Lives in compliance.yaml (edit to change)",
+    "rows": [
+     [
+      "What a hardhat looks like",
+      "Which items are required in which area"
+     ],
+     [
+      "What a person looks like",
+      "Minimum worker size before judging"
+     ],
+     [
+      "Detection confidence per box",
+      "The ambiguity margin that forces UNKNOWN"
+     ],
+     [
+      "—",
+      "How long a violation persists before an event"
+     ],
+     [
+      "—",
+      "Whether synthetic (orphan-PPE) workers may alarm"
+     ],
+     [
+      "Changes need a GPU and a dataset",
+      "Changes need a text editor and sign-off"
+     ]
+    ]
+   },
+   "punch": "The detector reports; the policy decides. Same principle as the alert rule this morning.",
+   "n": 70
+  },
+  {
+   "layout": "warn",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:36",
+   "title": "The industrial-relations question",
+   "subtitle": "Safety system or disciplinary system? Decided by the FIRST alert",
+   "notes": "[16:36–16:38] The make-or-break slide, and it is not technical. Unions will reasonably ask which system this is, and the answer is settled by what the first alert produces: if it is a show-cause notice against a named individual, the programme is finished, permanently, on day one. The design answer: zone-level statistics, no identification, no name-and-shame, the union briefed BEFORE the first camera — and recall of 0.787 quoted aloud, because a false alert against a named person is a grievance with the programme's name on it.",
+   "warnings": [
+    [
+     "Name-and-shame",
+     "The first individually-targeted alert converts a safety tool into a surveillance grievance. Permanently."
+    ],
+    [
+     "False accusation",
+     "At 0.921 precision, 1 flag in 13 is wrong. Against a named worker, that is a formal grievance waiting."
+    ],
+    [
+     "Discipline creep",
+     "If HR ever asks for the footage, the safety framing is dead — and so is the data source."
+    ],
+    [
+     "Union sequencing",
+     "Briefed first, with the miss-rate on the table, unions often support zone-level safety statistics."
+    ],
+    [
+     "Metric theatre",
+     "Zone compliance trending up may mean PPE improved — or workers learned the camera positions. Audit on foot."
+    ]
+   ],
+   "never": "Never use PPE vision for: identifying individuals · disciplinary evidence · performance appraisal · anything beyond zone statistics",
+   "n": 71
+  },
+  {
+   "layout": "maturity",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:38",
+   "title": "Where plant vision pays first",
+   "subtitle": "Ranked honestly — thermal before optical, statistics before individuals",
+   "notes": "[16:38–16:39] One minute, read the verdict column only, and note the pattern: the proven rows are THERMAL and volumetric — physics-adjacent measurements a camera happens to make — while the glamour applications sit lower. The course recommendation for a first project is drone stockpile volumetrics: outdoor, uncontroversial, safety-positive, and it produces a number finance already understands.",
+   "maturity": [
+    [
+     "Coal stockpile hot spots",
+     "Thermal imaging finds spontaneous combustion early",
+     "Proven — quick win"
+    ],
+    [
+     "Drone stockpile volumetrics",
+     "Photogrammetry replaces surveyors at height",
+     "Proven — recommended first"
+    ],
+    [
+     "Switchyard / joint hot spots",
+     "Scheduled thermal rounds, trended over time",
+     "Proven — extends existing practice"
+    ],
+    [
+     "Conveyor: hot idlers, tracking",
+     "Thermal + edge detection along the run",
+     "Emerging — high value in CHP"
+    ],
+    [
+     "PPE zone statistics",
+     "SafetyNet-class, zone-level only, union-first",
+     "Emerging — governance decides"
+    ],
+    [
+     "Flame / combustion vision",
+     "Camera-based flame analysis feeding tuning",
+     "Emerging — value depends on baseline"
+    ]
+   ],
+   "punch": "Start where the camera measures physics. Start where nobody's name is involved.",
+   "n": 72
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "6 · Computer vision and SafetyNet",
+   "time": "16:39",
+   "title": "Two independent witnesses",
+   "subtitle": "Vision and tags, corroborating — the day's discipline, unified",
+   "notes": "[16:39–16:40] Close the block by joining it to the morning: a thermal camera flags a hot idler; the power-versus-tonnage residual on the same conveyor drifts high. Two witnesses, different physics, same story — confidence multiplies. A vision alert is a CLAIM, exactly like day 255, and claims want corroboration before money moves. One discipline, every sensor: cameras included.",
+   "left": {
+    "label": "The camera says",
+    "value": "Hot idler, bay 7",
+    "detail": "Thermal spot 18 °C above neighbours, persisting across frames. A claim — from pixels."
+   },
+   "right": {
+    "label": "The tags say",
+    "value": "Power ↑ at same tonnage",
+    "detail": "Drive power residual drifting high for a week on the same belt. The same claim — from the historian."
+   },
+   "punch": "A vision alert is a claim, like day 255. Corroborate, then act.",
+   "n": 73
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "7 · From data to decisions",
+   "time": "16:40",
+   "title": "The other half of plant knowledge",
+   "subtitle": "The historian holds the numbers. The documents hold everything else.",
+   "notes": "[16:40–16:42] Pivot fast — twenty minutes left, three slides of GenAI, then decisions. The plant's other knowledge base: manuals, SOPs, log books, trip reports, OEM letters — none of it in the historian, most of it findable only through one retiring engineer's memory. A language model alone knows NONE of our documents and will answer questions about them confidently anyway; fluent wrongness near a permit-to-work is worse than no answer. The fix is not a bigger model — it is grounding.",
+   "left": {
+    "label": "What an LLM is",
+    "value": "Next-word prediction",
+    "detail": "Trained on public text. It contains none of our SOPs, limits or revisions — and no signal for when it is guessing."
+   },
+   "right": {
+    "label": "The danger mode",
+    "value": "Fluent wrongness",
+    "detail": "A confident, well-phrased answer citing nothing. Near a PTW or an OEM limit, fluency without provenance is a hazard."
+   },
+   "punch": "The failure mode is not gibberish — it is confidence. Grounding, not size, is the fix.",
+   "n": 74
+  },
+  {
+   "layout": "process",
+   "block": "7 · From data to decisions",
+   "time": "16:42",
+   "title": "RAG — the answer must quote our document",
+   "subtitle": "Retrieve first, answer second, cite always",
+   "notes": "[16:42–16:45] RAG in four steps, no mystique: chunk our documents, index them by meaning, retrieve the passages relevant to the question, and answer FROM those passages with document, revision and page attached to every claim. If nothing relevant is retrieved, say so — that is a feature. The practical lever, measured on the session's own bench: metadata. Clean section titles and revision tags moved recall from 84 to 90 percent — document hygiene, an AE-controllable input, beat the choice of model. The trust checklist: citation present, document current, numbers recomputed.",
+   "steps": [
+    [
+     "1",
+     "Chunk & index",
+     "Split manuals and SOPs into passages; index by meaning, tagged with document, revision, page."
+    ],
+    [
+     "2",
+     "Retrieve",
+     "The question finds its passages first — recall@5 of 90% hybrid on the session's measured bench."
+    ],
+    [
+     "3",
+     "Answer, grounded",
+     "The model writes ONLY from what was retrieved. Nothing retrieved → 'not found', honestly."
+    ],
+    [
+     "4",
+     "Cite",
+     "Document, revision, page on every claim. Trust check: citation present · doc current · numbers recomputed."
+    ]
+   ],
+   "punch": "Metadata beat the model: titles and revisions moved recall more than any algorithm choice.",
+   "n": 75
+  },
+  {
+   "layout": "lab",
+   "block": "7 · From data to decisions",
+   "time": "16:45",
+   "title": "Mini-lab — Pocket RAG, on your phone",
+   "subtitle": "Your own PDF, parsed, indexed and answered on the device — nothing leaves it",
+   "notes": "[LAB] [16:45–16:50] Five minutes, deliberately short — a taste, with the full exercise as homework. Everyone opens Pocket RAG from the landing page, loads any PDF on their phone (or the built-in sample SOP), asks one question, and CHECKS THE CITATION — tap through to the quoted passage. The sentence that matters in a government utility: everything ran on the handset; the document never left it. No server, no upload, no account. That is what makes this class of tool even discussable for our documents.",
+   "lab": {
+    "id": "POCKET RAG",
+    "name": "On-device retrieval over your own document",
+    "mins": 5,
+    "do": [
+     "Open Pocket RAG from the landing page",
+     "Load any PDF on your phone — or the sample SOP provided",
+     "Ask one question you know the answer to",
+     "Tap the citation and verify the quoted passage",
+     "Ask one question the document does NOT answer — watch it say so"
+    ],
+    "see": [
+     "Parsing, indexing and answering happening entirely on the handset",
+     "A citation on every claim — and an honest miss when nothing matches",
+     "Flight mode still works once the page has loaded"
+    ],
+    "why": "On-device changes the confidentiality conversation completely. Verify-the-citation is the habit that makes RAG safe to use near real procedures."
+   },
+   "n": 76
+  },
+  {
+   "layout": "fails",
+   "block": "7 · From data to decisions",
+   "time": "16:50",
+   "title": "Why these programmes fail",
+   "subtitle": "Eight failure modes — every one demonstrated on your phone today",
+   "notes": "[16:50–16:53] Read fast; the room has personally caused most of these since 10:30. Point at the blocks as you go: contamination was Experiment 3, seasonal windows Experiment 2, alert spam the budget table, the missing owner is the triage discussion, misdirected inputs the negative residual, ungrounded answers the RAG slides. The meta-lesson: none of these is an algorithm failure. They are decisions — windows, inputs, budgets, owners — made badly or not at all. Decisions have owners. That is the bridge to the pilots.",
+   "fails": [
+    [
+     "Training window touched the fault",
+     "Window ends before the judged period — procedurally, always"
+    ],
+    [
+     "Winter window, summer alarms",
+     "Span the seasons; retrain after overhaul, every time"
+    ],
+    [
+     "Alert spam killed adoption",
+     "Fix the alert budget FIRST; spend it with σ and persistence"
+    ],
+    [
+     "Symptom tags fed as inputs",
+     "Duty in, symptoms out — or the model expects the fault"
+    ],
+    [
+     "No named triage owner",
+     "Every advisory has a recipient before go-live, or none fire"
+    ],
+    [
+     "Model never retrained",
+     "Overhauls change 'normal' — retraining is maintenance"
+    ],
+    [
+     "Vendor black box",
+     "Demand the sensitivity table and the sister-machine run"
+    ],
+    [
+     "Ungrounded AI answers",
+     "Citation or it does not count — especially near a PTW"
+    ]
+   ],
+   "punch": "None of these is an algorithm failure. All of them are decisions nobody made.",
+   "n": 77
+  },
+  {
+   "layout": "pilot",
+   "block": "7 · From data to decisions",
+   "time": "16:53",
+   "title": "Choosing the first pilot — against your cards",
+   "subtitle": "The criteria, the candidates, and ninety days of proof",
+   "notes": "[16:53–16:56] Bring out the Block 5 cards and read three or four aloud against the criteria — this is the payoff of the exercise, real candidates in the room's own handwriting. Then the honest ranking: condition monitoring on one unit's fans and BFPs is the strongest first pilot — instrumented, felt, provable in 90 days. The 176-kcal hunt is the bigger money on a harder data problem — it goes second, sharing the same historian export. SafetyNet zones and GCV soft-sensing wait their turn. One pilot, done visibly well, buys the licence for everything after it.",
+   "criteria": [
+    "Tags already historised, one year clean",
+    "A failure mode this station has actually felt",
+    "Money visible monthly, from the bill",
+    "One named owner for triage",
+    "Provable inside 90 days",
+    "No capex, no procurement cycle",
+    "A sister machine for the negative control"
+   ],
+   "candidates": [
+    [
+     "Fans + BFPs, one 660 unit",
+     "High",
+     "Low",
+     "START — 90-day proof"
+    ],
+    [
+     "176-kcal loss accounting",
+     "High",
+     "Medium",
+     "Second — bigger money, harder data"
+    ],
+    [
+     "Aux scheduling advisory",
+     "Medium",
+     "Low",
+     "Fold into the second"
+    ],
+    [
+     "GCV soft sensor",
+     "Medium",
+     "Medium",
+     "Third — feeds the optimisers"
+    ],
+    [
+     "SafetyNet zone statistics",
+     "Medium",
+     "Medium",
+     "Governance first, then trial"
+    ],
+    [
+     "RAG on station SOPs",
+     "Medium",
+     "Low",
+     "Quiet parallel — document hygiene"
+    ]
+   ],
+   "plan": [
+    [
+     "Days 1–30",
+     "Tag list, one-year export, quality profile, training windows chosen and written down",
+     "Pilot owner + C&I"
+    ],
+    [
+     "Days 31–60",
+     "Models trained; alert budget set at 2/month; sister machines wired as negative controls",
+     "Pilot owner"
+    ],
+    [
+     "Days 61–90",
+     "Live advisories into the morning meeting; every one triaged, closed and costed",
+     "Triage owner + HOD"
+    ]
+   ],
+   "n": 78
+  },
+  {
+   "layout": "compare",
+   "block": "7 · From data to decisions",
+   "time": "16:56",
+   "title": "The two pilots, side by side",
+   "subtitle": "Different money, different data problems, one shared foundation",
+   "notes": "[16:56–16:57] One minute: the two pilots differ in kind, and knowing which is which prevents the classic mistake of judging the second by the first's timeline. Condition monitoring proves the DISCIPLINE — triage, budgets, owners — in 90 days on scenario-scale money. Loss accounting chases the ₹22.87 crore but needs performance-grade data quality and patience. They share one historian export, one data-quality effort, one owner structure — which is why they are phases, not rivals.",
+   "compare": {
+    "leftTitle": "Pilot 1 · condition monitoring",
+    "rightTitle": "Pilot 2 · the 176-kcal hunt",
+    "rows": [
+     [
+      "Fans + BFPs of one 660 unit",
+      "Condenser, heaters, sprays — continuous attribution"
+     ],
+     [
+      "Money: availability protected",
+      "Money: ₹22.87 cr/month gap localised"
+     ],
+     [
+      "Data: tags we already trust",
+      "Data: performance-grade quality needed"
+     ],
+     [
+      "Provable in 90 days",
+      "Provable in a season"
+     ],
+     [
+      "Risk: alert fatigue — budget fixes it",
+      "Risk: attribution disputes — measurement fixes them"
+     ],
+     [
+      "Proves the discipline",
+      "Spends the discipline on the big number"
+     ]
+    ]
+   },
+   "punch": "Phase 1 proves the discipline. Phase 2 points it at ₹22.87 crore. Same export, same owners.",
+   "n": 79
+  },
+  {
+   "layout": "boundary",
+   "block": "7 · From data to decisions",
+   "time": "16:57",
+   "title": "The safety boundary",
+   "subtitle": "What AI may never touch here — policy, not preference",
+   "notes": "[16:57–16:58] Non-negotiable, one minute, verbatim: nothing built or piloted here writes to DCS logic, touches protections or interlocks, or carries PTW authority. Advisories are addressed to people; people decide. SafetyNet reports zones, never names. And the cyber rules are the same ones the station already knows — this adds no new attack surface if the boundary holds. Write the boundary into the pilot charter on day one, because retrofitting it after an incident is how programmes end.",
+   "layers": [
+    [
+     "Never",
+     "Protection systems, interlocks, trip logic, PTW authority, closed-loop control of anything — and identifying individuals on camera",
+     "no"
+    ],
+    [
+     "Only with controls",
+     "Operator-facing advisories with named owners; setpoint suggestions a human accepts or declines with a reason; zone-level safety statistics",
+     "care"
+    ],
+    [
+     "Freely",
+     "Historian analytics, residual monitoring, loss accounting, document retrieval with citations, training and simulation — everything in this course",
+     "yes"
+    ]
+   ],
+   "cyber": [
+    [
+     "Air-gap respected",
+     "Everything today ran client-side. Plant systems export data OUT; nothing connects IN."
+    ],
+    [
+     "No cloud dependency",
+     "Phone labs cache offline. Pilot models run on-prem hardware the station already owns."
+    ],
+    [
+     "Data leaves by policy",
+     "Historian exports follow the same approval as any data leaving today. RAG stays on-device or on-prem."
+    ],
+    [
+     "Model files are files",
+     "Version them, hash them, back them up — the 19 MB SafetyNet weight file is config, not infrastructure."
+    ],
+    [
+     "Audit by design",
+     "Every advisory logged with evidence and outcome. The JSONL trail is the programme's defence in any review."
+    ]
+   ],
+   "n": 80
+  },
+  {
+   "layout": "bignumber-compare",
+   "block": "7 · From data to decisions",
+   "time": "16:58",
+   "title": "The two numbers, reconnected",
+   "subtitle": "Where the morning's reading and the bill's crore ended up",
+   "notes": "[16:58–16:59] Close the spine. The 74.2 °C reading became a residual, a day-255 advisory, a vote, and a work order — the full journey from data to a decision, executed by this room on its own phones. The ₹22.87 crore became a decomposition, a lab that localised it, a card in their handwriting, and a pilot plan with owners and ninety days. Two numbers, two journeys, one method: measure, expect, compare, decide.",
+   "left": {
+    "label": "The reading's journey",
+    "value": "74.2 °C → work order",
+    "detail": "Sensor → residual → advisory day 255 → the room's vote → a signed decision. You ran every step yourselves."
+   },
+   "right": {
+    "label": "The crore's journey",
+    "value": "₹22.87 cr → a pilot",
+    "detail": "Bill → decomposition → SIM-2 localisation → your cards → a 90-day plan with named owners."
+   },
+   "punch": "Measure · expect · compare · decide. That is the whole method — for degrees and for crores.",
+   "n": 81
+  },
+  {
+   "layout": "close",
+   "block": "Close",
+   "time": "16:59",
+   "title": "FROM DATA TO DECISIONS",
+   "subtitle": "The data is already in our historian. The decision layer is us.",
+   "notes": "[16:59–17:00] Close warm and specific. Three Monday actions, each with a named recipient — you. Repeat the offer: every artefact stays live at the URL, works on their phones, and the other Theatre modules and Simulation Lab exercises are homework with answer keys. End on the sentence of the day: the data was already there — what this station adds is the decision layer, and the decision layer is people. Thank the room; stay for questions.",
+   "monday": [
+    "Send me your unit's five worst actors — machine, failure history, and which tags they carry",
+    "Run the Model Builder on ONE real historian export from your area — the CSV reader handles our format",
+    "Name the triage owner for your area: who receives an advisory if one arrives tomorrow morning"
+   ],
+   "closing": "The data is already in our historian. The decision layer is us.",
+   "n": 82
+  }
+ ]
+}
