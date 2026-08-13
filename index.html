@@ -3,211 +3,355 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AI for Power Plants — MAHAGENCO Training Centre, Nashik</title>
-<meta name="description" content="Six working browser artefacts from a one-day session on AI for thermal power plants. Everything runs on your own machine.">
-<meta name="theme-color" content="#1C2530">
+<title>AI for Power Plants — hands-on artefacts, on your own device</title>
+<meta name="description" content="Working browser artefacts for AI in thermal power plants: a 3-D algorithm theatre, a predictive-maintenance simulator, a no-code model builder, a simulation lab and on-device RAG. Everything runs on your own machine.">
+<meta name="theme-color" content="#101823">
 <style>
+/* =====================================================================
+   AI for Power Plants — landing page.
+   Self-contained on purpose: no webfonts, no CDN, no script. The page
+   must open from a file:// double-click, from GitHub Pages, and from a
+   phone in flight mode, identically. Everything decorative is CSS or
+   inline SVG.
+   ===================================================================== */
 :root{
-  --ink:#1C2530; --ink2:#3A4757; --mut:#6B7A8C; --line:#DDE4EC;
-  --bg:#F7F9FB; --card:#FFFFFF; --acc:#1F5C8B; --hot:#A8261E; --good:#256B45;
-  --shadow:0 1px 2px rgba(28,37,48,.06),0 8px 24px rgba(28,37,48,.06);
+  --ink:#101823; --ink2:#1C2530; --ink3:#3A4757; --mut:#66788C;
+  --line:#E2E8F0; --line2:#EDF1F6;
+  --bg:#F6F8FB; --card:#FFFFFF;
+  --ember:#D96A16; --ember-2:#F08A3C; --teal:#0B8F86; --blue:#1E74C0;
+  --hot:#A8261E; --good:#256B45;
+  --r:18px;
+  --shadow:0 1px 2px rgba(16,24,35,.05), 0 10px 30px rgba(16,24,35,.07);
+  --shadow-lift:0 2px 4px rgba(16,24,35,.06), 0 18px 44px rgba(16,24,35,.13);
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 html,body{margin:0;padding:0}
 body{
   background:var(--bg); color:var(--ink);
-  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  -webkit-font-smoothing:antialiased;
+  font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }
-.wrap{max-width:980px;margin:0 auto;padding:0 20px}
-header{background:var(--ink);color:#fff;padding:44px 0 40px}
-header .wrap{max-width:980px}
-h1{margin:0 0 8px;font-size:29px;line-height:1.2;letter-spacing:-.4px;font-weight:650}
-header p{margin:0;color:#B9C6D4;font-size:15px;max-width:62ch}
-header .who{margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.14);
-  color:#8FA2B5;font-size:13.5px;max-width:62ch}
-header .who b{color:#DCE6EF;font-weight:600}
+.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--ember);outline-offset:2px;border-radius:6px}
+::selection{background:#F7DCC4}
 
-.claim{background:#12303F;color:#CFE3F0;font-size:14px;padding:14px 0}
-.claim .wrap{display:flex;gap:10px;align-items:flex-start}
-.claim b{color:#fff}
+/* ---------------------------------------------------------------- nav */
+nav{
+  position:sticky;top:0;z-index:40;
+  background:rgba(16,24,35,.82);
+  -webkit-backdrop-filter:saturate(140%) blur(14px); backdrop-filter:saturate(140%) blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+nav .wrap{display:flex;align-items:center;gap:18px;height:58px}
+.mark{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:-.2px}
+.mark .dot{width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,var(--ember),var(--ember-2));
+  box-shadow:0 0 12px rgba(217,106,22,.55)}
+nav .links{margin-left:auto;display:flex;gap:4px}
+nav .links a{color:#B9C6D4;text-decoration:none;font-size:13.5px;font-weight:600;padding:8px 12px;border-radius:8px;
+  transition:color .15s, background .15s}
+nav .links a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.mark{white-space:nowrap}
+@media(max-width:640px){
+  nav .links a.hide-s{display:none}
+  .mark{font-size:13.5px}
+  nav .links a{font-size:12.5px;padding:8px 9px}
+}
 
-section{padding:38px 0 6px}
-h2{font-size:13px;letter-spacing:.10em;text-transform:uppercase;color:var(--mut);
-   margin:0 0 16px;font-weight:700}
+/* --------------------------------------------------------------- hero */
+.hero{
+  position:relative; overflow:hidden; color:#fff;
+  background:
+    radial-gradient(1100px 480px at 12% -10%, rgba(217,106,22,.20), transparent 60%),
+    radial-gradient(900px 420px at 88% -16%, rgba(11,143,134,.17), transparent 58%),
+    radial-gradient(700px 380px at 55% 118%, rgba(30,116,192,.14), transparent 60%),
+    linear-gradient(180deg,#0E1520 0%, #101823 55%, #121B27 100%);
+}
+.hero::before{ /* faint engineering grid */
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(900px 520px at 50% 0%, #000 30%, transparent 78%);
+  -webkit-mask-image:radial-gradient(900px 520px at 50% 0%, #000 30%, transparent 78%);
+}
+.hero .wrap{position:relative;padding-top:72px;padding-bottom:36px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;color:#F0A45E;background:rgba(217,106,22,.12);border:1px solid rgba(217,106,22,.35);
+  padding:6px 12px;border-radius:999px;margin-bottom:22px}
+.eyebrow .pulse{width:7px;height:7px;border-radius:50%;background:var(--ember-2);box-shadow:0 0 0 0 rgba(240,138,60,.6);
+  animation:pulse 2.4s infinite}
+@keyframes pulse{ 70%{box-shadow:0 0 0 9px rgba(240,138,60,0)} 100%{box-shadow:0 0 0 0 rgba(240,138,60,0)} }
+h1{
+  margin:0; font-size:clamp(38px, 6.5vw, 62px); line-height:1.04; letter-spacing:-1.5px; font-weight:800;
+}
+h1 .grad{background:linear-gradient(92deg,#F08A3C 0%, #F6B173 45%, #6FC7C0 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent}
+.hero .chips{display:flex;flex-wrap:wrap;gap:9px;margin:28px 0 0}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#D5DEE7;
+  background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);padding:8px 14px;border-radius:999px}
+.chip svg{flex:0 0 auto;opacity:.9}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 0}
+.btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:700;font-size:15px;
+  padding:13px 22px;border-radius:12px;transition:transform .15s, box-shadow .15s, background .15s}
+.btn.primary{background:linear-gradient(135deg,var(--ember),#C85E10);color:#fff;
+  box-shadow:0 6px 22px rgba(217,106,22,.35)}
+.btn.primary:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(217,106,22,.45)}
+.btn.ghost{background:rgba(255,255,255,.07);color:#E8EEF4;border:1px solid rgba(255,255,255,.16)}
+.btn.ghost:hover{background:rgba(255,255,255,.12)}
 
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:760px){ .grid{grid-template-columns:1fr} h1{font-size:24px} }
+/* the residual strip — the course's one idea, drawn once */
+.spark{position:relative;margin:44px -22px 0;padding:0}
+.spark svg{display:block;width:100%;height:88px}
+.spark .cap{position:absolute;right:26px;bottom:10px;font-size:11px;color:#7E92A6;letter-spacing:.04em}
+@media(max-width:640px){ .spark .cap{display:none} }
 
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column}
-.card h3{margin:0 0 6px;font-size:17.5px;font-weight:650;letter-spacing:-.2px}
-.card .sub{color:var(--acc);font-size:12.5px;font-weight:600;letter-spacing:.02em;margin:0 0 10px}
-.card p{margin:0 0 16px;color:var(--ink2);font-size:14.5px;flex:1}
+/* ------------------------------------------------------------ sections */
+section{padding:54px 0 8px;scroll-margin-top:70px}
+.sec-head{margin:0 0 22px}
+.sec-head .kick{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember);margin:0 0 6px}
+.sec-head h2{margin:0;font-size:clamp(22px,3.2vw,28px);letter-spacing:-.5px;font-weight:750;color:var(--ink)}
+.sec-head p{margin:8px 0 0;color:var(--mut);font-size:15px;max-width:64ch}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(305px,1fr));gap:18px}
+
+.card{
+  position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:24px 24px 22px;box-shadow:var(--shadow);display:flex;flex-direction:column;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift);border-color:#D3DCE6}
+.card::after{ /* accent hairline that lights on hover */
+  content:"";position:absolute;left:24px;right:24px;top:0;height:3px;border-radius:0 0 4px 4px;
+  background:linear-gradient(90deg,var(--ember),var(--ember-2));opacity:0;transition:opacity .18s}
+.card:hover::after{opacity:1}
+.card .icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 0 16px;
+  background:linear-gradient(160deg,#FBF0E4,#F6E3CE);border:1px solid #F0DDC4}
+.card .icon.t2{background:linear-gradient(160deg,#E2F1F0,#D2E9E7);border-color:#C4E0DD}
+.card .icon.t3{background:linear-gradient(160deg,#E4EEF8,#D5E5F4);border-color:#C6DBEF}
+.card h3{margin:0 0 4px;font-size:18.5px;font-weight:720;letter-spacing:-.3px}
+.card .meta{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.meta span{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);
+  background:var(--line2);border-radius:999px;padding:3px 9px}
+.meta span.hot{background:#FBEEEC;color:var(--hot)}
+.meta span.new{background:#E8F3EC;color:var(--good)}
+.card p{margin:0 0 18px;color:var(--ink3);font-size:14.5px;flex:1}
 .card p em{color:var(--ink);font-style:italic;font-weight:600}
-.go{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
-  background:var(--ink);color:#fff;text-decoration:none;font-size:14px;font-weight:600;
-  padding:9px 16px;border-radius:9px;transition:background .15s}
-.go:hover{background:#2C3B4D}
-.go.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
-.go.alt:hover{background:#F2F5F8}
-.go .arr{opacity:.6}
+.go{display:inline-flex;align-items:center;gap:9px;align-self:flex-start;
+  color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:700;
+  padding:10px 16px;border-radius:10px;background:var(--ink2);color:#fff;
+  transition:background .15s, gap .15s}
+.go:hover{background:#2E3D50;gap:13px}
+.go .arr{opacity:.65;transition:transform .15s}
 
-.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
-  text-transform:uppercase;padding:3px 8px;border-radius:20px;margin-left:8px;vertical-align:2px}
-.tag.new{background:#E8F3EC;color:var(--good)}
-.tag.local{background:#FBEEEC;color:var(--hot)}
+.card.wide{flex-direction:row;gap:22px;align-items:flex-start}
+.card.wide .body{flex:1;display:flex;flex-direction:column}
+@media(max-width:700px){ .card.wide{flex-direction:column} }
 
-ul.files{list-style:none;padding:0;margin:0;border:1px solid var(--line);
-  border-radius:14px;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
-ul.files li{display:flex;align-items:center;gap:12px;padding:13px 18px;border-top:1px solid var(--line);font-size:14.5px}
-ul.files li:first-child{border-top:0}
-ul.files a{color:var(--ink);text-decoration:none;font-weight:600}
-ul.files a:hover{color:var(--acc);text-decoration:underline}
-ul.files .sz{margin-left:auto;color:var(--mut);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
-ul.files .kind{display:inline-block;min-width:44px;font-size:10.5px;font-weight:700;letter-spacing:.05em;
-  color:var(--mut);border:1px solid var(--line);border-radius:5px;padding:2px 5px;text-align:center}
+/* ------------------------------------------------------------ downloads */
+.files{list-style:none;padding:0;margin:0;border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+.files li{display:flex;align-items:center;gap:14px;padding:15px 20px;border-top:1px solid var(--line2)}
+.files li:first-child{border-top:0}
+.files li:hover{background:#FAFBFD}
+.files a{color:var(--ink);text-decoration:none;font-weight:650;font-size:14.5px}
+.files a:hover{color:var(--ember)}
+.files .sz{margin-left:auto;color:var(--mut);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kind{flex:0 0 52px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-align:center;
+  border-radius:7px;padding:5px 0}
+.kind.pptx{background:#FBEEEC;color:#B3401A}
+.kind.pdf{background:#FBF0DC;color:#8A5D07}
+.kind.docx{background:#E4EEF8;color:#1E5C93}
 
-.finding{background:#FFF8E9;border:1px solid #EBDCB8;border-left:4px solid #C9962C;
-  border-radius:10px;padding:18px 20px;margin:6px 0 0}
-.finding p{margin:0 0 10px;font-size:14.5px;color:#4A3D22}
-.finding p:last-child{margin:0}
-.finding b{color:#7A5A12}
+.note{color:var(--mut);font-size:13.5px;margin:14px 0 0;max-width:72ch}
+.note code{background:#EAEFF5;border-radius:5px;padding:1px 6px;font-size:12.5px}
 
-.note{color:var(--mut);font-size:13.5px;margin:14px 0 0;max-width:70ch}
-.note code{background:#EDF1F5;border-radius:4px;padding:1px 5px;font-size:12.5px}
+/* -------------------------------------------------------------- footer */
+footer{margin-top:64px;background:var(--ink);color:#93A5B6;font-size:13.5px}
+footer .wrap{padding-top:34px;padding-bottom:44px;display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start}
+footer .who{max-width:46ch;line-height:1.7}
+footer .who b{color:#E4EBF1;font-weight:650}
+footer .right{margin-left:auto;text-align:right;line-height:2}
+footer a{color:#C8D4DE;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)}
+footer a:hover{color:#fff;border-bottom-color:#fff}
+@media(max-width:640px){ footer .right{margin-left:0;text-align:left} }
 
-footer{margin-top:44px;padding:26px 0 40px;border-top:1px solid var(--line);
-  color:var(--mut);font-size:13px}
-footer a{color:var(--acc)}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
 </style>
 </head>
 <body>
 
-<header>
+<nav aria-label="Site">
   <div class="wrap">
-    <h1>AI for Power Plants</h1>
-    <p>Working software from a one-day session at the MAHAGENCO Training Centre, Nashik, for
-       engineers from Nashik, Koradi, Khaperkheda, Bhusawal and Paras.</p>
-    <div class="who">
-      <b>S. H. Parihar</b> — 16 years in the power sector; author of <i>Lean AI</i>,
-      <i>Learn the English that AI Understands</i> and <i>AI for Busy Parents</i>.
+    <a class="mark" href="#top"><span class="dot" aria-hidden="true"></span>AI for Power Plants</a>
+    <div class="links">
+      <a href="#artefacts">Artefacts</a>
+      <a href="#course">Course material</a>
+      <a class="hide-s" href="#bench">RAG bench</a>
+      <a class="hide-s" href="third-party.html">Licences</a>
     </div>
   </div>
-</header>
+</nav>
 
-<div class="claim"><div class="wrap">
-  <span>Everything on this page runs in <b>your</b> browser. No API key, no account, no server doing
-  the work. Every number on every screen is computed on the machine in front of you.</span>
-</div></div>
+<div class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow"><span class="pulse" aria-hidden="true"></span>Runs entirely on your device</span>
+    <h1>AI for <span class="grad">Power Plants</span></h1>
+
+    <div class="chips" aria-label="What makes this different">
+      <span class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6FC7C0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Works on your phone</span>
+      <span class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F0A45E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.4 14.7A7 7 0 0 0 6.6 9.3a5.5 5.5 0 1 0-.6 10.7h11a4 4 0 0 0 1.4-5.3z"/><line x1="4" y1="2" x2="20" y2="20"/></svg>No cloud, no account</span>
+      <span class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8FB8E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 3 7v6c0 5 3.8 8.4 9 9 5.2-.6 9-4 9-9V7z"/><path d="m9 12 2 2 4-4"/></svg>Nothing you open ever leaves the device</span>
+      <span class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B9C6D4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>Every number computed live</span>
+    </div>
+
+    <div class="cta">
+      <a class="btn primary" href="dist/MAHAGENCO_PdM_Simulator.html">Open the PdM Simulator
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn ghost" href="#course">Course material
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
+    </div>
+  </div>
+
+  <!-- The one idea of the whole pack: actual vs expected, and the residual
+       opening between them. Decorative, but not arbitrary. -->
+  <div class="spark" aria-hidden="true">
+    <svg viewBox="0 0 1200 88" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#D96A16" stop-opacity=".22"/>
+          <stop offset="1" stop-color="#D96A16" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="M0,56 C80,50 140,60 220,54 C300,48 340,38 420,42 C500,46 540,58 620,54 C700,50 740,40 820,44 C860,46 890,50 920,49 C980,47 1030,38 1080,28 C1130,18 1170,10 1200,6 L1200,88 L0,88 Z" fill="url(#fade)"/>
+      <path d="M0,56 C80,50 140,60 220,54 C300,48 340,38 420,42 C500,46 540,58 620,54 C700,50 740,40 820,44 C860,46 890,50 920,49 C980,47 1030,38 1080,28 C1130,18 1170,10 1200,6"
+            fill="none" stroke="#F08A3C" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M0,58 C80,54 140,62 220,57 C300,52 340,44 420,47 C500,50 540,60 620,57 C700,54 740,46 820,49 C860,51 890,54 920,54 C980,54 1030,53 1080,52 C1130,52 1170,52 1200,52"
+            fill="none" stroke="#4E9E98" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+    </svg>
+    <span class="cap">actual — expected · the residual is the finding</span>
+  </div>
+</div>
 
 <div class="wrap">
 
-<section>
-  <h2>Open in the browser</h2>
+<section id="artefacts">
+  <div class="sec-head">
+    <p class="kick">Open in the browser</p>
+    <h2>Five working artefacts, zero installs</h2>
+    <p>Each one is a single page. Open it, and it runs — on a workstation, on a phone,
+       and offline once loaded.</p>
+  </div>
+
   <div class="grid">
 
     <div class="card">
+      <div class="icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C85E10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.2 2.2M16.9 16.9l2.2 2.2M19.1 4.9l-2.2 2.2M7.1 16.9l-2.2 2.2"/></svg></div>
       <h3>Algorithm Anatomy Theatre</h3>
-      <div class="sub">Six 3-D modules · 924 KB</div>
+      <div class="meta"><span>Six 3-D modules</span><span>Tap a neuron open</span></div>
       <p>Opens up the machinery of k-nearest neighbours, PCA, gradient descent, a neural network,
-         retrieval and k-means. One real reading — an ID fan bearing at 74.2&nbsp;°C — is followed
+         retrieval and k-means. One reading — an ID fan bearing at 74.2&nbsp;°C — is followed
          through all six, so you watch the same number become a decision six different ways.</p>
       <a class="go" href="dist/MAHAGENCO_Algorithm_Theatre.html">Open the Theatre <span class="arr">→</span></a>
     </div>
 
     <div class="card">
+      <div class="icon t2" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0B8F86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 20V9l4-3 4 3 4-6 3 4v13"/></svg></div>
       <h3>Predictive Maintenance Simulator</h3>
-      <div class="sub">Eight stages, five equipment cases · 820 KB</div>
+      <div class="meta"><span>8 stages</span><span>5 machines</span><span>3-D, degrades live</span></div>
       <p>The whole path from a sensor reading to a signed work order, with a 3-D model of the machine
-         that visibly degrades as you scrub through a full year of hourly data. Shows where the money is, and where
-         the false alarms come from.</p>
+         that visibly degrades as you scrub through a full year of hourly data. Shows where the money
+         is, and where the false alarms come from.</p>
       <a class="go" href="dist/MAHAGENCO_PdM_Simulator.html">Open the simulator <span class="arr">→</span></a>
     </div>
 
     <div class="card">
+      <div class="icon t3" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E74C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></svg></div>
+      <h3>Model Builder</h3>
+      <div class="meta"><span class="new">No code</span><span>Trains in ~1.5 s</span><span>Your own CSV works</span></div>
+      <p>Build a neural network from blocks — drag on a desktop, tap on a phone — on a year of hourly
+         readings from any of five machines, or <em>drop in your own historian export</em>. Tap any
+         block to see the exact arithmetic it performs, with the live model's numbers in it.</p>
+      <a class="go" href="dist/MAHAGENCO_Model_Builder.html">Open the builder <span class="arr">→</span></a>
+    </div>
+
+    <div class="card">
+      <div class="icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C85E10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h7M8 11h7"/></svg></div>
       <h3>AI Simulation Lab</h3>
-      <div class="sub">Eight models on real June 2026 figures · 144 KB</div>
-      <p>Heat rate decomposition, auxiliary power, mill scheduling, anomaly detection and more —
-         built on the stations' own numbers, not a textbook dataset. Change an input and the
-         crore-rupee consequence moves with it.</p>
+      <div class="meta"><span>8 models</span><span>Real June 2026 figures</span></div>
+      <p>Heat rate decomposition, auxiliary power scheduling, combustion trade-offs, anomaly
+         detection and more — built on the stations' own numbers, not a textbook dataset. Change an
+         input and the crore-rupee consequence moves with it.</p>
       <a class="go" href="dist/MAHAGENCO_AI_Simulation_Lab.html">Open the lab <span class="arr">→</span></a>
     </div>
 
     <div class="card">
-      <h3>Pocket RAG <span class="tag new">on your phone</span></h3>
-      <div class="sub">Bring your own document · installs as an app</div>
+      <div class="icon t2" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0B8F86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.9-4.9"/></svg></div>
+      <h3>Pocket RAG</h3>
+      <div class="meta"><span class="new">On your phone</span><span>Installs as an app</span><span>Flight mode OK</span></div>
       <p>Open a PDF or Word file <em>on your own phone</em>. It is parsed, split into passages,
-         embedded and searched on the device. The file is never uploaded — there is nowhere for it
-         to go. Add it to your home screen and it works in flight mode.</p>
+         embedded and searched on the device — the file is never uploaded, because there is nowhere
+         for it to go. Every answer carries its citation.</p>
       <a class="go" href="pocket-rag/">Open Pocket RAG <span class="arr">→</span></a>
     </div>
 
-    <div class="card">
-      <h3>Model Builder <span class="tag new">no code</span></h3>
-      <div class="sub">Drag blocks, train a real network · 98 KB</div>
-      <p>Build a neural network by dragging blocks, on a year of hourly readings from any of the five machines
-         — or <em>drop in your own historian export</em>. It trains here, in about a second, and a side panel
-         writes out the same model as pandas and Keras so you can see the blocks are not a toy.</p>
-      <a class="go" href="dist/MAHAGENCO_Model_Builder.html">Open the builder <span class="arr">→</span></a>
-    </div>
-
   </div>
 </section>
 
-<section>
-  <h2>Run on your own machine</h2>
-  <div class="card">
-    <h3>Local RAG Bench <span class="tag local">needs a local server</span></h3>
-    <div class="sub">A real ONNX embedding model on WebGPU, over 1,302 chunks of plant material</div>
-    <p>Retrieval-augmented generation with a genuine embedding model and an optional local language
-       model, measured rather than asserted: 31 hand-marked questions, recall@5 of 84% dense, 84%
-       keyword, <b>90% hybrid</b>, median query 43–48&nbsp;ms. It is the one thing here that will not
-       run from this page — it loads several hundred megabytes of model weights from disk, so it ships
-       with a launcher instead.</p>
+<section id="course">
+  <div class="sec-head">
+    <p class="kick">Course material</p>
+    <h2>AI in Power Plant: From Data to Decisions</h2>
+    <p>The one-day internal faculty programme at Koradi TPS (3×660 MW) — seven blocks, six hands-on
+       labs on the artefacts above, and every block ends on a decision.</p>
   </div>
-  <p class="note">Clone the repository, then <code>cd rag-bench &amp;&amp; python3 get-models.py small &amp;&amp;
-     python3 serve.py</code>. Add <code>--lan</code> and phones on the same Wi-Fi can use the retrieval
-     side; generation needs a secure origin, which a bare LAN address is not.</p>
-</section>
-
-<section>
-  <h2>Course material — AI in Power Plant: From Data to Decisions</h2>
-  <p class="note" style="margin-top:0">The one-day internal faculty programme at Koradi TPS (3×660 MW):
-     seven blocks, six hands-on labs on the artefacts above, every block ending on a decision.</p>
   <ul class="files">
-    <li><span class="kind">PPTX</span><a href="dist/AI_in_Power_Plant_From_Data_to_Decisions_Koradi.pptx">Slide deck — 82 slides, with timed speaker notes</a><span class="sz">2.1 MB</span></li>
-    <li><span class="kind">PDF</span><a href="dist/AI_in_Power_Plant_From_Data_to_Decisions_Koradi.pdf">Slide deck, print view</a><span class="sz">1.3 MB</span></li>
-    <li><span class="kind">DOCX</span><a href="dist/AI_in_Power_Plant_Koradi_Course_Material.docx">Participant course material, editable</a><span class="sz">36 KB</span></li>
-    <li><span class="kind">PDF</span><a href="dist/AI_in_Power_Plant_Koradi_Course_Material.pdf">Participant course material — 17 pages</a><span class="sz">232 KB</span></li>
+    <li><span class="kind pptx">PPTX</span><a href="dist/AI_in_Power_Plant_From_Data_to_Decisions_Koradi.pptx">Slide deck — 82 slides, with timed speaker notes</a><span class="sz">2.1 MB</span></li>
+    <li><span class="kind pdf">PDF</span><a href="dist/AI_in_Power_Plant_From_Data_to_Decisions_Koradi.pdf">Slide deck, print view</a><span class="sz">1.3 MB</span></li>
+    <li><span class="kind docx">DOCX</span><a href="dist/AI_in_Power_Plant_Koradi_Course_Material.docx">Participant course material, editable</a><span class="sz">36 KB</span></li>
+    <li><span class="kind pdf">PDF</span><a href="dist/AI_in_Power_Plant_Koradi_Course_Material.pdf">Participant course material — 17 pages</a><span class="sz">232 KB</span></li>
   </ul>
 </section>
 
-<section>
-  <h2>The finding that runs through all of it</h2>
-  <div class="finding">
-    <p><b>Net heat rate already contains auxiliary power.</b> Decompose it and Nashik's boiler and
-       turbine are <i>beating</i> the norm — 2,440 against 2,458 kcal/kWh gross — while the entire
-       50 kcal/kWh penalty comes from auxiliary consumption at 12.96% against a norm of 10.75%.
-       Koradi 8-10 is the mirror image: a genuine 176 kcal/kWh thermodynamic gap.</p>
-    <p>The two effects overlap by construction, so the <b>₹56.35 crore heat-rate gap and the
-       ₹32.91 crore auxiliary excess must never be added together.</b> Getting this wrong is the
-       most expensive arithmetic error available in a station review.</p>
+<section id="bench">
+  <div class="sec-head">
+    <p class="kick">Run on your own machine</p>
+    <h2>The Local RAG Bench</h2>
   </div>
-  <p class="note">Figures from the MAHAGENCO June-2026 energy bill, the provisional Part-I FSA bill
-     including the F10 ECR calculation, and the MERC merit-order dispatch stack for July 2026.
-     The ID fan sensor data inside the Theatre and the simulator is synthetic — a teaching artefact
-     needs a fault whose true onset date is known exactly — and is labelled as such wherever it appears.</p>
+  <div class="card wide">
+    <div class="icon t3" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E74C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></svg></div>
+    <div class="body">
+      <h3>Local RAG Bench <span style="font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--hot);background:#FBEEEC;border-radius:999px;padding:3px 9px;vertical-align:3px;margin-left:6px">NEEDS A LOCAL SERVER</span></h3>
+      <div class="meta"><span>Real ONNX embeddings</span><span>WebGPU</span><span>1,302 chunks</span></div>
+      <p>Retrieval-augmented generation with a genuine embedding model and an optional local language
+         model, measured rather than asserted: 31 hand-marked questions, recall@5 of 84% dense, 84%
+         keyword, <em>90% hybrid</em>, median query 43–48&nbsp;ms. It loads several hundred megabytes
+         of model weights from disk, so it ships with a launcher instead of running from this page.</p>
+      <p class="note" style="margin:0">Clone the repository, then <code>cd rag-bench &amp;&amp; python3 get-models.py small &amp;&amp;
+         python3 serve.py</code>. Add <code>--lan</code> and phones on the same Wi-Fi can use the
+         retrieval side.</p>
+    </div>
+  </div>
 </section>
 
+</div>
+
 <footer>
-  <div class="wrap" style="padding:0">
-    Every figure on every screen is computed on the device in front of you. Nothing is sent anywhere.
-    The libraries this is built on, their versions and their licences are listed under
-    <a href="third-party.html">third-party code</a>.
+  <div class="wrap">
+    <div class="who">
+      <b>S. H. Parihar</b> — 16 years in the power sector; author of <i>Lean AI</i>,
+      <i>Learn the English that AI Understands</i> and <i>AI for Busy Parents</i>.
+    </div>
+    <div class="right">
+      Every figure on every screen is computed on the device in front of you.<br>
+      Nothing is sent anywhere. <a href="third-party.html">Third-party code &amp; licences</a>
+    </div>
   </div>
 </footer>
 
-</div>
 </body>
 </html>
