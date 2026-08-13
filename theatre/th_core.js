@@ -297,11 +297,56 @@ const TH3 = (function(){
 
     const el = renderer.domElement;
     el.style.cursor='grab';
-    el.addEventListener('pointerdown', e=>{ orb.drag=true; orb.pan=(e.button===2||e.shiftKey);
-      orb.px=e.clientX; orb.py=e.clientY; el.style.cursor='grabbing'; });
+    /* Without this the browser treats a drag across the canvas as a page
+       scroll and a two-finger spread as a page zoom, so on a phone the scene
+       could not be orbited at all — the gesture was gone before three.js
+       ever saw it. */
+    el.style.touchAction='none';
+
+    /* One pointer orbits, two pinch. Tracking them in a map rather than
+       reading e.touches keeps mouse, pen and finger on the same code path. */
+    const pts = new Map();
+    let pinch0 = 0, dist0 = 0, tap = null;
+
+    const spread = () => {
+      const [a,b] = [...pts.values()];
+      return Math.hypot(a.x-b.x, a.y-b.y);
+    };
+
+    el.addEventListener('pointerdown', e=>{
+      pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      try{ el.setPointerCapture(e.pointerId); }catch(err){}
+      if(pts.size===2){ orb.drag=false; pinch0=spread(); dist0=orb.dist; return; }
+      orb.drag=true; orb.pan=(e.button===2||e.shiftKey);
+      orb.px=e.clientX; orb.py=e.clientY; el.style.cursor='grabbing';
+      /* Remember where this gesture began so a release that never moved can
+         be treated as a tap on whatever is under it. */
+      tap={x:e.clientX, y:e.clientY, t:performance.now(), id:e.pointerId};
+    });
     el.addEventListener('contextmenu', e=>e.preventDefault());
+
+    const release = e=>{
+      pts.delete(e.pointerId);
+      if(pts.size<2) pinch0=0;
+      orb.drag=false; if(el) el.style.cursor='grab';
+      if(tap && tap.id===e.pointerId){
+        const moved=Math.hypot(e.clientX-tap.x, e.clientY-tap.y);
+        if(moved<6 && performance.now()-tap.t<600) doPick(e.clientX, e.clientY);
+        tap=null;
+      }
+    };
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', e=>{ pts.delete(e.pointerId); orb.drag=false; tap=null; });
     window.addEventListener('pointerup', ()=>{ orb.drag=false; if(el) el.style.cursor='grab'; });
-    window.addEventListener('pointermove', e=>{
+
+    el.addEventListener('pointermove', e=>{
+      if(pts.has(e.pointerId)) pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pts.size===2 && pinch0){
+        fly=null; tap=null;
+        const s=spread();
+        if(s>4) orb.dist = clamp(dist0 * (pinch0/s), 1.6, 70);
+        return;
+      }
       if(!orb.drag) return; fly=null;
       const dx=e.clientX-orb.px, dy=e.clientY-orb.py;
       if(orb.pan){
@@ -325,6 +370,9 @@ const TH3 = (function(){
   function clear(){
     while(root.children.length){ const c=root.children[0]; root.remove(c); disposeTree(c); }
     clearLabels(); frameCB=null; fly=null; orb.auto=0;
+    /* Drop the pick list with the scene. Leaving it holds disposed geometry
+       alive and lets a tap in a new module select a neuron from the old one. */
+    pickList = []; pickCB = null;
   }
   function disposeTree(o){ o.traverse&&o.traverse(x=>{ if(x.geometry) x.geometry.dispose();
     if(x.material){ if(Array.isArray(x.material)) x.material.forEach(m=>m.dispose()); else x.material.dispose(); } }); }
@@ -375,7 +423,40 @@ const TH3 = (function(){
     renderer.render(scene, cam);
   }
 
-  return {init, clear, resize, setCam, autospin, onFrame, getCam, toScreen,
+  /* ---------------------------------------------------------- picking
+     A module registers a list of meshes and a callback; a tap that did not
+     turn into an orbit raycasts against them. This is what makes "click the
+     neuron to see its arithmetic" possible on a phone, where there is no
+     hover to hint that a thing is clickable and a dropdown is the only
+     alternative. Registered meshes get a slightly generous hit radius,
+     because a fingertip is about 8 mm across and a neuron is not. */
+  let pickList = [], pickCB = null;
+  const ray = new THREE.Raycaster();
+  function onPick(list, cb){
+    pickList = list || []; pickCB = cb || null;
+    if (ray.params.Points) ray.params.Points.threshold = 0.2;
+  }
+  function doPick(cx, cy){
+    if (!pickCB || !pickList.length || !renderer) return;
+    const r = renderer.domElement.getBoundingClientRect();
+    const v = new THREE.Vector2(((cx-r.left)/r.width)*2-1, -((cy-r.top)/r.height)*2+1);
+    ray.setFromCamera(v, cam);
+    const hits = ray.intersectObjects(pickList, false);
+    if (hits.length){ pickCB(hits[0].object, hits[0]); return; }
+    /* Missed every mesh. Fall back to the nearest one in screen space, so a
+       finger that lands beside a small sphere still selects it rather than
+       doing nothing — but only if it is genuinely close. */
+    let best = null, bd = 34;
+    for (const m of pickList){
+      const p = m.getWorldPosition(new THREE.Vector3()).project(cam);
+      const sx = r.left + (p.x*0.5+0.5)*r.width, sy = r.top + (-p.y*0.5+0.5)*r.height;
+      const d = Math.hypot(sx-cx, sy-cy);
+      if (p.z < 1 && d < bd){ bd = d; best = m; }
+    }
+    if (best) pickCB(best, null);
+  }
+
+  return {init, clear, resize, setCam, autospin, onFrame, getCam, toScreen, onPick,
           label, clearLabels, axisFrame,
           mat, basic, sph, box, cyl, plane, tube, arrow, dashed, lineSet, points,
           COL, get root(){return root;}, get scene(){return scene;}, get cam(){return cam;},

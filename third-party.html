@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Third-party code — AI for Power Plants</title>
+<meta name="theme-color" content="#1C2530">
+<style>
+:root{--ink:#1C2530;--mut:#6B7A8C;--line:#DDE4EC;--bg:#F7F9FB;--card:#fff;--acc:#1F5C8B}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);
+  font:16px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px}
+header{background:var(--ink);color:#fff;padding:30px 0 26px}
+header h1{margin:0;font-size:24px;line-height:1.2;font-weight:650}
+header a{color:#B9C6D4;font-size:14px;text-decoration:none;display:inline-block;
+  margin-bottom:14px;min-height:24px}
+header a:hover{color:#fff}
+main{padding:26px 0 60px}
+h1,h2,h3{font-weight:650;line-height:1.25}
+h1{font-size:23px;margin:0 0 10px}
+h2{font-size:17px;margin:30px 0 10px}
+h3{font-size:15px;margin:22px 0 8px}
+p{margin:0 0 13px;max-width:74ch;color:#2A3644}
+hr{border:0;border-top:1px solid var(--line);margin:26px 0}
+code{background:#EDF1F5;border-radius:4px;padding:1px 5px;
+  font:13px/1.4 ui-monospace,Consolas,"Courier New",monospace;word-break:break-word}
+a{color:var(--acc)}
+table{width:100%;border-collapse:collapse;margin:0 0 18px;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);
+  font-size:14px;vertical-align:top}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);
+  background:#F2F5F8;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+/* A five-column licence table cannot survive a phone. Turn every row into a
+   labelled stack instead of letting it scroll sideways off the screen. */
+@media(max-width:720px){
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table,tbody,tr,td{display:block;width:100%}
+  table{border:0;background:none}
+  tr{background:var(--card);border:1px solid var(--line);border-radius:10px;
+     margin:0 0 12px;padding:4px 2px}
+  td{border-bottom:0;padding:6px 13px}
+  td:first-child{font-weight:700;font-size:15px;padding-top:11px}
+  td:not(:first-child):before{content:attr(data-l);display:block;font-size:10.5px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:1px}
+}
+</style>
+</head>
+<body>
+<header><div class="wrap"><a href="./">&larr; Back to the artefacts</a>
+  <h1>Third-party code</h1></div></header>
+<main><div class="wrap">
+<h1>Third-party code</h1>
+<p>Everything in this repository that was not written for it, what it is used for, and where the exact bytes came from.</p>
+<p>Nothing here is bundled with its own licence text stripped: each project's licence travels inside its distributed file, and the links below go to the canonical copy.</p>
+<hr>
+<h2>Committed to this repository</h2>
+<table><thead><tr><th>Library</th><th>Version</th><th>Licence</th><th>Where</th><th>Why</th></tr></thead><tbody><tr><td><a href="https://github.com/mrdoob/three.js" rel="noopener noreferrer">three.js</a></td><td>bundled from npm <code>three</code></td><td>MIT</td><td><code>vendor/three.global.min.js</code></td><td>The 3-D scenes in the Algorithm Anatomy Theatre and the PdM simulator. Rebuilt with esbuild into a single IIFE global so the artefacts can be inlined into one HTML file that opens by double-clicking.</td></tr><tr><td><a href="https://github.com/gitbrent/PptxGenJS" rel="noopener noreferrer">pptxgenjs</a></td><td>dev dependency, not committed</td><td>MIT</td><td>used by <code>deck/build_deck.js</code></td><td>Generates the 117-slide deck. Installed with <code>npm i pptxgenjs</code> at build time only.</td></tr></tbody></table>
+<h2>Loaded at runtime, pinned by checksum</h2>
+<p>Pocket RAG does not commit its libraries. <code>pocket-rag/vendor.json</code> pins each one to an exact version on jsDelivr and records the SHA-256 of the bytes the app was tested against; <code>pocket-rag/get-vendor.py</code> will download and verify them into <code>pocket-rag/vendor/</code> for an air-gapped deployment.</p>
+<table><thead><tr><th>Library</th><th>Version</th><th>Licence</th><th>Why</th></tr></thead><tbody><tr><td><a href="https://github.com/mozilla/pdf.js" rel="noopener noreferrer">pdf.js</a></td><td>6.2.108</td><td>Apache-2.0</td><td>Reads PDFs. Used for its per-text-item font sizes, which is how section headings are inferred without any layout model.</td></tr><tr><td><a href="https://github.com/mwilliamson/mammoth.js" rel="noopener noreferrer">mammoth</a></td><td>1.12.0</td><td>BSD-2-Clause</td><td>Converts <code>.docx</code> to HTML, preserving real heading levels so breadcrumbs are accurate rather than guessed.</td></tr><tr><td><a href="https://github.com/huggingface/transformers.js" rel="noopener noreferrer">transformers.js</a></td><td>4.2.0</td><td>Apache-2.0</td><td>Runs the ONNX embedding model in the browser, on WebGPU where available and WebAssembly otherwise.</td></tr><tr><td><a href="https://github.com/microsoft/onnxruntime" rel="noopener noreferrer">ONNX Runtime Web</a></td><td>as shipped inside transformers.js 4.2.0</td><td>MIT</td><td>The actual inference engine underneath transformers.js. The RAG bench can self-host its WebAssembly builds; <code>rag-bench/get-models.py vendor</code> fetches them.</td></tr><tr><td><a href="https://github.com/mlc-ai/web-llm" rel="noopener noreferrer">WebLLM</a></td><td>0.2.84</td><td>Apache-2.0</td><td>The optional on-device answer writer. Only downloaded if someone turns that tier on.</td></tr></tbody></table>
+<p><code>rag-bench/</code> uses transformers.js 4.2.0 and ONNX Runtime Web on the same terms; <code>rag-bench/get-models.py vendor</code> fetches them from the same pinned CDN paths.</p>
+<h2>Models</h2>
+<p>Not code, and not in this repository — downloaded by the browser and cached there.</p>
+<table><thead><tr><th>Model</th><th>Licence</th><th>Used by</th></tr></thead><tbody><tr><td><a href="https://huggingface.co/Xenova/bge-small-en-v1.5" rel="noopener noreferrer"><code>Xenova/bge-small-en-v1.5</code></a> (ONNX, int8)</td><td>MIT</td><td>Pocket RAG and the RAG bench, for 384-dimension sentence embeddings. Derived from BAAI/bge-small-en-v1.5.</td></tr><tr><td>WebLLM prebuilt models (Llama 3.2, Qwen 2.5, SmolLM2, TinyLlama and others)</td><td>each under its own upstream licence — Llama 3.2 Community Licence, Apache-2.0, and so on</td><td>The optional writer tier. The model list is whatever <code>prebuiltAppConfig</code> offers that fits the device; the licence is the upstream model's, not this project's.</td></tr></tbody></table>
+<h2>Everything else</h2>
+<p>All original code in this repository — the simulators, the Theatre, the lab, the retrieval and chunking, the course material, the build and QA scripts — is by S. H. Parihar.</p>
+<p>The plant figures in <code>course/</code> come from MAHAGENCO's own June 2026 energy bill, the provisional Part-I FSA bill, and the MERC merit-order dispatch stack for July 2026. The ID fan sensor data in the Theatre and the PdM simulator is synthetic, generated from a physical model with a fault injected on a known day, and is labelled as such wherever it appears.</p>
+</div></main>
+<script>
+/* Label each cell with its column heading so the stacked phone layout reads
+   as "Licence: MIT" rather than as an unlabelled list of fragments. */
+document.querySelectorAll('table').forEach(t => {
+  const h = [...t.querySelectorAll('thead th')].map(x => x.textContent);
+  t.querySelectorAll('tbody tr').forEach(r =>
+    [...r.children].forEach((c, i) => { if (h[i]) c.setAttribute('data-l', h[i]); }));
+});
+</script>
+</body>
+</html>

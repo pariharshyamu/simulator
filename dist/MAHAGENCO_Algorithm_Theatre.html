@@ -180,6 +180,108 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:11px 0}
 #modalbox{background:#fff;border-radius:12px;max-width:640px;width:92%;max-height:84%;overflow:auto;padding:20px 24px}
 #modalbox h2{font-size:19px;margin-bottom:8px}
 @media(max-width:1100px){ #view{flex:0 0 48%;min-width:340px} }
+
+/* =====================================================================
+   PHONES AND SMALL TABLETS
+
+   Side by side stops working somewhere around 860px: #view has a 420px
+   floor and #panel needs about the same to hold a five-column table, so
+   below that one of them was being squeezed to nothing. Stack them
+   instead — scene on top, reading underneath. That is the order the
+   material is meant to be taken in anyway.
+
+   The 3-D view keeps a fixed share of the viewport rather than a share of
+   the flex row, because a scene that shrinks as the panel grows ends up
+   as a letterbox. 46vh leaves room for the narration without burying it.
+   ===================================================================== */
+@media(max-width:860px){
+  .tb{padding:7px 11px;gap:9px}
+  .tb h1{font-size:14px;white-space:normal}
+  .tb .sub{display:none}
+  #specChip{padding:4px 9px}
+  #specChip .l{font-size:7.6px}
+  #specChip .v{font-size:13px}
+  #specChip .s{display:none}
+
+  #rail .st{min-width:118px;padding:6px 9px 7px}
+  #rail .st .t{font-size:11px}
+  /* A row that scrolls sideways needs to look like it does. */
+  #rail{-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+
+  #body{flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  #view{flex:0 0 auto;min-width:0;height:46vh;min-height:270px}
+  #panel{flex:1 1 auto;overflow:visible;min-height:0}
+  .pw{padding:12px 12px 40px}
+
+  /* Stop overlaying. The narration and the transport go under the scene,
+     where they can be as tall as they like and the machine keeps its pixels. */
+  #view{display:flex;flex-direction:column;height:auto}
+  #gl{flex:0 0 auto;height:40vh;min-height:230px}
+  #say{position:static;margin:0;border-radius:0;border-left:0;border-right:0;
+       font-size:12.5px;padding:10px 12px;max-height:none;order:2}
+  #glfoot{position:static;padding:9px 11px 10px;order:1;background:#131E29;
+          border-top:1px solid #253544}
+  /* Labels drawn into the scene have to shrink with it or they cover it. */
+  .l3d{font-size:9.6px;padding:1px 5px}
+  .l3d.big{font-size:11px}
+  #acts{gap:5px;margin-bottom:7px;max-height:none}
+  #acts .a{padding:9px 13px;font-size:11.5px;min-height:40px;
+    display:inline-flex;align-items:center;border-radius:20px}
+  /* The scene caption and the sub-caption both repeat text that is in the
+     panel a thumb-scroll below. On 390px they collided with the read-out in
+     the opposite corner, so only the title stays. */
+  #glhud{padding:7px 9px}
+  #glhud .ttl{font-size:12px;max-width:56%}
+  #glhud .sb{display:none}
+  #glnum{top:8px;right:9px}
+  #glnum .v{font-size:15px}
+  #glnum .k,#glnum .s{font-size:8.6px}
+  /* setModule writes display:block inline, so the stylesheet needs to shout
+     to take the dimension caption off a 390px scene where it lands on top
+     of the read-out. */
+  #dimcap{display:none!important}
+
+  /* Touch targets and thumb-friendly controls. */
+  .btn{padding:10px 15px;font-size:13px;min-height:40px}
+  .btnrow{gap:8px}
+  .ctl input[type=range]{height:30px}
+  .ctl select{padding:9px 8px;font-size:13.5px;min-height:42px}
+  .tog input{width:20px;height:20px}
+  .stat{min-width:calc(50% - 6px)}
+  .hd2 h2{font-size:17px}
+  #tl{height:40px}
+  .play,.ghd{min-height:40px;padding-left:13px;padding-right:13px}
+  #specChip{min-height:40px}
+  #rail .st{min-height:44px}
+
+  /* Wide tables are the other thing that breaks. Let them scroll on their
+     own instead of pushing the whole page sideways. */
+  .tw{max-height:340px}
+  table{font-size:11.2px}
+  th,td{padding:4px 5px}
+  .card{padding:11px 12px}
+}
+
+/* Below 860px it is #gl that carries the height, not #view — #view has to
+   stay auto so the narration underneath is never clipped. */
+@media(max-width:520px){
+  #gl{height:37vh;min-height:210px}
+  .stat{min-width:100%}
+  .tb h1{font-size:13px}
+  #rail .st{min-width:104px}
+  #rail .st .t{font-size:10.4px}
+}
+
+/* Landscape on a phone: almost no height. Give it to the scene and let the
+   reading scroll. */
+@media(max-height:520px) and (max-width:960px){
+  #gl{height:66vh;min-height:180px}
+  .tb{padding:4px 10px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms!important}
+}
 </style>
 </head>
 <body>
@@ -210,14 +312,20 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:11px 0}
       <div id="glhud"><div class="ttl" id="glTitle">—</div><div class="sb" id="glSub">—</div></div>
       <div id="dimcap"></div>
       <div id="glnum"><div class="k" id="numK"></div><div class="v" id="numV"></div><div class="s" id="numS"></div></div>
-      <div id="say"></div>
-      <div id="glfoot">
-        <div id="acts"></div>
-        <div class="rowf">
-          <button class="play" id="play">▶ Play</button>
-          <input type="range" id="tl" min="0" max="1000" value="0" step="1">
-          <button class="ghd" id="resetCam">Reset view</button>
-        </div>
+    </div>
+    <!-- The narration and the transport are siblings of #gl rather than
+         children of it. On a desktop they are positioned over #view, which
+         #gl fills exactly, so the result is pixel-identical to before. On a
+         phone they can simply stop being overlays and sit under the scene,
+         which is the only way a 340px-tall viewport keeps both the machine
+         and the words that explain it. -->
+    <div id="say"></div>
+    <div id="glfoot">
+      <div id="acts"></div>
+      <div class="rowf">
+        <button class="play" id="play">▶ Play</button>
+        <input type="range" id="tl" min="0" max="1000" value="0" step="1">
+        <button class="ghd" id="resetCam">Reset view</button>
       </div>
     </div>
   </div>
@@ -4644,11 +4752,56 @@ const TH3 = (function(){
 
     const el = renderer.domElement;
     el.style.cursor='grab';
-    el.addEventListener('pointerdown', e=>{ orb.drag=true; orb.pan=(e.button===2||e.shiftKey);
-      orb.px=e.clientX; orb.py=e.clientY; el.style.cursor='grabbing'; });
+    /* Without this the browser treats a drag across the canvas as a page
+       scroll and a two-finger spread as a page zoom, so on a phone the scene
+       could not be orbited at all — the gesture was gone before three.js
+       ever saw it. */
+    el.style.touchAction='none';
+
+    /* One pointer orbits, two pinch. Tracking them in a map rather than
+       reading e.touches keeps mouse, pen and finger on the same code path. */
+    const pts = new Map();
+    let pinch0 = 0, dist0 = 0, tap = null;
+
+    const spread = () => {
+      const [a,b] = [...pts.values()];
+      return Math.hypot(a.x-b.x, a.y-b.y);
+    };
+
+    el.addEventListener('pointerdown', e=>{
+      pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      try{ el.setPointerCapture(e.pointerId); }catch(err){}
+      if(pts.size===2){ orb.drag=false; pinch0=spread(); dist0=orb.dist; return; }
+      orb.drag=true; orb.pan=(e.button===2||e.shiftKey);
+      orb.px=e.clientX; orb.py=e.clientY; el.style.cursor='grabbing';
+      /* Remember where this gesture began so a release that never moved can
+         be treated as a tap on whatever is under it. */
+      tap={x:e.clientX, y:e.clientY, t:performance.now(), id:e.pointerId};
+    });
     el.addEventListener('contextmenu', e=>e.preventDefault());
+
+    const release = e=>{
+      pts.delete(e.pointerId);
+      if(pts.size<2) pinch0=0;
+      orb.drag=false; if(el) el.style.cursor='grab';
+      if(tap && tap.id===e.pointerId){
+        const moved=Math.hypot(e.clientX-tap.x, e.clientY-tap.y);
+        if(moved<6 && performance.now()-tap.t<600) doPick(e.clientX, e.clientY);
+        tap=null;
+      }
+    };
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', e=>{ pts.delete(e.pointerId); orb.drag=false; tap=null; });
     window.addEventListener('pointerup', ()=>{ orb.drag=false; if(el) el.style.cursor='grab'; });
-    window.addEventListener('pointermove', e=>{
+
+    el.addEventListener('pointermove', e=>{
+      if(pts.has(e.pointerId)) pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pts.size===2 && pinch0){
+        fly=null; tap=null;
+        const s=spread();
+        if(s>4) orb.dist = clamp(dist0 * (pinch0/s), 1.6, 70);
+        return;
+      }
       if(!orb.drag) return; fly=null;
       const dx=e.clientX-orb.px, dy=e.clientY-orb.py;
       if(orb.pan){
@@ -4672,6 +4825,9 @@ const TH3 = (function(){
   function clear(){
     while(root.children.length){ const c=root.children[0]; root.remove(c); disposeTree(c); }
     clearLabels(); frameCB=null; fly=null; orb.auto=0;
+    /* Drop the pick list with the scene. Leaving it holds disposed geometry
+       alive and lets a tap in a new module select a neuron from the old one. */
+    pickList = []; pickCB = null;
   }
   function disposeTree(o){ o.traverse&&o.traverse(x=>{ if(x.geometry) x.geometry.dispose();
     if(x.material){ if(Array.isArray(x.material)) x.material.forEach(m=>m.dispose()); else x.material.dispose(); } }); }
@@ -4722,7 +4878,40 @@ const TH3 = (function(){
     renderer.render(scene, cam);
   }
 
-  return {init, clear, resize, setCam, autospin, onFrame, getCam, toScreen,
+  /* ---------------------------------------------------------- picking
+     A module registers a list of meshes and a callback; a tap that did not
+     turn into an orbit raycasts against them. This is what makes "click the
+     neuron to see its arithmetic" possible on a phone, where there is no
+     hover to hint that a thing is clickable and a dropdown is the only
+     alternative. Registered meshes get a slightly generous hit radius,
+     because a fingertip is about 8 mm across and a neuron is not. */
+  let pickList = [], pickCB = null;
+  const ray = new THREE.Raycaster();
+  function onPick(list, cb){
+    pickList = list || []; pickCB = cb || null;
+    if (ray.params.Points) ray.params.Points.threshold = 0.2;
+  }
+  function doPick(cx, cy){
+    if (!pickCB || !pickList.length || !renderer) return;
+    const r = renderer.domElement.getBoundingClientRect();
+    const v = new THREE.Vector2(((cx-r.left)/r.width)*2-1, -((cy-r.top)/r.height)*2+1);
+    ray.setFromCamera(v, cam);
+    const hits = ray.intersectObjects(pickList, false);
+    if (hits.length){ pickCB(hits[0].object, hits[0]); return; }
+    /* Missed every mesh. Fall back to the nearest one in screen space, so a
+       finger that lands beside a small sphere still selects it rather than
+       doing nothing — but only if it is genuinely close. */
+    let best = null, bd = 34;
+    for (const m of pickList){
+      const p = m.getWorldPosition(new THREE.Vector3()).project(cam);
+      const sx = r.left + (p.x*0.5+0.5)*r.width, sy = r.top + (-p.y*0.5+0.5)*r.height;
+      const d = Math.hypot(sx-cx, sy-cy);
+      if (p.z < 1 && d < bd){ bd = d; best = m; }
+    }
+    if (best) pickCB(best, null);
+  }
+
+  return {init, clear, resize, setCam, autospin, onFrame, getCam, toScreen, onPick,
           label, clearLabels, axisFrame,
           mat, basic, sph, box, cyl, plane, tube, arrow, dashed, lineSet, points,
           COL, get root(){return root;}, get scene(){return scene;}, get cam(){return cam;},
@@ -6044,7 +6233,8 @@ const M4 = (function(){
   ];
   const NI=8, NH1=10, NH2=6;
   const st = {act:0, ready:false, actf:'tanh', showW:true, speed:1, epoch:0, training:false,
-              inspect:0, day:96, phase:0, lossHist:[], trained:false};
+              inspect:0, day:96, phase:0, lossHist:[], trained:false,
+              pick:{l:1, i:0}};      // the node last tapped in the 3-D scene
   let W1,b1,W2,b2,W3,b3, mu={}, sg={}, TRX=[], TRY=[], my=0, sy=1;
   let nodes=[[],[],[],[]], edges=[], edgeLines, parts, partMeta=[], gLayerCards=[];
   let labs={}, curAct=null, curOut=0;
@@ -6185,6 +6375,26 @@ const M4 = (function(){
     for(let i=0;i<240;i++) partMeta.push({e:0, t:0});
 
     runSpec();
+
+    /* Tap a neuron to open it. The dropdown stays for anyone who prefers it,
+       but on a touch screen the obvious thing to do with a glowing sphere
+       labelled "neuron" is to press it, and until now that did nothing. */
+    TH3.onPick([...nodes[1], ...nodes[0], ...nodes[2], nodes[3][0]], mesh=>{
+      const h1=nodes[1].indexOf(mesh);
+      if(h1>-1){ st.inspect=h1; st.pick={l:1,i:h1}; }
+      else {
+        const i0=nodes[0].indexOf(mesh), i2=nodes[2].indexOf(mesh);
+        if(i0>-1) st.pick={l:0,i:i0};
+        else if(i2>-1) st.pick={l:2,i:i2};
+        else if(mesh===nodes[3][0]) st.pick={l:3,i:0};
+        else return;
+      }
+      refresh();
+      if(window.THEATRE) THEATRE.repanel();
+      const c=document.getElementById('m4pick');
+      if(c) c.scrollIntoView({block:'nearest', behavior:'smooth'});
+    });
+
     TH3.setCam(0.42, 0.26, 12.6, new THREE.Vector3(0,0,0), false);
     st.ready=true; refresh();
   }
@@ -6318,6 +6528,82 @@ const M4 = (function(){
       ((r.brgT-curOut)>=0?'+':'')+f1(r.brgT-curOut)+' °C'};
   }
 
+  /* ------------------------------------------------------ the backward pass
+     The forward pass is already opened up below; this is the other half, and
+     it is the half people are asked to take on faith. Every quantity here is
+     the one the trainer computes — same expressions as trainEpoch, evaluated
+     at the hour on screen — so a participant can follow one weight from the
+     error at the output all the way to the number it is about to become. */
+  function backCard(){
+    const F=curAct||runSpec(), r=specRow();
+    const yt=(r.brgT-my)/sy;              // the standardised truth
+    const e=F.y-yt, dy=2*e;               // dL/dŷ for this single hour
+    const d2=new Float64Array(NH2);
+    for(let i=0;i<NH2;i++) d2[i]=dy*W3[i][0]*dact(F.z2[i],F.a2[i]);
+    const d1=new Float64Array(NH1);
+    for(let i=0;i<NH1;i++){ let s=0; for(let j=0;j<NH2;j++) s+=d2[j]*W2[i][j];
+                            d1[i]=s*dact(F.z1[i],F.a1[i]); }
+    const j=st.inspect, lr=0.045;
+    /* Follow the weight from the input that matters most into this neuron. */
+    let bi=0, bv=-1;
+    for(let i=0;i<NI;i++){ const m=Math.abs(d1[j]*F.x[i]); if(m>bv){ bv=m; bi=i; } }
+    const grad=d1[j]*F.x[bi], w0=W1[bi][j], w1=w0-lr*grad;
+
+    return `
+<div class="card" id="m4back"><h3>The backward pass, on this hour<span class="tag">where the weights come from</span></h3>
+<div class="small" style="margin-bottom:7px">Forward is multiply, add, squash. Backward is the chain rule, once
+per layer, and it is the entire training algorithm. These are live numbers for
+<b>${IN[bi].n} → neuron ${j+1}</b> at day ${f1(st.day)}.</div>
+<div class="eq">error        e   = ŷ − y        = <span class="o">${f2(F.y)}</span> − <span class="o">${f2(yt)}</span> = <span class="o">${f2(e)}</span>   <span class="c">standardised</span>
+output δ     δ<span class="o">out</span> = 2e            = <span class="o">${f2(dy)}</span>
+hidden-2 δ   δ²<span class="o">j</span>  = δ<span class="o">out</span>·w³<span class="o">j</span>·f′(z²<span class="o">j</span>)
+hidden-1 δ   δ¹<span class="o">${j+1}</span>  = Σ<span class="o">j</span> δ²<span class="o">j</span>·w²  · f′(z¹<span class="o">${j+1}</span>) = <span class="o">${f2(d1[j])}</span>
+                             ─────────
+gradient     ∂L/∂w = δ¹<span class="o">${j+1}</span> · x<span class="o">${bi+1}</span>   = <span class="o">${f2(d1[j])}</span> × <span class="o">${f2(F.x[bi])}</span> = <span class="o">${f2(grad)}</span>
+update       w ← w − η·∂L/∂w  = <span class="o">${f2(w0)}</span> − ${lr}×<span class="o">${f2(grad)}</span> = <span class="g">${f2(w1)}</span></div>
+<div class="small" style="margin-top:6px"><b>f′ is why the activation matters twice.</b> tanh′ = 1 − a², so a
+neuron saturated near ±1 has a derivative near zero and stops learning — its weights barely move however wrong
+the answer is. That is the vanishing gradient, visible here as a δ of
+${Math.abs(d1[j])<0.005?'almost exactly zero on this neuron right now':'a workable size on this neuron'}.
+Multiply this by ${f0(TRX.length)} hours and 220 epochs and you have the training run.</div></div>`;
+  }
+
+  /* What the last tap landed on. Different layers mean different things and
+     saying so is most of the value of being able to tap them at all. */
+  function pickCard(){
+    const F=curAct||runSpec(), r=specRow(), p=st.pick||{l:1,i:0};
+    let title='', val='', note='';
+    if(p.l===0){
+      const f=IN[p.i];
+      title=`Input ${p.i+1} · ${f.n}`;
+      val=`${f1(r[f.k])}${f.u?' '+f.u:''} → standardised ${f2(F.x[p.i])}`;
+      note=`Standardised as (x − ${f2(mu[f.k])}) / ${f2(sg[f.k])}, using the mean and spread of the healthy
+            hours only. This one number is fanned out to all ${NH1} neurons in the next layer, each with its
+            own weight.`;
+    } else if(p.l===1){
+      title=`Hidden-1 neuron ${p.i+1} of ${NH1}`;
+      val=`z = ${f2(F.z1[p.i])} → a = ${f2(F.a1[p.i])}`;
+      note=`Opened up in full below. It combines all ${NI} inputs with its own ${NI} weights and one bias.` +
+           (Math.abs(F.a1[p.i])>0.97 ? ' <b>It is saturated</b> — tanh has flattened, so it is barely learning.' : '');
+    } else if(p.l===2){
+      title=`Hidden-2 neuron ${p.i+1} of ${NH2}`;
+      val=`z = ${f2(F.z2[p.i])} → a = ${f2(F.a2[p.i])}`;
+      note=`This layer combines the ${NH1} outputs of the first hidden layer. Its inputs are no longer sensor
+            readings but abstractions the network invented — which is exactly why "explainable" is a harder
+            claim than a vendor slide makes it sound.`;
+    } else {
+      title='Output neuron';
+      val=`${f2(F.y)} standardised → ${f1(curOut)} °C`;
+      note=`Un-standardised as ŷ × ${f2(sy)} + ${f1(my)}. Linear, no activation — squashing the output would
+            cap what the network can predict.`;
+    }
+    return `<div class="card" id="m4pick"><h3>${title}<span class="tag">tapped in the scene</span></h3>
+      <div class="eq">${val}</div>
+      <div class="small" style="margin-top:6px">${note}</div>
+      <div class="small" style="margin-top:6px;opacity:.8">Tap any sphere in the 3-D view to open it. Pinch to
+        zoom, drag to orbit.</div></div>`;
+  }
+
   /* ---------- panel ---------- */
   function panel(){
     const r=specRow(), F=curAct||runSpec(), err=r.brgT-curOut;
@@ -6354,6 +6640,8 @@ hours from this fan.</p></div>
 and all three land on the same conclusion about the same reading. <b>That agreement is the point.</b> The
 algorithm is a means; the residual is the finding.</div></div>
 
+${pickCard()}
+
 <div class="card"><h3>One neuron, fully opened<span class="tag">given input → process → output</span></h3>
 <div class="ctl"><label>Inspect hidden-layer-1 neuron</label>
   <select id="m4insp">${Array.from({length:NH1},(_,i)=>
@@ -6369,6 +6657,8 @@ a<span class="o">${j+1}</span> = ${st.actf}(z<span class="o">${j+1}</span>)     
 from doing it 17 times in three ranks, not from any single step being clever. The activation function is what
 stops the whole stack collapsing back into one straight line — without it, ten layers of multiply-and-add are
 mathematically identical to one.</div></div>
+
+${backCard()}
 
 <div class="card"><h3>What the network leans on</h3>
 <div class="small" style="margin-bottom:6px">Sensitivity of the output to each input at this operating point —

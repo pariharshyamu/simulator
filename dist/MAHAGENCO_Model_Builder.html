@@ -122,6 +122,129 @@ table.t td.num{text-align:right;font-variant-numeric:tabular-nums}
 #drophint{position:fixed;inset:0;background:rgba(28,37,48,.72);color:#fff;display:none;
   align-items:center;justify-content:center;font-size:20px;z-index:50;font-family:Cambria,Georgia,serif}
 #drophint.on{display:flex}
+
+/* ---------- dragging, by pointer rather than by HTML5 drag ----------
+   HTML5 dragstart never fires from a finger, so the artefact was inert on a
+   phone. Everything below is driven by pointer events instead, which give
+   mouse, touch and pen through one code path. touch-action:none on a block
+   is what stops the browser claiming the gesture as a scroll the moment the
+   finger moves — without it the drag is cancelled before it starts. */
+.blk{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.blk.grabbable{touch-action:none}
+#ghostblk{position:fixed;z-index:60;pointer-events:none;opacity:.93;width:220px;
+  box-shadow:0 8px 24px rgba(28,37,48,.28);transform:translate(-50%,-50%) scale(1.03);
+  border-radius:8px;padding:8px 10px;border:1px solid rgba(0,0,0,.10)}
+.slot{height:8px;border-radius:4px;background:var(--ember);margin:0 0 7px;opacity:.85}
+
+/* ---------- the maths panel ---------- */
+.mth{background:#182029;color:#D8E2EA;border-radius:9px;padding:12px 14px;margin-top:9px;
+  font:12.5px/1.7 ui-monospace,Consolas,"Courier New",monospace;overflow-x:auto}
+.mth .ln{white-space:nowrap;padding:1px 0}
+.mth .op{color:#6B7F91}
+.mth .sym{color:#E8A45C;font-style:italic}
+.mth .num{color:#8FC7E8;font-variant-numeric:tabular-nums}
+.mth .res{color:#93D3A2;font-weight:700}
+/* The prose alongside the arithmetic goes back to the body face — a
+   paragraph set in monospace italic is a wall, and this is the part that
+   explains why the numbers above it matter. */
+.mth .cm{color:#95AABC;white-space:normal;margin-top:7px;
+  font:13px/1.55 Calibri,Carlito,"Segoe UI",system-ui,sans-serif}
+.mth .cm b{color:#DCE6EF}
+.mth h4{font:700 11px/1.4 inherit;letter-spacing:.09em;text-transform:uppercase;color:#8DA2B5;
+  margin:11px 0 4px}
+.mth h4:first-child{margin-top:0}
+.mth .wrap2{white-space:normal}
+.blk .math{margin-top:7px;font-size:11px;color:var(--ink3);background:rgba(255,255,255,.6);
+  border:1px solid rgba(0,0,0,.09);border-radius:5px;padding:4px 7px;
+  font-family:ui-monospace,Consolas,monospace;overflow-x:auto;white-space:nowrap}
+.blk .more{font-size:10.5px;color:var(--ink3);opacity:.8;margin-top:5px}
+#canvas .blk.sel{outline:2px solid var(--ember);outline-offset:1px}
+
+/* ---------- phone and tablet ----------
+   Under 900px the three fixed columns cannot all be on screen at once, so
+   only one is, and a thumb-reachable bar at the bottom switches between
+   them. The palette and the model end up on separate panels, which means
+   dragging between them is impossible — so on these widths a tap on a
+   palette block adds it, and dragging is only for reordering. */
+#mobnav{display:none}
+#toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%) translateY(14px);
+  background:var(--ink);color:#fff;padding:9px 16px;border-radius:22px;font-size:13px;
+  z-index:70;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;
+  max-width:88vw;text-align:center;box-shadow:0 6px 20px rgba(28,37,48,.3)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:900px){
+  body{overflow:hidden}
+  header{padding:9px 13px;gap:9px;flex-wrap:wrap}
+  header h1{font-size:15.5px}
+  header .sub{display:none}
+  header .chip{padding:3px 9px;font-size:11px}
+  #chParams{display:none}
+
+  #body{flex-direction:column}
+  #palette,#canvasWrap,#right{display:none}
+  #palette.on,#canvasWrap.on,#right.on{display:flex;flex-direction:column;
+    flex:1 1 auto;width:auto;min-width:0;min-height:0}
+  #palette{overflow-y:auto;padding:8px 12px 96px}
+  #palette.on{display:block}
+  #canvasWrap{flex-basis:auto;border-right:0}
+  #canvas{padding:12px 12px 96px}
+  #right{padding:12px 14px 96px}
+
+  /* Touch targets. A 26px-tall block is a coin-flip with a fingertip. */
+  #palette .blk{padding:11px 12px;margin-bottom:8px;min-height:52px}
+  #palette .blk .d{font-size:11.5px}
+  #canvas .blk{padding:10px 12px;padding-right:52px}
+  #canvas .blk .x{width:40px;height:40px;font-size:18px;top:3px;right:3px;
+    display:flex;align-items:center;justify-content:center}
+  /* 16px on the inputs, because anything smaller makes iOS Safari zoom the
+     page on focus and then leave it scrolled sideways. */
+  .fld{padding:1px 8px;font-size:13px;min-height:42px}
+  .fld input,.fld select{font-size:16px;min-height:40px}
+  .fld input[type=number]{width:66px}
+  .tg{font-size:13px;padding:10px 13px;min-height:40px;display:inline-flex;align-items:center}
+  .btn{padding:11px 17px;font-size:14px}
+  .btn.sm{padding:8px 13px;font-size:13px}
+  .tab{padding:9px 14px;font-size:13px}
+  .stat{min-width:44%;margin-right:10px}
+
+  .card{padding:12px 13px;border-radius:9px}
+  .row>.card{min-width:100%}
+  pre.py{font-size:11px;padding:11px 12px;max-height:none}
+  table.t{font-size:11.5px}
+  table.t th,table.t td{padding:6px 5px}
+
+  #mobnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:var(--ink);border-top:1px solid #33465A;
+    padding-bottom:env(safe-area-inset-bottom,0)}
+  #mobnav button{flex:1;background:none;border:0;color:#8FA2B5;padding:9px 4px 10px;
+    font-size:11.5px;font-weight:600;cursor:pointer;min-height:54px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    -webkit-tap-highlight-color:transparent}
+  #mobnav button .ic{font:700 15px/1 ui-monospace,Consolas,monospace}
+  #mobnav button.on{color:#fff;box-shadow:inset 0 2px 0 var(--ember)}
+  #mobnav .badge{position:absolute;top:6px;margin-left:26px;background:var(--ember);
+    color:#fff;border-radius:9px;min-width:17px;height:17px;font-size:10.5px;
+    line-height:17px;padding:0 4px;font-weight:700}
+}
+
+@media (max-width:400px){
+  header h1{font-size:14.5px}
+  .stat{min-width:100%;margin-right:0}
+  #mobnav button{font-size:10.5px}
+}
+
+/* Landscape phone: the header and the bottom bar together eat the screen. */
+@media (max-width:900px) and (max-height:480px){
+  header{padding:5px 12px}
+  header h1{font-size:14px}
+  #mobnav button{min-height:44px;padding:5px 4px 6px}
+  #palette,#canvas,#right{padding-bottom:66px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
 </style>
 </head>
 <body>
@@ -143,7 +266,7 @@ table.t td.num{text-align:right;font-variant-numeric:tabular-nums}
   <div id="canvasWrap">
     <div id="canvasHd">
       <h2>Your model</h2>
-      <p>Drag blocks in from the left. Order matters, top to bottom.</p>
+      <p id="canvasHint">Drag blocks in from the left. Order matters, top to bottom.</p>
     </div>
     <div id="canvas"></div>
   </div>
@@ -162,6 +285,13 @@ table.t td.num{text-align:right;font-variant-numeric:tabular-nums}
   </div>
 </div>
 
+<nav id="mobnav" aria-label="Sections">
+  <button data-p="palette" aria-label="Block palette"><span class="ic">+</span>Blocks</button>
+  <button data-p="canvasWrap" class="on" aria-label="Your model"><span class="ic">▤</span>Model<span class="badge" id="navCount">0</span></button>
+  <button data-p="right" aria-label="Results"><span class="ic">▶</span>Results</button>
+</nav>
+
+<div id="toast" role="status" aria-live="polite"></div>
 <div id="drophint">Drop a CSV to use your own data</div>
 
 <script>/* =========================================================================
@@ -813,6 +943,7 @@ const MB = {
   model: null,         // trained network
   result: null,        // residuals, alerts, timings
   csvProfile: null,
+  open: null,          // index of the block whose maths is expanded, if any
 };
 
 /* ---------------------------------------------------------------- blocks */
@@ -1104,9 +1235,51 @@ function mlpTrain(spec, onEpoch){
   const params = W.reduce((s, m) => s + m.length * m[0].length, 0) +
                  B.reduce((s, v) => s + v.length, 0);
 
-  MB.model = { W, B, sizes, layers, mu, sg, ym, ys, names, yName, params, doNorm };
+  /* Keep the design matrix and the layer spec so the maths panel can replay a
+     single hour through the trained network and print every term of it.
+     Nothing here is recomputed for display — the numbers a participant reads
+     are the numbers the model used. */
+  MB.model = { W, B, sizes, layers, mu, sg, ym, ys, names, yName, yUnit, params, doNorm,
+               X, y, a, b, lr, epochs, sigma, loss };
   return { pred, resid, sigma, noise, loss, trainFrom:a, trainTo:b, y, names, yName, yUnit,
            params, ms: performance.now() - t0 };
+}
+
+/* -------------------------------------------------------- forward trace
+   Replay ONE hour through the trained network and hand back every
+   intermediate quantity, so the maths panel can print the actual arithmetic
+   rather than a textbook version of it. Same weights, same order, same
+   activation as mlpTrain — if these two ever disagree the panel is lying,
+   which is worse than not having one. */
+function forwardTrace(hour){
+  const M = MB.model;
+  if (!M) return null;
+  const j = Math.max(0, Math.min(M.X[0].length - 1, Math.round(hour)));
+  const NI = M.sizes[0];
+  const raw = [], xs = [];
+  for (let i = 0; i < NI; i++){
+    raw.push(M.X[i][j]);
+    xs.push((M.X[i][j] - M.mu[i]) / M.sg[i]);
+  }
+  const actOf = L => (L < M.layers.length ? M.layers[L].act : 'linear');
+  const f = (v, k) => k === 'tanh' ? Math.tanh(v) : k === 'relu' ? Math.max(0, v) : v;
+
+  const A = [xs], Z = [];
+  for (let L = 0; L < M.W.length; L++){
+    const z = [], o = [], k = actOf(L);
+    for (let q = 0; q < M.sizes[L+1]; q++){
+      let s = M.B[L][q];
+      for (let i = 0; i < M.sizes[L]; i++) s += A[L][i] * M.W[L][i][q];
+      z.push(s); o.push(f(s, k));
+    }
+    Z.push(z); A.push(o);
+  }
+  const yhatStd = A[A.length - 1][0];
+  return { hour: j, raw, xs, A, Z, actOf,
+           yhatStd, yhat: yhatStd * M.ys + M.ym,
+           yStd: (M.y[j] - M.ym) / M.ys, y: M.y[j],
+           resid: M.y[j] - (yhatStd * M.ys + M.ym),
+           inTraining: j >= M.a && j < M.b };
 }
 
 /* the alert rule, applied outside the training window */
@@ -1523,6 +1696,490 @@ function adoptCSV(parsed, prof, fileName){
 }
 
 /* =========================================================================
+   THE MATHS BEHIND EACH BLOCK, WITH THIS MODEL'S NUMBERS IN IT
+
+   A block-based builder has an obvious failure mode: it teaches people to
+   assemble a neural network without ever showing them that a neural network
+   is arithmetic. They leave able to operate the tool and no better able to
+   judge a vendor's claim, which is the opposite of the point.
+
+   So every block opens into the operation it stands for, written twice — once
+   as the formula, once with the actual numbers from the model currently on the
+   canvas substituted in. Not a worked example from a textbook: the real
+   weights, at a real hour of the real year, printed to the precision the
+   network is using. `forwardTrace` in mb_core.js replays that hour through the
+   same code path training used, so the two cannot drift apart.
+
+   The hour shown defaults to the day the advisory fired, because that is the
+   moment a participant actually wants to interrogate: what did the network
+   think the bearing should have been, and by how much was it wrong.
+   ========================================================================= */
+
+/* ------------------------------------------------------------- numbers */
+const nf = (v, d) => {
+  if (!isFinite(v)) return '—';
+  const a = Math.abs(v);
+  if (a !== 0 && (a < 0.001 || a >= 1e6)) return v.toExponential(2);
+  return v.toFixed(d != null ? d : (a >= 100 ? 1 : a >= 10 ? 2 : 3));
+};
+const sgn = v => (v < 0 ? '−' : '+') + ' ' + nf(Math.abs(v));
+const N_ = v => `<span class="num">${nf(v)}</span>`;
+/* Counts are counts. "4320.0 rows" and "72.00 consecutive hours" read as
+   though the quantity were uncertain, which is exactly the wrong signal in a
+   panel whose whole job is to be exact. */
+const I_ = v => `<span class="num">${Math.round(v).toLocaleString('en-IN')}</span>`;
+const bigOps = n =>
+  n >= 1e9 ? (n/1e9).toFixed(1) + ' billion' :
+  n >= 1e6 ? (n/1e6).toFixed(0) + ' million' :
+  n >= 1e3 ? (n/1e3).toFixed(0) + ' thousand' : String(Math.round(n));
+const S_ = s => `<span class="sym">${s}</span>`;
+const R_ = v => `<span class="res">${nf(v)}</span>`;
+const O_ = s => `<span class="op">${esc(s)}</span>`;
+const LN = s => `<div class="ln">${s}</div>`;
+const CM = s => `<div class="cm">${s}</div>`;
+const H_ = s => `<h4>${esc(s)}</h4>`;
+
+/* Which hour to narrate. The advisory day if there is one, otherwise a
+   summer afternoon well outside the training window — the interesting case
+   either way, never a row the model was fitted on. */
+function traceHour(){
+  const r = MB.result;
+  if (r && r.alert && r.alert.firstDay != null) return Math.round(r.alert.firstDay * 24);
+  if (r) return Math.min(MB.data.hours - 1, r.trainTo + 24 * 30 + 14);
+  return 14;
+}
+function hourLabel(j){
+  const d = Math.floor(j / 24), h = j % 24;
+  return MB.data && MB.data.source === 'built-in'
+    ? `day ${d} (${dayLabel(d)}), ${String(h).padStart(2, '0')}:00`
+    : `row ${j.toLocaleString('en-IN')}`;
+}
+
+/* ------------------------------------------------- the one-line version
+   Shown on the face of every block, whether or not it is open. Short enough
+   to sit on a phone without scrolling sideways. */
+function blockFormula(type, b){
+  const M = MB.model, d = MB.data;
+  switch (type){
+    case 'dataset':
+    case 'csv':      return d ? `rows = ${d.rows.toLocaleString('en-IN')} × ${d.tags.length} tags` : '';
+    case 'window':   return `train = rows[${Math.round(b.f.from)*24} : ${Math.round(b.f.to)*24}]`;
+    case 'inputs':   return `X ∈ ℝ<sup>n×${(b.f.tags||[]).length}</sup>`;
+    case 'target':   return `y = ${esc(tagName(b.f.tag))}`;
+    case 'normalise':return `x̃ = (x − μ) / σ`;
+    case 'lag':      return `x′[t] = x[t − ${Math.round(b.f.h)}]`;
+    case 'roll':     return `x′[t] = (1/${Math.round(b.f.h)}) Σ x[t−k]`;
+    case 'dense':    return `a = ${b.f.act === 'linear' ? '' : b.f.act}(W·x + b),  ${Math.round(b.f.n)} neurons`;
+    case 'train':    return `w ← w − ${b.f.lr} · ∂L/∂w,  ${Math.round(b.f.epochs)} epochs`;
+    case 'residual': return `r = y − ŷ`;
+    case 'alert':    return `|r| > ${b.f.k}σ for ${Math.round(b.f.hours)} h`;
+  }
+  return '';
+}
+
+/* --------------------------------------------------- the opened version */
+function blockMaths(type, b){
+  const M = MB.model, d = MB.data;
+  const untrained = `<div class="mth">${CM('Press <b>Train the network</b> and this fills with the real numbers — these are the weights the model ends up with, not an illustration.')}</div>`;
+  let body = '';
+
+  switch (type){
+
+  /* ------------------------------------------------------------- data */
+  case 'dataset':
+  case 'csv': {
+    if (!d) return '';
+    body = H_('what one row is') +
+      LN(`${S_('row')} = ( ${d.tags.map(t => esc(t.id)).join(', ')} )`) +
+      LN(`${S_('n')} = ${I_(d.rows)} ${O_('rows, one an hour')}`) +
+      CM(d.source === 'built-in'
+        ? `${d.rows.toLocaleString('en-IN')} hours is 365 × 24 — a full year, so the model meets every season it will be asked to judge. The fault begins on day ${d.onset} and takes ${d.ttf} days to run its course.`
+        : 'Your own export. Nothing was uploaded — the file was read by this tab.');
+    break;
+  }
+
+  case 'window': {
+    const a = Math.round(b.f.from) * 24, e = Math.round(b.f.to) * 24;
+    const tot = d ? d.rows : 8760;
+    body = H_('which rows the fit may see') +
+      LN(`${S_('train')} = rows[ ${I_(a)} : ${I_(e)} ]  ${O_('=')} <span class="res">${(e-a).toLocaleString('en-IN')}</span> ${O_('rows')}`) +
+      LN(`${S_('judged')} = rows[ ${I_(e)} : ${I_(tot)} ]  ${O_('=')} <span class="res">${Math.max(0,tot-e).toLocaleString('en-IN')}</span> ${O_('rows')}`) +
+      CM(`Every number the model learns — the weights, the scaler, and σ — comes only from the first set. The second set is never fitted on, which is the only reason the residual there means anything.` +
+         (d && d.onset != null && b.f.to > d.onset
+          ? ` <b>This window ends on day ${Math.round(b.f.to)}, past the fault onset on day ${d.onset}.</b> The degradation is inside the training data, so the model is being taught that it is normal.`
+          : ''));
+    break;
+  }
+
+  case 'inputs': {
+    const t = b.f.tags || [];
+    body = H_('the design matrix') +
+      LN(`${S_('X')} ${O_('=')} [ ${t.map(x => esc(x)).join(' , ')} ]`) +
+      LN(`${O_('shape')} ${I_(d ? d.rows : 0)} ${O_('×')} ${I_(t.length)}`) +
+      CM('Choosing these matters more than choosing layers. A tag the fault moves is a trap: the model learns to expect the fault and stops reporting it — or worse, expects it on a tag the fault never touches and drives that residual negative.');
+    break;
+  }
+
+  case 'target': {
+    if (!d || !b.f.tag) return '';
+    const v = d.tags.find(x => x.id === b.f.tag);
+    if (!v) return '';
+    let s = 0, n = v.v.length; for (let i = 0; i < n; i++) s += v.v[i];
+    const m = s / n; let q = 0; for (let i = 0; i < n; i++) q += (v.v[i] - m) ** 2;
+    body = H_('what is being predicted') +
+      LN(`${S_('y')} ${O_('=')} ${esc(v.name)} ${O_('(' + (v.unit || '') + ')')}`) +
+      LN(`${S_('ȳ')} ${O_('=')} ${N_(m)}   ${S_('s')}<sub>y</sub> ${O_('=')} ${N_(Math.sqrt(q / n))}`) +
+      CM('Over the whole year. The scaler the network actually uses is fitted on the training window alone — open the Normalise block to see the difference.');
+    break;
+  }
+
+  /* ---------------------------------------------------------- prepare */
+  case 'normalise': {
+    if (!M) return untrained;
+    body = H_('the scaler, fitted on the training window only') +
+      LN(`${S_('x̃')}<sub>i</sub> ${O_('=')} ( ${S_('x')}<sub>i</sub> ${O_('−')} ${S_('μ')}<sub>i</sub> ) ${O_('/')} ${S_('σ')}<sub>i</sub>`) +
+      M.names.map((nm, i) =>
+        LN(`${O_(nm.padEnd(0))} : ${S_('μ')}=${N_(M.mu[i])}  ${S_('σ')}=${N_(M.sg[i])}`)).join('') +
+      H_('and the target') +
+      LN(`${S_('ỹ')} ${O_('=')} ( ${S_('y')} ${O_('−')} ${N_(M.ym)} ) ${O_('/')} ${N_(M.ys)}`) +
+      CM('These come from the training rows and nowhere else. Fit the scaler on the whole year and you have leaked the future into the model — the standard way a benchmark number becomes fiction.');
+    break;
+  }
+
+  case 'lag':
+    body = H_('a copy of each input, shifted back') +
+      LN(`${S_('x′')}[t] ${O_('=')} ${S_('x')}[ t ${O_('−')} ${N_(Math.round(b.f.h))} ]`) +
+      CM('Lets the network see a rate of change without being told about derivatives. Costs one extra column per input, and the first ' + Math.round(b.f.h) + ' rows have nothing to look back at.');
+    break;
+
+  case 'roll':
+    body = H_('a smoothed copy of each input') +
+      LN(`${S_('x′')}[t] ${O_('=')} (1/${N_(Math.round(b.f.h))}) ${O_('Σ')}<sub>k=0..${Math.round(b.f.h)-1}</sub> ${S_('x')}[t−k]`) +
+      CM('Suppresses shift-to-shift noise. It also delays the model’s reaction by roughly half the window, which on a slow degradation is a fair trade and on a fast one is not.');
+    break;
+
+  /* ------------------------------------------------------------ layer */
+  case 'dense': {
+    if (!M) return untrained;
+    const t = forwardTrace(traceHour());
+    if (!t) return untrained;
+    /* which dense layer is this one? */
+    const denses = MB.spec.filter(x => x.type === 'dense');
+    const L = Math.max(0, denses.indexOf(b));
+    if (L >= M.W.length - 1) return untrained;
+    const nOut = M.sizes[L+1], nIn = M.sizes[L];
+    const q = 0;                                  // narrate the first neuron
+    const act = M.layers[L] ? M.layers[L].act : 'tanh';
+    const names = L === 0 ? M.names : Array.from({length:nIn}, (_, i) => `a${L}_${i+1}`);
+
+    const terms = [];
+    for (let i = 0; i < nIn; i++)
+      terms.push(LN(`  ${O_(i ? '+' : ' ')} ${N_(M.W[L][i][q])} ${O_('×')} ${N_(t.A[L][i])}` +
+                    `   ${O_('← ' + names[i])}`));
+
+    body = H_(`layer ${L+1}: ${nIn} in → ${nOut} out, ${nIn*nOut + nOut} parameters`) +
+      LN(`${S_('z')}<sub>j</sub> ${O_('=')} ${O_('Σ')}<sub>i</sub> ${S_('w')}<sub>ij</sub> ${S_('x̃')}<sub>i</sub> ${O_('+')} ${S_('b')}<sub>j</sub>`) +
+      LN(`${S_('a')}<sub>j</sub> ${O_('=')} ${act}( ${S_('z')}<sub>j</sub> )`) +
+      H_(`neuron 1, evaluated at ${hourLabel(t.hour)}`) +
+      terms.join('') +
+      LN(`  ${O_('+')} ${N_(M.B[L][q])}   ${O_('← bias')}`) +
+      LN(`  ${O_('=')} ${S_('z')}<sub>1</sub> ${O_('=')} ${R_(t.Z[L][q])}`) +
+      LN(`  ${S_('a')}<sub>1</sub> ${O_('=')} ${act}(${nf(t.Z[L][q])}) ${O_('=')} ${R_(t.A[L+1][q])}`) +
+      CM(act === 'tanh'
+        ? 'tanh squashes to (−1, 1). That bend is the whole reason a network can fit the cooler’s knee when a straight line cannot — remove every activation and the network collapses to one linear regression, however many layers you stack.'
+        : act === 'relu'
+        ? 'ReLU passes positives and zeroes the rest. Cheap, and it makes each neuron a hinge; enough hinges approximate any curve. A neuron whose z is negative for every row is dead and contributes nothing.'
+        : 'A linear activation makes this layer redundant — stacked linear maps are one linear map. Useful only as the output layer.');
+    break;
+  }
+
+  /* --------------------------------------------------------- training */
+  case 'train': {
+    if (!M || !MB.result) return untrained;
+    const r = MB.result;
+    const t = forwardTrace(traceHour());
+    const err = t.yhatStd - t.yStd;
+    body = H_('what is being minimised') +
+      LN(`${S_('L')} ${O_('=')} (1/n) ${O_('Σ')} ( ${S_('ŷ̃')} ${O_('−')} ${S_('ỹ')} )²   ${O_('on the standardised target')}`) +
+      LN(`${O_('epoch 1')} ${O_(':')} ${S_('L')} ${O_('=')} ${N_(r.loss[0])} ${O_('  →  epoch ' + r.loss.length + ' :')} ${S_('L')} ${O_('=')} ${R_(r.loss[r.loss.length-1])}`) +
+      CM(`Predicting the mean scores exactly 1.0, so ${nf(r.loss[r.loss.length-1])} means the network explains ${((1 - r.loss[r.loss.length-1]) * 100).toFixed(0)}% of the variance a mean-predictor leaves.`) +
+      H_('backpropagation, one weight') +
+      LN(`${S_('δ')}<sub>out</sub> ${O_('=')} 2( ${S_('ŷ̃')} ${O_('−')} ${S_('ỹ')} ) ${O_('=')} 2( ${nf(t.yhatStd)} ${O_('−')} ${nf(t.yStd)} ) ${O_('=')} ${R_(2*err)}`) +
+      LN(`${S_('δ')}<sub>j</sub> ${O_('=')} ( ${O_('Σ')}<sub>k</sub> ${S_('δ')}<sub>k</sub> ${S_('w')}<sub>jk</sub> ) ${O_('·')} ${S_('f′')}( ${S_('z')}<sub>j</sub> )   ${O_('tanh′ = 1 − a²')}`) +
+      LN(`${O_('∂L/∂')}${S_('w')}<sub>ij</sub> ${O_('=')} ${S_('δ')}<sub>j</sub> ${O_('·')} ${S_('a')}<sub>i</sub>`) +
+      LN(`${S_('w')}<sub>ij</sub> ${O_('←')} ${S_('w')}<sub>ij</sub> ${O_('−')} <span class="num">${b.f.lr}</span> ${O_('·')} ${O_('∂L/∂')}${S_('w')}<sub>ij</sub>`) +
+      CM(`One row at a time, not a batch — δ<sub>out</sub> above is the gradient for this single hour. Applied to all ${M.params.toLocaleString('en-IN')} parameters, over ${(M.b - M.a).toLocaleString('en-IN')} rows, ${Math.round(b.f.epochs)} times: about ${bigOps(M.params * (M.b - M.a) * Math.round(b.f.epochs))} multiply-adds, which is why this takes about a second and needs no GPU. Raise the learning rate too far and the updates overshoot; the loss curve turns jagged and then climbs.`);
+    break;
+  }
+
+  /* ----------------------------------------------------------- output */
+  case 'residual': {
+    if (!M || !MB.result) return untrained;
+    const t = forwardTrace(traceHour());
+    const u = M.yUnit ? ' ' + M.yUnit : '';
+    body = H_(`one hour, all the way through — ${hourLabel(t.hour)}`) +
+      LN(`${S_('ŷ̃')} ${O_('=')} ${N_(t.yhatStd)}   ${O_('the network’s output, standardised')}`) +
+      LN(`${S_('ŷ')} ${O_('=')} ${N_(t.yhatStd)} ${O_('×')} ${N_(M.ys)} ${O_('+')} ${N_(M.ym)} ${O_('=')} ${R_(t.yhat)}${O_(u)}`) +
+      LN(`${S_('y')} ${O_('=')} ${N_(t.y)}${O_(u)}   ${O_('what the sensor read')}`) +
+      LN(`${S_('r')} ${O_('=')} ${S_('y')} ${O_('−')} ${S_('ŷ')} ${O_('=')} ${R_(t.resid)}${O_(u)}`) +
+      CM(t.resid < 0
+        ? 'Negative: the model expected <i>more</i> than the plant delivered. That is not the same as the reading falling — check whether an input is itself being moved by the fault.'
+        : 'Un-standardising is what turns an abstract network output back into degrees the control room can act on. The residual is the only line that matters: it is flat when the machine behaves as it always did, whatever the weather is doing.');
+    break;
+  }
+
+  case 'alert': {
+    if (!M || !MB.result || !MB.result.alert) return untrained;
+    const r = MB.result, al = r.alert, u = M.yUnit ? ' ' + M.yUnit : '';
+    body = H_('the band, and where it comes from') +
+      LN(`${S_('σ')} ${O_('=')} √( (1/n) ${O_('Σ')}<sub>train</sub> ${S_('r')}² ) ${O_('=')} ${R_(r.sigma)}${O_(u)}`) +
+      LN(`${O_('band')} ${O_('=')} <span class="num">${al.k}</span>${S_('σ')} ${O_('=')} ${R_(al.thr)}${O_(u)}`) +
+      LN(`${O_('fire when')} | ${S_('r')} | ${O_('>')} ${N_(al.thr)} ${O_('for')} ${I_(al.need)} ${O_('consecutive hours')}`) +
+      CM(`σ is the model’s own error, not the instrument’s — hour to hour this signal only moves by ${nf(r.noise)}${u}. Every bit of the rest is width the model added by failing to explain its training window, and it is paid for in days of warning.`);
+    break;
+  }
+
+  default: return '';
+  }
+
+  return `<div class="mth" role="region" aria-label="the mathematics of this block">${body}</div>`;
+}
+
+/* =========================================================================
+   POINTER-DRIVEN DRAG, AND THE PHONE SHELL
+
+   The artefact was built with HTML5 drag-and-drop — dragstart, dataTransfer,
+   drop. None of those events exist on a touch screen. On a phone the palette
+   was decorative: you could look at the blocks and you could not move one.
+   That is the whole interaction, so the whole artefact was inert.
+
+   Pointer events replace it. One code path covers mouse, finger and pen, and
+   there is no dataTransfer to marshal — the thing being dragged is just a
+   variable. Two details matter and both are easy to get wrong:
+
+     touch-action  A finger on an element the browser thinks is scrollable is
+                   a scroll gesture, and the browser will steal it mid-drag
+                   and cancel your pointer stream. `touch-action:none` on the
+                   block says otherwise. It is applied only while a drag is
+                   possible, so ordinary scrolling through the palette still
+                   works.
+
+     capture       setPointerCapture keeps the events coming to the element
+                   the finger started on even after it has moved somewhere
+                   else. Without it a fast drag off the edge of a block drops
+                   the stream and the ghost sticks to the screen.
+
+   The second half of the problem is layout. Under 900px the three columns
+   become one panel at a time, so the palette and the model are never both on
+   screen — and no amount of drag support helps you drag between two things
+   you cannot both see. On those widths a TAP on a palette block adds it, and
+   drag is reserved for reordering within the model. That is the right mobile
+   idiom anyway: dragging across a screen edge is a desktop affordance.
+   ========================================================================= */
+
+const NARROW = () => window.matchMedia('(max-width:900px)').matches;
+
+/* ------------------------------------------------------------ the panels */
+let PANEL = 'canvasWrap';
+
+function showPanel(id){
+  PANEL = id;
+  ['palette', 'canvasWrap', 'right'].forEach(k => {
+    const el = document.getElementById(k);
+    if (el) el.classList.toggle('on', k === id);
+  });
+  document.querySelectorAll('#mobnav button').forEach(b =>
+    b.classList.toggle('on', b.dataset.p === id));
+  /* A panel that was hidden has zero width, so any canvas drawn into it was
+     drawn at zero width too. Re-render the results when they come back. */
+  if (id === 'right' && MB.result) renderResults(MB.result);
+  const el = document.getElementById(id);
+  if (el) el.scrollTop = el.scrollTop;   // keep position, do not jump
+}
+
+function syncNav(){
+  const b = document.getElementById('navCount');
+  if (b){ b.textContent = MB.spec.length; b.style.display = MB.spec.length ? '' : 'none'; }
+  /* The instruction under "Your model" is a lie on a phone — there is no
+     "left" to drag from. Say what actually works on this screen. */
+  const h = document.getElementById('canvasHint');
+  if (h) h.textContent = NARROW()
+    ? 'Tap a block in Blocks to add it. Drag a block here to reorder, tap it for the maths.'
+    : 'Drag blocks in from the left. Order matters, top to bottom. Tap a block for the maths it performs.';
+}
+
+let toastT = null;
+function toast(msg){
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('on'), 2100);
+}
+
+function wireNav(){
+  document.querySelectorAll('#mobnav button').forEach(b =>
+    b.addEventListener('click', () => showPanel(b.dataset.p)));
+  showPanel(NARROW() ? 'canvasWrap' : 'canvasWrap');
+  /* Rotating a phone, or resizing a desktop window across the breakpoint,
+     must not leave two panels hidden with nothing to show. */
+  window.addEventListener('resize', () => {
+    if (!NARROW())
+      ['palette', 'canvasWrap', 'right'].forEach(k =>
+        document.getElementById(k).classList.remove('on'));
+    else showPanel(PANEL);
+    syncNav();
+  });
+}
+
+/* ----------------------------------------------------------------- drag */
+const DRAG_START_PX = 7;      // below this it is a tap, not a drag
+let D = null;                 // the live gesture, or null
+
+/* Where in the canvas would a drop at this y land? Returns an index into
+   MB.spec, counting only blocks (the drop hint is not one). */
+function dropIndex(y){
+  const blocks = [...document.querySelectorAll('#canvas .blk')];
+  for (let i = 0; i < blocks.length; i++){
+    const r = blocks[i].getBoundingClientRect();
+    if (y < r.top + r.height / 2) return i;
+  }
+  return blocks.length;
+}
+
+function showSlot(i){
+  document.querySelectorAll('#canvas .slot').forEach(n => n.remove());
+  if (i == null) return;
+  const canvas = document.getElementById('canvas');
+  const blocks = [...canvas.querySelectorAll('.blk')];
+  const slot = document.createElement('div');
+  slot.className = 'slot';
+  if (i >= blocks.length) canvas.insertBefore(slot, canvas.querySelector('.drop'));
+  else canvas.insertBefore(slot, blocks[i]);
+}
+
+/* Auto-scroll when the finger is held near an edge of the canvas — without
+   it you cannot drag a block to a position that is off screen, which on a
+   phone is most of them. */
+let scrollT = null;
+function edgeScroll(y){
+  const c = document.getElementById('canvas');
+  if (!c) return;
+  const r = c.getBoundingClientRect(), M = 46;
+  const up = y < r.top + M, dn = y > r.bottom - M;
+  clearInterval(scrollT); scrollT = null;
+  if (up || dn) scrollT = setInterval(() => { c.scrollTop += up ? -11 : 11; }, 16);
+}
+function stopEdgeScroll(){ clearInterval(scrollT); scrollT = null; }
+
+function makeGhost(node, x, y){
+  const g = node.cloneNode(true);
+  g.id = 'ghostblk';
+  g.querySelectorAll('.x,.flds,.tags,.math,.more').forEach(n => n.remove());
+  g.classList.remove('sel');
+  g.style.left = x + 'px'; g.style.top = y + 'px';
+  document.body.appendChild(g);
+  return g;
+}
+
+function endDrag(commit){
+  if (!D) return;
+  const d = D; D = null;
+  stopEdgeScroll();
+  if (d.ghost) d.ghost.remove();
+  if (d.node) d.node.classList.remove('drag');
+  document.querySelectorAll('#canvas .slot').forEach(n => n.remove());
+  document.body.style.userSelect = '';
+  try { d.node.releasePointerCapture(d.id); } catch (e) {}
+
+  if (!commit || !d.moved) return;
+  const i = d.index;
+  if (i == null) return;
+  if (d.kind === 'new') addBlock(d.type, i);
+  else {
+    const from = d.from;
+    if (i === from || i === from + 1) return;         // dropped where it was
+    const [b] = MB.spec.splice(from, 1);
+    MB.spec.splice(i > from ? i - 1 : i, 0, b);
+    sortSpec(); afterChange();
+  }
+}
+
+/* Attach the gesture to one block. `info` is {kind:'new', type} for a palette
+   block or {kind:'move', from} for one already in the model. */
+function wireBlockPointer(node, info, onTap){
+  node.classList.add('grabbable');
+  node.addEventListener('pointerdown', e => {
+    /* A finger that landed on a number field, a dropdown, a tag chip or the
+       delete button is not trying to drag the block. Leave those alone or
+       the controls become unusable, which is worse than no drag at all. */
+    if (e.target.closest('input,select,button,.tg')) return;
+    if (e.button != null && e.button !== 0) return;
+
+    /* Dragging out of the palette is meaningless when the canvas is on
+       another panel — let the gesture scroll the palette instead. */
+    const canDrag = !(NARROW() && info.kind === 'new');
+
+    D = { kind: info.kind, type: info.type, from: info.from, node,
+          id: e.pointerId, x0: e.clientX, y0: e.clientY,
+          moved: false, index: null, ghost: null, canDrag };
+    try { node.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  node.addEventListener('pointermove', e => {
+    if (!D || D.id !== e.pointerId) return;
+    const dx = e.clientX - D.x0, dy = e.clientY - D.y0;
+    if (!D.moved){
+      if (Math.hypot(dx, dy) < DRAG_START_PX) return;
+      if (!D.canDrag){ D = null; return; }            // give the gesture back
+      D.moved = true;
+      D.ghost = makeGhost(node, e.clientX, e.clientY);
+      if (D.kind === 'move') node.classList.add('drag');
+      document.body.style.userSelect = 'none';
+    }
+    e.preventDefault();
+    D.ghost.style.left = e.clientX + 'px';
+    D.ghost.style.top  = e.clientY + 'px';
+    const c = document.getElementById('canvas');
+    const r = c.getBoundingClientRect();
+    const inside = e.clientX >= r.left - 40 && e.clientX <= r.right + 40 &&
+                   e.clientY >= r.top  - 20 && e.clientY <= r.bottom + 20;
+    D.index = inside ? dropIndex(e.clientY) : null;
+    showSlot(D.index);
+    edgeScroll(e.clientY);
+  });
+
+  const up = e => {
+    if (!D || D.id !== e.pointerId) return;
+    const wasTap = !D.moved;
+    endDrag(true);
+    if (wasTap && onTap) onTap();
+  };
+  node.addEventListener('pointerup', up);
+  node.addEventListener('pointercancel', () => endDrag(false));
+}
+
+/* A palette block: tap adds it, drag places it. */
+function wirePaletteBlock(node, type){
+  wireBlockPointer(node, { kind: 'new', type }, () => {
+    const before = MB.spec.length;
+    addBlock(type);
+    if (MB.spec.length === before)
+      toast(`Only one ${BLOCKS[type].label.toLowerCase()} block is allowed`);
+    else if (NARROW())
+      toast(`${BLOCKS[type].label} added — see Model`);
+  });
+}
+
+/* A block already in the model: tap opens its maths, drag reorders it. */
+function wireCanvasBlock(node, i){
+  wireBlockPointer(node, { kind: 'move', from: i }, () => {
+    MB.open = (MB.open === i) ? null : i;
+    renderCanvas();
+  });
+}
+
+/* =========================================================================
    Model Builder — the canvas, the charts and the wiring.
    ========================================================================= */
 'use strict';
@@ -1581,8 +2238,16 @@ function chart(el, o){
     g.stroke();
   }
   g.strokeStyle = C.line; g.beginPath(); g.moveTo(L, h - B); g.lineTo(w - R, h - B); g.stroke();
-  g.fillStyle = C.mut; g.font = '10px Calibri,system-ui'; g.textAlign = 'center';
-  (o.xTicks || []).forEach(t => g.fillText(t.label, px(t.i), h - B + 14));
+  /* Keep the first and last tick label inside the canvas. Centred on the axis
+     end they hang half off it, and on a phone "epoch 220" arrives as
+     "epoch 2". Nudge them in and align to the edge instead. */
+  g.fillStyle = C.mut; g.font = '10px Calibri,system-ui';
+  (o.xTicks || []).forEach(t => {
+    const x = px(t.i), wid = g.measureText(t.label).width;
+    if (x - wid / 2 < 2){ g.textAlign = 'left'; g.fillText(t.label, 0, h - B + 14); }
+    else if (x + wid / 2 > w - 1){ g.textAlign = 'right'; g.fillText(t.label, w, h - B + 14); }
+    else { g.textAlign = 'center'; g.fillText(t.label, x, h - B + 14); }
+  });
 }
 const fmtSmall = v => Math.abs(v) >= 1000 ? (v/1000).toFixed(1)+'k'
                     : Math.abs(v) >= 10 ? v.toFixed(0)
@@ -1615,10 +2280,19 @@ function blockHTML(type, b, inCanvas, i){
           >${esc(t.name.length > 22 ? t.name.slice(0, 21) + '…' : t.name)}</span>`).join('') + '</div>';
     }
   }
-  return `<div class="blk ${B.cat}" draggable="true" data-type="${type}" ${inCanvas ? `data-i="${i}"` : ''}>
-    ${inCanvas ? '<button class="x" title="remove">×</button>' : ''}
+  /* Every block carries the one line of arithmetic it stands for, and opens
+     into the full working when tapped. A block whose maths you cannot see is
+     a black box with a friendly label on it, which is the thing this artefact
+     exists to argue against. */
+  const open = inCanvas && MB.open === i;
+  const oneLine = inCanvas ? blockFormula(type, b) : '';
+  return `<div class="blk ${B.cat} ${open ? 'sel' : ''}" data-type="${type}" ${inCanvas ? `data-i="${i}"` : ''}>
+    ${inCanvas ? '<button class="x" title="remove" aria-label="remove this block">×</button>' : ''}
     <div class="t"><span class="ic">${B.ic}</span>${B.label}</div>
-    <div class="d">${B.desc}</div>${f}</div>`;
+    <div class="d">${B.desc}</div>${f}
+    ${oneLine ? `<div class="math">${oneLine}</div>` : ''}
+    ${inCanvas ? (open ? blockMaths(type, b) : '<div class="more">tap for the maths, with this model’s numbers</div>') : ''}
+  </div>`;
 }
 
 function renderPalette(){
@@ -1628,11 +2302,7 @@ function renderPalette(){
     Object.entries(BLOCKS).filter(([, b]) => b.cat === cat)
       .map(([k]) => blockHTML(k, {f:{}}, false)).join('')
   ).join('');
-  el.querySelectorAll('.blk').forEach(n => {
-    n.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/new', n.dataset.type); e.dataTransfer.effectAllowed = 'copy';
-    });
-  });
+  el.querySelectorAll('.blk').forEach(n => wirePaletteBlock(n, n.dataset.type));
 }
 
 function addBlock(type, at){
@@ -1650,12 +2320,14 @@ function sortSpec(){
 
 function renderCanvas(){
   const el = document.getElementById('canvas');
+  const add = NARROW() ? 'Tap a block under <b>Blocks</b>' : 'Drag a block here';
   if (!MB.spec.length){
-    el.innerHTML = `<div class="drop" id="dz">Drag a block here.<br><br>
+    el.innerHTML = `<div class="drop" id="dz">${add}.<br><br>
       Start with <b>Machine data</b>, then <b>Predict this tag</b>.</div>`;
   } else {
     el.innerHTML = MB.spec.map((b, i) => blockHTML(b.type, b, true, i)).join('') +
-      `<div class="drop" id="dz" style="margin-top:4px">drop here to add at the end</div>`;
+      `<div class="drop" id="dz" style="margin-top:4px">${NARROW()
+        ? 'blocks are kept in run order automatically' : 'drop here to add at the end'}</div>`;
   }
   /* field edits */
   el.querySelectorAll('input,select').forEach(n => {
@@ -1675,27 +2347,15 @@ function renderCanvas(){
   }));
   el.querySelectorAll('.x').forEach(n => n.addEventListener('click', e => {
     e.stopPropagation();
-    MB.spec.splice(+n.parentNode.dataset.i, 1); afterChange();
+    const i = +n.parentNode.dataset.i;
+    MB.spec.splice(i, 1);
+    if (MB.open === i) MB.open = null; else if (MB.open > i) MB.open--;
+    afterChange();
   }));
-  /* reorder within the canvas */
-  el.querySelectorAll('.blk').forEach(n => {
-    n.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/move', n.dataset.i); n.classList.add('drag');
-    });
-    n.addEventListener('dragend', () => n.classList.remove('drag'));
-  });
-  const dz = document.getElementById('dz');
-  [el, dz].forEach(z => {
-    z.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
-    z.addEventListener('dragleave', () => dz.classList.remove('over'));
-    z.addEventListener('drop', e => {
-      e.preventDefault(); dz.classList.remove('over');
-      const nw = e.dataTransfer.getData('text/new');
-      const mv = e.dataTransfer.getData('text/move');
-      if (nw) addBlock(nw);
-      else if (mv !== ''){ const [b] = MB.spec.splice(+mv, 1); MB.spec.push(b); sortSpec(); afterChange(); }
-    });
-  });
+  /* Reorder, and tap to open the maths. Both are pointer gestures now — see
+     mb_touch.js for why HTML5 drag had to go. */
+  el.querySelectorAll('.blk').forEach(n => wireCanvasBlock(n, +n.dataset.i));
+  syncNav();
 }
 
 /* Switching the machine in the dropdown has to leave a model that still runs.
@@ -1760,10 +2420,18 @@ function paneRun(){
       <div class="sub">Everything runs on this machine. Nothing is uploaded, and there is no server to upload to.</div>
       <button class="btn go" id="btnTrain">▶ Train the network</button>
       <button class="btn alt sm" id="btnReset" style="margin-left:8px">Start over</button>
+      <button class="btn alt sm" id="btnCsv" style="margin-left:8px">Use my own CSV</button>
+      <input type="file" id="csvIn" accept=".csv,.txt,text/csv,text/plain" class="hide">
       <span id="prog" style="margin-left:12px;color:var(--muted);font-size:12.5px"></span>
     </div>
     <div id="results"></div>`;
   document.getElementById('btnTrain').onclick = doTrain;
+  /* You cannot drag a file onto a phone. The drop target stays for desktop;
+     this is the same code path reached by a file picker. */
+  document.getElementById('btnCsv').onclick = () => document.getElementById('csvIn').click();
+  document.getElementById('csvIn').onchange = e => {
+    if (e.target.files && e.target.files[0]) loadCSVFile(e.target.files[0]);
+  };
   document.getElementById('btnReset').onclick = () => { MB.spec = []; MB.result = null; defaultSpec(); };
   if (r) renderResults(r);
 }
@@ -2073,24 +2741,29 @@ function wireDrop(){
   window.addEventListener('drop', e => {
     if (!e.dataTransfer.files || !e.dataTransfer.files.length) return;
     e.preventDefault(); depth = 0; hint.classList.remove('on');
-    const f = e.dataTransfer.files[0];
-    const rd = new FileReader();
-    rd.onload = () => {
-      try {
-        const parsed = parseHistorianCSV(String(rd.result));
-        const prof = profileTags(parsed);
-        adoptCSV(parsed, prof, f.name);
-        const i = MB.spec.findIndex(b => b.type === 'dataset');
-        if (i > -1) MB.spec.splice(i, 1);
-        if (!MB.spec.some(b => b.type === 'csv')) MB.spec.unshift({type:'csv', cat:'data', f:{}});
-        resetTagFields(); MB.result = null; sortSpec();
-        TAB = 'data'; syncTabs(); afterChange();
-      } catch (err){
-        alert('That file could not be read as a historian export.\n\n' + err.message);
-      }
-    };
-    rd.readAsText(f);
+    loadCSVFile(e.dataTransfer.files[0]);
   });
+}
+
+/* One path for a dropped file and for one chosen from a picker. */
+function loadCSVFile(f){
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const parsed = parseHistorianCSV(String(rd.result));
+      const prof = profileTags(parsed);
+      adoptCSV(parsed, prof, f.name);
+      const i = MB.spec.findIndex(b => b.type === 'dataset');
+      if (i > -1) MB.spec.splice(i, 1);
+      if (!MB.spec.some(b => b.type === 'csv')) MB.spec.unshift({type:'csv', cat:'data', f:{}});
+      resetTagFields(); MB.result = null; MB.open = null; sortSpec();
+      TAB = 'data'; syncTabs(); afterChange();
+      if (NARROW()) showPanel('right');
+    } catch (err){
+      alert('That file could not be read as a historian export.\n\n' + err.message);
+    }
+  };
+  rd.readAsText(f);
 }
 
 /* ------------------------------------------------------------------ boot */
@@ -2129,7 +2802,9 @@ function boot(){
     TAB = t.dataset.t; syncTabs(); renderPane();
   }));
   wireDrop();
+  wireNav();
   defaultSpec();
+  syncNav();
   window.addEventListener('resize', () => { if (MB.result && TAB === 'run') renderResults(MB.result); });
 }
 boot();

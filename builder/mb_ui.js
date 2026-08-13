@@ -57,8 +57,16 @@ function chart(el, o){
     g.stroke();
   }
   g.strokeStyle = C.line; g.beginPath(); g.moveTo(L, h - B); g.lineTo(w - R, h - B); g.stroke();
-  g.fillStyle = C.mut; g.font = '10px Calibri,system-ui'; g.textAlign = 'center';
-  (o.xTicks || []).forEach(t => g.fillText(t.label, px(t.i), h - B + 14));
+  /* Keep the first and last tick label inside the canvas. Centred on the axis
+     end they hang half off it, and on a phone "epoch 220" arrives as
+     "epoch 2". Nudge them in and align to the edge instead. */
+  g.fillStyle = C.mut; g.font = '10px Calibri,system-ui';
+  (o.xTicks || []).forEach(t => {
+    const x = px(t.i), wid = g.measureText(t.label).width;
+    if (x - wid / 2 < 2){ g.textAlign = 'left'; g.fillText(t.label, 0, h - B + 14); }
+    else if (x + wid / 2 > w - 1){ g.textAlign = 'right'; g.fillText(t.label, w, h - B + 14); }
+    else { g.textAlign = 'center'; g.fillText(t.label, x, h - B + 14); }
+  });
 }
 const fmtSmall = v => Math.abs(v) >= 1000 ? (v/1000).toFixed(1)+'k'
                     : Math.abs(v) >= 10 ? v.toFixed(0)
@@ -91,10 +99,19 @@ function blockHTML(type, b, inCanvas, i){
           >${esc(t.name.length > 22 ? t.name.slice(0, 21) + '…' : t.name)}</span>`).join('') + '</div>';
     }
   }
-  return `<div class="blk ${B.cat}" draggable="true" data-type="${type}" ${inCanvas ? `data-i="${i}"` : ''}>
-    ${inCanvas ? '<button class="x" title="remove">×</button>' : ''}
+  /* Every block carries the one line of arithmetic it stands for, and opens
+     into the full working when tapped. A block whose maths you cannot see is
+     a black box with a friendly label on it, which is the thing this artefact
+     exists to argue against. */
+  const open = inCanvas && MB.open === i;
+  const oneLine = inCanvas ? blockFormula(type, b) : '';
+  return `<div class="blk ${B.cat} ${open ? 'sel' : ''}" data-type="${type}" ${inCanvas ? `data-i="${i}"` : ''}>
+    ${inCanvas ? '<button class="x" title="remove" aria-label="remove this block">×</button>' : ''}
     <div class="t"><span class="ic">${B.ic}</span>${B.label}</div>
-    <div class="d">${B.desc}</div>${f}</div>`;
+    <div class="d">${B.desc}</div>${f}
+    ${oneLine ? `<div class="math">${oneLine}</div>` : ''}
+    ${inCanvas ? (open ? blockMaths(type, b) : '<div class="more">tap for the maths, with this model’s numbers</div>') : ''}
+  </div>`;
 }
 
 function renderPalette(){
@@ -104,11 +121,7 @@ function renderPalette(){
     Object.entries(BLOCKS).filter(([, b]) => b.cat === cat)
       .map(([k]) => blockHTML(k, {f:{}}, false)).join('')
   ).join('');
-  el.querySelectorAll('.blk').forEach(n => {
-    n.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/new', n.dataset.type); e.dataTransfer.effectAllowed = 'copy';
-    });
-  });
+  el.querySelectorAll('.blk').forEach(n => wirePaletteBlock(n, n.dataset.type));
 }
 
 function addBlock(type, at){
@@ -126,12 +139,14 @@ function sortSpec(){
 
 function renderCanvas(){
   const el = document.getElementById('canvas');
+  const add = NARROW() ? 'Tap a block under <b>Blocks</b>' : 'Drag a block here';
   if (!MB.spec.length){
-    el.innerHTML = `<div class="drop" id="dz">Drag a block here.<br><br>
+    el.innerHTML = `<div class="drop" id="dz">${add}.<br><br>
       Start with <b>Machine data</b>, then <b>Predict this tag</b>.</div>`;
   } else {
     el.innerHTML = MB.spec.map((b, i) => blockHTML(b.type, b, true, i)).join('') +
-      `<div class="drop" id="dz" style="margin-top:4px">drop here to add at the end</div>`;
+      `<div class="drop" id="dz" style="margin-top:4px">${NARROW()
+        ? 'blocks are kept in run order automatically' : 'drop here to add at the end'}</div>`;
   }
   /* field edits */
   el.querySelectorAll('input,select').forEach(n => {
@@ -151,27 +166,15 @@ function renderCanvas(){
   }));
   el.querySelectorAll('.x').forEach(n => n.addEventListener('click', e => {
     e.stopPropagation();
-    MB.spec.splice(+n.parentNode.dataset.i, 1); afterChange();
+    const i = +n.parentNode.dataset.i;
+    MB.spec.splice(i, 1);
+    if (MB.open === i) MB.open = null; else if (MB.open > i) MB.open--;
+    afterChange();
   }));
-  /* reorder within the canvas */
-  el.querySelectorAll('.blk').forEach(n => {
-    n.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/move', n.dataset.i); n.classList.add('drag');
-    });
-    n.addEventListener('dragend', () => n.classList.remove('drag'));
-  });
-  const dz = document.getElementById('dz');
-  [el, dz].forEach(z => {
-    z.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
-    z.addEventListener('dragleave', () => dz.classList.remove('over'));
-    z.addEventListener('drop', e => {
-      e.preventDefault(); dz.classList.remove('over');
-      const nw = e.dataTransfer.getData('text/new');
-      const mv = e.dataTransfer.getData('text/move');
-      if (nw) addBlock(nw);
-      else if (mv !== ''){ const [b] = MB.spec.splice(+mv, 1); MB.spec.push(b); sortSpec(); afterChange(); }
-    });
-  });
+  /* Reorder, and tap to open the maths. Both are pointer gestures now — see
+     mb_touch.js for why HTML5 drag had to go. */
+  el.querySelectorAll('.blk').forEach(n => wireCanvasBlock(n, +n.dataset.i));
+  syncNav();
 }
 
 /* Switching the machine in the dropdown has to leave a model that still runs.
@@ -236,10 +239,18 @@ function paneRun(){
       <div class="sub">Everything runs on this machine. Nothing is uploaded, and there is no server to upload to.</div>
       <button class="btn go" id="btnTrain">▶ Train the network</button>
       <button class="btn alt sm" id="btnReset" style="margin-left:8px">Start over</button>
+      <button class="btn alt sm" id="btnCsv" style="margin-left:8px">Use my own CSV</button>
+      <input type="file" id="csvIn" accept=".csv,.txt,text/csv,text/plain" class="hide">
       <span id="prog" style="margin-left:12px;color:var(--muted);font-size:12.5px"></span>
     </div>
     <div id="results"></div>`;
   document.getElementById('btnTrain').onclick = doTrain;
+  /* You cannot drag a file onto a phone. The drop target stays for desktop;
+     this is the same code path reached by a file picker. */
+  document.getElementById('btnCsv').onclick = () => document.getElementById('csvIn').click();
+  document.getElementById('csvIn').onchange = e => {
+    if (e.target.files && e.target.files[0]) loadCSVFile(e.target.files[0]);
+  };
   document.getElementById('btnReset').onclick = () => { MB.spec = []; MB.result = null; defaultSpec(); };
   if (r) renderResults(r);
 }
@@ -549,24 +560,29 @@ function wireDrop(){
   window.addEventListener('drop', e => {
     if (!e.dataTransfer.files || !e.dataTransfer.files.length) return;
     e.preventDefault(); depth = 0; hint.classList.remove('on');
-    const f = e.dataTransfer.files[0];
-    const rd = new FileReader();
-    rd.onload = () => {
-      try {
-        const parsed = parseHistorianCSV(String(rd.result));
-        const prof = profileTags(parsed);
-        adoptCSV(parsed, prof, f.name);
-        const i = MB.spec.findIndex(b => b.type === 'dataset');
-        if (i > -1) MB.spec.splice(i, 1);
-        if (!MB.spec.some(b => b.type === 'csv')) MB.spec.unshift({type:'csv', cat:'data', f:{}});
-        resetTagFields(); MB.result = null; sortSpec();
-        TAB = 'data'; syncTabs(); afterChange();
-      } catch (err){
-        alert('That file could not be read as a historian export.\n\n' + err.message);
-      }
-    };
-    rd.readAsText(f);
+    loadCSVFile(e.dataTransfer.files[0]);
   });
+}
+
+/* One path for a dropped file and for one chosen from a picker. */
+function loadCSVFile(f){
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const parsed = parseHistorianCSV(String(rd.result));
+      const prof = profileTags(parsed);
+      adoptCSV(parsed, prof, f.name);
+      const i = MB.spec.findIndex(b => b.type === 'dataset');
+      if (i > -1) MB.spec.splice(i, 1);
+      if (!MB.spec.some(b => b.type === 'csv')) MB.spec.unshift({type:'csv', cat:'data', f:{}});
+      resetTagFields(); MB.result = null; MB.open = null; sortSpec();
+      TAB = 'data'; syncTabs(); afterChange();
+      if (NARROW()) showPanel('right');
+    } catch (err){
+      alert('That file could not be read as a historian export.\n\n' + err.message);
+    }
+  };
+  rd.readAsText(f);
 }
 
 /* ------------------------------------------------------------------ boot */
@@ -605,7 +621,9 @@ function boot(){
     TAB = t.dataset.t; syncTabs(); renderPane();
   }));
   wireDrop();
+  wireNav();
   defaultSpec();
+  syncNav();
   window.addEventListener('resize', () => { if (MB.result && TAB === 'run') renderResults(MB.result); });
 }
 boot();

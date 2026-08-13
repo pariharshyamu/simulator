@@ -19,6 +19,7 @@ const MB = {
   model: null,         // trained network
   result: null,        // residuals, alerts, timings
   csvProfile: null,
+  open: null,          // index of the block whose maths is expanded, if any
 };
 
 /* ---------------------------------------------------------------- blocks */
@@ -310,9 +311,51 @@ function mlpTrain(spec, onEpoch){
   const params = W.reduce((s, m) => s + m.length * m[0].length, 0) +
                  B.reduce((s, v) => s + v.length, 0);
 
-  MB.model = { W, B, sizes, layers, mu, sg, ym, ys, names, yName, params, doNorm };
+  /* Keep the design matrix and the layer spec so the maths panel can replay a
+     single hour through the trained network and print every term of it.
+     Nothing here is recomputed for display — the numbers a participant reads
+     are the numbers the model used. */
+  MB.model = { W, B, sizes, layers, mu, sg, ym, ys, names, yName, yUnit, params, doNorm,
+               X, y, a, b, lr, epochs, sigma, loss };
   return { pred, resid, sigma, noise, loss, trainFrom:a, trainTo:b, y, names, yName, yUnit,
            params, ms: performance.now() - t0 };
+}
+
+/* -------------------------------------------------------- forward trace
+   Replay ONE hour through the trained network and hand back every
+   intermediate quantity, so the maths panel can print the actual arithmetic
+   rather than a textbook version of it. Same weights, same order, same
+   activation as mlpTrain — if these two ever disagree the panel is lying,
+   which is worse than not having one. */
+function forwardTrace(hour){
+  const M = MB.model;
+  if (!M) return null;
+  const j = Math.max(0, Math.min(M.X[0].length - 1, Math.round(hour)));
+  const NI = M.sizes[0];
+  const raw = [], xs = [];
+  for (let i = 0; i < NI; i++){
+    raw.push(M.X[i][j]);
+    xs.push((M.X[i][j] - M.mu[i]) / M.sg[i]);
+  }
+  const actOf = L => (L < M.layers.length ? M.layers[L].act : 'linear');
+  const f = (v, k) => k === 'tanh' ? Math.tanh(v) : k === 'relu' ? Math.max(0, v) : v;
+
+  const A = [xs], Z = [];
+  for (let L = 0; L < M.W.length; L++){
+    const z = [], o = [], k = actOf(L);
+    for (let q = 0; q < M.sizes[L+1]; q++){
+      let s = M.B[L][q];
+      for (let i = 0; i < M.sizes[L]; i++) s += A[L][i] * M.W[L][i][q];
+      z.push(s); o.push(f(s, k));
+    }
+    Z.push(z); A.push(o);
+  }
+  const yhatStd = A[A.length - 1][0];
+  return { hour: j, raw, xs, A, Z, actOf,
+           yhatStd, yhat: yhatStd * M.ys + M.ym,
+           yStd: (M.y[j] - M.ym) / M.ys, y: M.y[j],
+           resid: M.y[j] - (yhatStd * M.ys + M.ym),
+           inTraining: j >= M.a && j < M.b };
 }
 
 /* the alert rule, applied outside the training window */

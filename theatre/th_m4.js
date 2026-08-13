@@ -14,7 +14,8 @@ const M4 = (function(){
   ];
   const NI=8, NH1=10, NH2=6;
   const st = {act:0, ready:false, actf:'tanh', showW:true, speed:1, epoch:0, training:false,
-              inspect:0, day:96, phase:0, lossHist:[], trained:false};
+              inspect:0, day:96, phase:0, lossHist:[], trained:false,
+              pick:{l:1, i:0}};      // the node last tapped in the 3-D scene
   let W1,b1,W2,b2,W3,b3, mu={}, sg={}, TRX=[], TRY=[], my=0, sy=1;
   let nodes=[[],[],[],[]], edges=[], edgeLines, parts, partMeta=[], gLayerCards=[];
   let labs={}, curAct=null, curOut=0;
@@ -155,6 +156,26 @@ const M4 = (function(){
     for(let i=0;i<240;i++) partMeta.push({e:0, t:0});
 
     runSpec();
+
+    /* Tap a neuron to open it. The dropdown stays for anyone who prefers it,
+       but on a touch screen the obvious thing to do with a glowing sphere
+       labelled "neuron" is to press it, and until now that did nothing. */
+    TH3.onPick([...nodes[1], ...nodes[0], ...nodes[2], nodes[3][0]], mesh=>{
+      const h1=nodes[1].indexOf(mesh);
+      if(h1>-1){ st.inspect=h1; st.pick={l:1,i:h1}; }
+      else {
+        const i0=nodes[0].indexOf(mesh), i2=nodes[2].indexOf(mesh);
+        if(i0>-1) st.pick={l:0,i:i0};
+        else if(i2>-1) st.pick={l:2,i:i2};
+        else if(mesh===nodes[3][0]) st.pick={l:3,i:0};
+        else return;
+      }
+      refresh();
+      if(window.THEATRE) THEATRE.repanel();
+      const c=document.getElementById('m4pick');
+      if(c) c.scrollIntoView({block:'nearest', behavior:'smooth'});
+    });
+
     TH3.setCam(0.42, 0.26, 12.6, new THREE.Vector3(0,0,0), false);
     st.ready=true; refresh();
   }
@@ -288,6 +309,82 @@ const M4 = (function(){
       ((r.brgT-curOut)>=0?'+':'')+f1(r.brgT-curOut)+' °C'};
   }
 
+  /* ------------------------------------------------------ the backward pass
+     The forward pass is already opened up below; this is the other half, and
+     it is the half people are asked to take on faith. Every quantity here is
+     the one the trainer computes — same expressions as trainEpoch, evaluated
+     at the hour on screen — so a participant can follow one weight from the
+     error at the output all the way to the number it is about to become. */
+  function backCard(){
+    const F=curAct||runSpec(), r=specRow();
+    const yt=(r.brgT-my)/sy;              // the standardised truth
+    const e=F.y-yt, dy=2*e;               // dL/dŷ for this single hour
+    const d2=new Float64Array(NH2);
+    for(let i=0;i<NH2;i++) d2[i]=dy*W3[i][0]*dact(F.z2[i],F.a2[i]);
+    const d1=new Float64Array(NH1);
+    for(let i=0;i<NH1;i++){ let s=0; for(let j=0;j<NH2;j++) s+=d2[j]*W2[i][j];
+                            d1[i]=s*dact(F.z1[i],F.a1[i]); }
+    const j=st.inspect, lr=0.045;
+    /* Follow the weight from the input that matters most into this neuron. */
+    let bi=0, bv=-1;
+    for(let i=0;i<NI;i++){ const m=Math.abs(d1[j]*F.x[i]); if(m>bv){ bv=m; bi=i; } }
+    const grad=d1[j]*F.x[bi], w0=W1[bi][j], w1=w0-lr*grad;
+
+    return `
+<div class="card" id="m4back"><h3>The backward pass, on this hour<span class="tag">where the weights come from</span></h3>
+<div class="small" style="margin-bottom:7px">Forward is multiply, add, squash. Backward is the chain rule, once
+per layer, and it is the entire training algorithm. These are live numbers for
+<b>${IN[bi].n} → neuron ${j+1}</b> at day ${f1(st.day)}.</div>
+<div class="eq">error        e   = ŷ − y        = <span class="o">${f2(F.y)}</span> − <span class="o">${f2(yt)}</span> = <span class="o">${f2(e)}</span>   <span class="c">standardised</span>
+output δ     δ<span class="o">out</span> = 2e            = <span class="o">${f2(dy)}</span>
+hidden-2 δ   δ²<span class="o">j</span>  = δ<span class="o">out</span>·w³<span class="o">j</span>·f′(z²<span class="o">j</span>)
+hidden-1 δ   δ¹<span class="o">${j+1}</span>  = Σ<span class="o">j</span> δ²<span class="o">j</span>·w²  · f′(z¹<span class="o">${j+1}</span>) = <span class="o">${f2(d1[j])}</span>
+                             ─────────
+gradient     ∂L/∂w = δ¹<span class="o">${j+1}</span> · x<span class="o">${bi+1}</span>   = <span class="o">${f2(d1[j])}</span> × <span class="o">${f2(F.x[bi])}</span> = <span class="o">${f2(grad)}</span>
+update       w ← w − η·∂L/∂w  = <span class="o">${f2(w0)}</span> − ${lr}×<span class="o">${f2(grad)}</span> = <span class="g">${f2(w1)}</span></div>
+<div class="small" style="margin-top:6px"><b>f′ is why the activation matters twice.</b> tanh′ = 1 − a², so a
+neuron saturated near ±1 has a derivative near zero and stops learning — its weights barely move however wrong
+the answer is. That is the vanishing gradient, visible here as a δ of
+${Math.abs(d1[j])<0.005?'almost exactly zero on this neuron right now':'a workable size on this neuron'}.
+Multiply this by ${f0(TRX.length)} hours and 220 epochs and you have the training run.</div></div>`;
+  }
+
+  /* What the last tap landed on. Different layers mean different things and
+     saying so is most of the value of being able to tap them at all. */
+  function pickCard(){
+    const F=curAct||runSpec(), r=specRow(), p=st.pick||{l:1,i:0};
+    let title='', val='', note='';
+    if(p.l===0){
+      const f=IN[p.i];
+      title=`Input ${p.i+1} · ${f.n}`;
+      val=`${f1(r[f.k])}${f.u?' '+f.u:''} → standardised ${f2(F.x[p.i])}`;
+      note=`Standardised as (x − ${f2(mu[f.k])}) / ${f2(sg[f.k])}, using the mean and spread of the healthy
+            hours only. This one number is fanned out to all ${NH1} neurons in the next layer, each with its
+            own weight.`;
+    } else if(p.l===1){
+      title=`Hidden-1 neuron ${p.i+1} of ${NH1}`;
+      val=`z = ${f2(F.z1[p.i])} → a = ${f2(F.a1[p.i])}`;
+      note=`Opened up in full below. It combines all ${NI} inputs with its own ${NI} weights and one bias.` +
+           (Math.abs(F.a1[p.i])>0.97 ? ' <b>It is saturated</b> — tanh has flattened, so it is barely learning.' : '');
+    } else if(p.l===2){
+      title=`Hidden-2 neuron ${p.i+1} of ${NH2}`;
+      val=`z = ${f2(F.z2[p.i])} → a = ${f2(F.a2[p.i])}`;
+      note=`This layer combines the ${NH1} outputs of the first hidden layer. Its inputs are no longer sensor
+            readings but abstractions the network invented — which is exactly why "explainable" is a harder
+            claim than a vendor slide makes it sound.`;
+    } else {
+      title='Output neuron';
+      val=`${f2(F.y)} standardised → ${f1(curOut)} °C`;
+      note=`Un-standardised as ŷ × ${f2(sy)} + ${f1(my)}. Linear, no activation — squashing the output would
+            cap what the network can predict.`;
+    }
+    return `<div class="card" id="m4pick"><h3>${title}<span class="tag">tapped in the scene</span></h3>
+      <div class="eq">${val}</div>
+      <div class="small" style="margin-top:6px">${note}</div>
+      <div class="small" style="margin-top:6px;opacity:.8">Tap any sphere in the 3-D view to open it. Pinch to
+        zoom, drag to orbit.</div></div>`;
+  }
+
   /* ---------- panel ---------- */
   function panel(){
     const r=specRow(), F=curAct||runSpec(), err=r.brgT-curOut;
@@ -324,6 +421,8 @@ hours from this fan.</p></div>
 and all three land on the same conclusion about the same reading. <b>That agreement is the point.</b> The
 algorithm is a means; the residual is the finding.</div></div>
 
+${pickCard()}
+
 <div class="card"><h3>One neuron, fully opened<span class="tag">given input → process → output</span></h3>
 <div class="ctl"><label>Inspect hidden-layer-1 neuron</label>
   <select id="m4insp">${Array.from({length:NH1},(_,i)=>
@@ -339,6 +438,8 @@ a<span class="o">${j+1}</span> = ${st.actf}(z<span class="o">${j+1}</span>)     
 from doing it 17 times in three ranks, not from any single step being clever. The activation function is what
 stops the whole stack collapsing back into one straight line — without it, ten layers of multiply-and-add are
 mathematically identical to one.</div></div>
+
+${backCard()}
 
 <div class="card"><h3>What the network leans on</h3>
 <div class="small" style="margin-bottom:6px">Sensitivity of the output to each input at this operating point —

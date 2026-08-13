@@ -261,7 +261,9 @@ function render(){
     `<span><i style="background:#D96A16"></i>live sensor</span>
      <span><i style="background:#44586B"></i>not instrumented</span>
      <span>${c.healthName}: <b style="color:#D96A16">${fmt(hv, Math.abs(hv)<10?2:1)} ${c.healthUnit}</b></span>
-     <span>drag to orbit · scroll to zoom</span>`;
+     <span>${matchMedia('(pointer:coarse)').matches
+       ? 'drag to orbit · pinch to zoom'
+       : 'drag to orbit · scroll to zoom'}</span>`;
   // panel
   $('pw').innerHTML = ST_RENDER[S.stage](d);
   ST_WIRE[S.stage] && ST_WIRE[S.stage](d);

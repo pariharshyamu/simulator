@@ -372,15 +372,18 @@ try {
 /* ==================================================================== 9c */
 group('9c. Behaviour, not appearance');
 
-/* Two artefacts whose deliverable is what they DO. A screenshot test passes on
-   a simulator whose shaft is tumbling and on a builder that teaches the
-   opposite of the handout; these do not. Only run under --full: together they
-   drive four browsers and train nine networks. */
+/* Three suites whose deliverable is what the artefacts DO. A screenshot test
+   passes on a simulator whose shaft is tumbling, on a builder that teaches the
+   opposite of the handout, and on a pack that is completely unusable on a
+   phone — the Model Builder shipped for a week with drag-and-drop that no
+   touch screen can fire. These do not. Only run under --full: together they
+   drive a dozen browser contexts and train a dozen networks. */
 if (!process.argv.includes('--full')) {
-  note('skipped — pass --full to run the PdM mechanics and Model Builder suites');
+  note('skipped — pass --full to run the PdM mechanics, Model Builder and phone suites');
 } else {
   for (const [script, what] of [['pdm-simulator/qa-geometry.js', 'PdM mechanics'],
-                                ['builder/qa-builder.js', 'Model Builder behaviour']]) {
+                                ['builder/qa-builder.js', 'Model Builder behaviour'],
+                                ['tools/qa-mobile.js', 'every artefact on a phone']]) {
     try {
       const out = cp.execSync(`node ${script}`, { cwd: ROOT, stdio: 'pipe', timeout: 1800000 })
         .toString().replace(/\x1b\[[0-9;]*m/g, '');

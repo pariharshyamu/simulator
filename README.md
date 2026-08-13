@@ -22,12 +22,16 @@ Presenter and author: **S. H. Parihar** — 16 years in the power sector; author
 | **Predictive Maintenance Simulator** | The full pipeline from sensor to signed work order, in eight stages across five equipment cases, with a 3-D model of the machine that degrades as you scrub through a full year. | `dist/MAHAGENCO_PdM_Simulator.html` |
 | **AI Simulation Lab** | Eight self-contained models built on the plant's own June 2026 figures — heat rate decomposition, auxiliary power, mill scheduling, anomaly detection and more. | `dist/MAHAGENCO_AI_Simulation_Lab.html` |
 | **Local RAG Bench** | A retrieval-augmented generation system with a **real** ONNX embedding model and an optional local language model, running entirely in the browser on WebGPU. Air-gapped after the first fetch. | `rag-bench/` — see its own README |
-| **Model Builder** | Drag-and-drop blocks that build and train a real neural network, in the browser, in about a second — on the same year of synthetic data the simulator uses, or on a historian export you drop in. A live panel writes the same model out as pandas and Keras. | `dist/MAHAGENCO_Model_Builder.html` |
+| **Model Builder** | Drag-and-drop blocks — or, on a phone, tap-to-add — that build and train a real neural network in the browser in about a second, on the same year of synthetic data the simulator uses or on a historian export you drop in. Tap any block to see the arithmetic it performs, forward pass and backprop, with the current model's own weights substituted in. A live panel writes the same model out as pandas and Keras. | `dist/MAHAGENCO_Model_Builder.html` |
 | **Pocket RAG** | The same idea with no curated corpus and no server at all: **you** open a PDF or Word file on your phone, and it is parsed, chunked, embedded, searched and answered on the device. A static site for GitHub Pages or Vercel; installs as a PWA and works in flight mode. | `pocket-rag/` — see its own README |
 
 The first three are single HTML files. Double-click and they run — no server, no
 install, no network. The RAG bench is the exception: it loads WebAssembly and ES
 modules, so it has to be served over http, and it ships with a launcher that does that.
+
+All four browser artefacts work on a phone: the 3-D scenes orbit by drag and zoom
+by pinch, the Model Builder becomes three thumb-reachable panels with tap-to-add
+instead of drag, and `node tools/qa-mobile.js` keeps it that way.
 
 Everything except the RAG bench is live at
 **[pariharshyamu.github.io/simulator](https://pariharshyamu.github.io/simulator/)**.
@@ -88,6 +92,14 @@ own two surprises — why the advisory took 55 days, and why a residual can go 2
 *negative* on a tag the fault never touches — that switching machine leaves a model that
 still validates, and that a semicolon-separated export with decimal commas and
 `I/O Timeout` strings survives the CSV reader.
+
+`node tools/qa-mobile.js` opens every artefact on three real phone viewports
+with touch emulation — 360×800, 390×844, 412×915 — and checks the things that
+are invisible at 1440px: that nothing overflows horizontally, that every control
+is at least 40px, that a **tap** adds a block and opens its maths, and that a
+two-finger pinch moves the camera rather than zooming the page. The Model
+Builder shipped for a week with HTML5 drag-and-drop, which no touch screen can
+fire; the artefact was inert on a phone and every desktop test passed.
 
 `node pdm-simulator/qa-geometry.js` is a different kind of test: it checks the
 **mechanics**, in world space, rather than the picture. For every rotating part it

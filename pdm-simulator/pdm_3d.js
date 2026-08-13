@@ -135,9 +135,36 @@ const V3 = (function(){
 
     const el = renderer.domElement;
     el.style.cursor='grab';
-    el.addEventListener('pointerdown', e=>{ spin.drag=true; spin.px=e.clientX; spin.py=e.clientY; el.style.cursor='grabbing'; });
+    /* Without touch-action the browser treats a drag over the canvas as a
+       page scroll and a spread as a page zoom, and the machine cannot be
+       turned at all on a phone — which is most of what this view is for. */
+    el.style.touchAction='none';
+
+    /* One pointer orbits, two pinch. A Map rather than e.touches so mouse,
+       pen and finger all arrive the same way. */
+    const pts = new Map();
+    let pinch0 = 0, dist0 = 0;
+    const spread = () => { const [a,b]=[...pts.values()]; return Math.hypot(a.x-b.x, a.y-b.y); };
+
+    el.addEventListener('pointerdown', e=>{
+      pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      try{ el.setPointerCapture(e.pointerId); }catch(err){}
+      if(pts.size===2){ spin.drag=false; pinch0=spread(); dist0=spin.dist; return; }
+      spin.drag=true; spin.px=e.clientX; spin.py=e.clientY; el.style.cursor='grabbing';
+    });
+    const drop = e=>{ pts.delete(e.pointerId); if(pts.size<2) pinch0=0;
+                      spin.drag=false; el.style.cursor='grab'; };
+    el.addEventListener('pointerup', drop);
+    el.addEventListener('pointercancel', drop);
     window.addEventListener('pointerup', ()=>{ spin.drag=false; el.style.cursor='grab'; });
-    window.addEventListener('pointermove', e=>{ if(!spin.drag) return;
+    el.addEventListener('pointermove', e=>{
+      if(pts.has(e.pointerId)) pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pts.size===2 && pinch0){
+        const s=spread();
+        if(s>4) spin.dist = clamp(dist0 * (pinch0/s), spin.fit*0.42, spin.fit*2.1);
+        return;
+      }
+      if(!spin.drag) return;
       spin.yaw += (e.clientX-spin.px)*0.008; spin.pitch = clamp(spin.pitch + (e.clientY-spin.py)*0.006, -0.25, 1.15);
       spin.px=e.clientX; spin.py=e.clientY; });
     el.addEventListener("wheel", e=>{ e.preventDefault(); spin.dist = clamp(spin.dist + e.deltaY*0.006, spin.fit*0.42, spin.fit*2.1); }, {passive:false});
@@ -942,6 +969,8 @@ const V3 = (function(){
   }
   /* Exposed for the geometry test: it asserts on real world-space axes
      rather than on how the picture looks. */
-  function _probe(){ return {parts, root, cam, state}; }
+  /* `spin` is exposed so the mobile suite can assert that a pinch actually
+     moved the camera rather than the page. */
+  function _probe(){ return {parts, root, cam, state, spin}; }
   return {init, build, setState, resize, _probe};
 })();
