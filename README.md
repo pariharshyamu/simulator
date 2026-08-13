@@ -80,12 +80,14 @@ QA scripts live beside each artefact — `node theatre/qa-screenshots.js` and fr
 drive the built file through Playwright, capture every state, and fail on any console
 error. They expect the built file in the working directory.
 
-`node builder/qa-builder.js` checks that the Model Builder still teaches what the
-handout says. It trains three models and asserts the behaviour, not the pixels: a
-season-spanning window must stay honest before the fault, a winter-only window must
-run several times its own alert band wrong in summer, and a window containing the
-fault must detect it far later than a clean one. It also drives a semicolon-separated
-export with decimal commas and `I/O Timeout` strings through the CSV reader.
+`node builder/qa-builder.js` asserts the Model Builder's **behaviour**, not its pixels.
+A season-spanning window must stay honest before the fault, a winter-only window must
+run several times its own alert band wrong in summer, and a window containing the fault
+must detect it far later than a clean one. It also checks that the artefact explains its
+own two surprises — why the advisory took 55 days, and why a residual can go 22 A
+*negative* on a tag the fault never touches — that switching machine leaves a model that
+still validates, and that a semicolon-separated export with decimal commas and
+`I/O Timeout` strings survives the CSV reader.
 
 `node pdm-simulator/qa-geometry.js` is a different kind of test: it checks the
 **mechanics**, in world space, rather than the picture. For every rotating part it

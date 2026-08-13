@@ -123,6 +123,10 @@ function loadCase(caseId){
   MB.data = {
     name: c.name, short: c.short, station: c.station, rows: N, hours: N,
     tags, source:'built-in', caseId, onset: c.onset, alarm: c.alarm,
+    /* The ground truth, kept so the verdict can say how far gone the machine
+       actually was on the day the advisory fired — the one number a real
+       deployment never has and a teaching artefact always should. */
+    severity: fault, ttf: c.ttf,
     health: c.health(truth), healthName: c.healthName,
     blurb: c.blurb, mode: c.mode
   };
@@ -176,14 +180,14 @@ function buildMatrix(spec){
       });
     }
   }
-  const y = d.tags.find(x => x.id === tgt.f.tag).v;
-  return { X: cols, names, y, yName: tagName(tgt.f.tag) };
+  const yTag = d.tags.find(x => x.id === tgt.f.tag);
+  return { X: cols, names, y: yTag.v, yName: tagName(tgt.f.tag), yUnit: yTag.unit || '' };
 }
 
 /* -------------------------------------------------------------- training */
 function mlpTrain(spec, onEpoch){
   const t0 = performance.now();
-  const { X, names, y, yName } = buildMatrix(spec);
+  const { X, names, y, yName, yUnit } = buildMatrix(spec);
   const w = spec.find(b => b.type === 'window') || {f:{from:0, to:180}};
   const a = Math.max(0, Math.round(w.f.from) * 24);
   const b = Math.min(X[0].length, Math.round(w.f.to) * 24);
@@ -280,11 +284,34 @@ function mlpTrain(spec, onEpoch){
   for (let j = a; j < b; j++){ rs += resid[j] * resid[j]; rn++; }
   const sigma = Math.sqrt(rs / rn) || 1e-9;
 
+  /* How much of sigma is irreducible?
+
+     Sigma is what sets the alert band, and the most common question a
+     participant asks is why the advisory took so long. The answer is almost
+     never "the machine hid it" — it is that the band is wide, and the band is
+     wide because the MODEL cannot explain the training window, not because
+     the instrument is noisy. Those two are worth separating on screen.
+
+     Successive hours of a residual share whatever the model is getting
+     structurally wrong — a seasonal offset is the same at 14:00 and 15:00 —
+     but not the measurement noise. So the standard deviation of the
+     hour-to-hour difference, divided by root two, estimates the part of
+     sigma no model could remove. On the default ID-fan model that is 0.9 °C
+     against a sigma of 2.0: more than half the band is the cooler's knee,
+     which duty and weather alone cannot see. Add the oil temperature and
+     sigma falls to 0.6 against a floor of 0.44, and the advisory arrives 25
+     days sooner. It is an upper bound on the true noise — any genuinely
+     hour-to-hour driver lands in it too — so it understates the gap rather
+     than flattering it. */
+  let ds = 0, dn = 0;
+  for (let j = a + 1; j < b; j++){ const dd = resid[j] - resid[j-1]; ds += dd * dd; dn++; }
+  const noise = dn ? Math.sqrt(ds / dn / 2) : sigma;
+
   const params = W.reduce((s, m) => s + m.length * m[0].length, 0) +
                  B.reduce((s, v) => s + v.length, 0);
 
   MB.model = { W, B, sizes, layers, mu, sg, ym, ys, names, yName, params, doNorm };
-  return { pred, resid, sigma, loss, trainFrom:a, trainTo:b, y, names, yName,
+  return { pred, resid, sigma, noise, loss, trainFrom:a, trainTo:b, y, names, yName, yUnit,
            params, ms: performance.now() - t0 };
 }
 
@@ -322,8 +349,29 @@ function applyAlert(res, spec){
   }
   const drift = dn ? dsum / dn : 0;
 
+  /* Which way does the residual break once the fault is running?
+
+     A negative one is the question this artefact gets asked most, and it is
+     nearly always misread as "the reading fell". It did not. Residual is
+     actual minus expected, so a negative value means the model expected MORE
+     than the plant delivered — and if an input is itself moved by the fault,
+     the expectation is what moved. Predict fan motor current from bearing
+     temperature and vibration and you get exactly that: in the healthy window
+     the only thing that raised those two was load, so the model learnt
+     "hot and shaking = working hard = drawing current". After onset they rise
+     on their own, the fan keeps pulling the same duty, and the residual goes
+     30 A negative on a machine whose current never changed. */
+  let fsum = 0, fn = 0;
+  if (onset != null)
+    for (let j = Math.max(res.trainTo, onset * 24); j < res.resid.length; j++){ fsum += res.resid[j]; fn++; }
+  const faultMean = fn ? fsum / fn : 0;
+
+  /* True severity on the day the advisory fired, 0..1 of the way to failure. */
+  const sev = MB.data.severity;
+  const sevAt = (first !== null && sev) ? sev[Math.min(sev.length - 1, Math.round(first))] : null;
+
   return { thr, k, need, firstDay: first === null ? null : first / 24, count,
            drift, driftMax: dmax, driftSigmas: dn ? Math.abs(drift) / res.sigma : 0,
-           preDays: dn / 24,
+           preDays: dn / 24, faultMean, sevAt,
            beforeFault: (first !== null && onset != null) ? (onset - first / 24) : null };
 }

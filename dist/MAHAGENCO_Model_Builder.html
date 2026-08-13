@@ -917,6 +917,10 @@ function loadCase(caseId){
   MB.data = {
     name: c.name, short: c.short, station: c.station, rows: N, hours: N,
     tags, source:'built-in', caseId, onset: c.onset, alarm: c.alarm,
+    /* The ground truth, kept so the verdict can say how far gone the machine
+       actually was on the day the advisory fired — the one number a real
+       deployment never has and a teaching artefact always should. */
+    severity: fault, ttf: c.ttf,
     health: c.health(truth), healthName: c.healthName,
     blurb: c.blurb, mode: c.mode
   };
@@ -970,14 +974,14 @@ function buildMatrix(spec){
       });
     }
   }
-  const y = d.tags.find(x => x.id === tgt.f.tag).v;
-  return { X: cols, names, y, yName: tagName(tgt.f.tag) };
+  const yTag = d.tags.find(x => x.id === tgt.f.tag);
+  return { X: cols, names, y: yTag.v, yName: tagName(tgt.f.tag), yUnit: yTag.unit || '' };
 }
 
 /* -------------------------------------------------------------- training */
 function mlpTrain(spec, onEpoch){
   const t0 = performance.now();
-  const { X, names, y, yName } = buildMatrix(spec);
+  const { X, names, y, yName, yUnit } = buildMatrix(spec);
   const w = spec.find(b => b.type === 'window') || {f:{from:0, to:180}};
   const a = Math.max(0, Math.round(w.f.from) * 24);
   const b = Math.min(X[0].length, Math.round(w.f.to) * 24);
@@ -1074,11 +1078,34 @@ function mlpTrain(spec, onEpoch){
   for (let j = a; j < b; j++){ rs += resid[j] * resid[j]; rn++; }
   const sigma = Math.sqrt(rs / rn) || 1e-9;
 
+  /* How much of sigma is irreducible?
+
+     Sigma is what sets the alert band, and the most common question a
+     participant asks is why the advisory took so long. The answer is almost
+     never "the machine hid it" — it is that the band is wide, and the band is
+     wide because the MODEL cannot explain the training window, not because
+     the instrument is noisy. Those two are worth separating on screen.
+
+     Successive hours of a residual share whatever the model is getting
+     structurally wrong — a seasonal offset is the same at 14:00 and 15:00 —
+     but not the measurement noise. So the standard deviation of the
+     hour-to-hour difference, divided by root two, estimates the part of
+     sigma no model could remove. On the default ID-fan model that is 0.9 °C
+     against a sigma of 2.0: more than half the band is the cooler's knee,
+     which duty and weather alone cannot see. Add the oil temperature and
+     sigma falls to 0.6 against a floor of 0.44, and the advisory arrives 25
+     days sooner. It is an upper bound on the true noise — any genuinely
+     hour-to-hour driver lands in it too — so it understates the gap rather
+     than flattering it. */
+  let ds = 0, dn = 0;
+  for (let j = a + 1; j < b; j++){ const dd = resid[j] - resid[j-1]; ds += dd * dd; dn++; }
+  const noise = dn ? Math.sqrt(ds / dn / 2) : sigma;
+
   const params = W.reduce((s, m) => s + m.length * m[0].length, 0) +
                  B.reduce((s, v) => s + v.length, 0);
 
   MB.model = { W, B, sizes, layers, mu, sg, ym, ys, names, yName, params, doNorm };
-  return { pred, resid, sigma, loss, trainFrom:a, trainTo:b, y, names, yName,
+  return { pred, resid, sigma, noise, loss, trainFrom:a, trainTo:b, y, names, yName, yUnit,
            params, ms: performance.now() - t0 };
 }
 
@@ -1116,9 +1143,30 @@ function applyAlert(res, spec){
   }
   const drift = dn ? dsum / dn : 0;
 
+  /* Which way does the residual break once the fault is running?
+
+     A negative one is the question this artefact gets asked most, and it is
+     nearly always misread as "the reading fell". It did not. Residual is
+     actual minus expected, so a negative value means the model expected MORE
+     than the plant delivered — and if an input is itself moved by the fault,
+     the expectation is what moved. Predict fan motor current from bearing
+     temperature and vibration and you get exactly that: in the healthy window
+     the only thing that raised those two was load, so the model learnt
+     "hot and shaking = working hard = drawing current". After onset they rise
+     on their own, the fan keeps pulling the same duty, and the residual goes
+     30 A negative on a machine whose current never changed. */
+  let fsum = 0, fn = 0;
+  if (onset != null)
+    for (let j = Math.max(res.trainTo, onset * 24); j < res.resid.length; j++){ fsum += res.resid[j]; fn++; }
+  const faultMean = fn ? fsum / fn : 0;
+
+  /* True severity on the day the advisory fired, 0..1 of the way to failure. */
+  const sev = MB.data.severity;
+  const sevAt = (first !== null && sev) ? sev[Math.min(sev.length - 1, Math.round(first))] : null;
+
   return { thr, k, need, firstDay: first === null ? null : first / 24, count,
            drift, driftMax: dmax, driftSigmas: dn ? Math.abs(drift) / res.sigma : 0,
-           preDays: dn / 24,
+           preDays: dn / 24, faultMean, sevAt,
            beforeFault: (first !== null && onset != null) ? (onset - first / 24) : null };
 }
 
@@ -1650,11 +1698,19 @@ function renderCanvas(){
   });
 }
 
+/* Switching the machine in the dropdown has to leave a model that still runs.
+   It used to tick every available tag as an input and then set the target to
+   the first of them — so the target was also an input, validation refused the
+   model, and a participant who simply wanted to look at the boiler feed pump
+   was met with a red error before they had done anything wrong. Pick the
+   target first, then hand the model everything except the target. */
 function resetTagFields(){
-  const ins = MB.spec.find(b => b.type === 'inputs');
-  if (ins) ins.f.tags = MB.data.tags.filter(t => t.have !== false).map(t => t.id);
   const tg = MB.spec.find(b => b.type === 'target');
-  if (tg) tg.f.tag = MB.data.tags[0].id;
+  const target = MB.data.tags[0].id;
+  if (tg) tg.f.tag = target;
+  const ins = MB.spec.find(b => b.type === 'inputs');
+  if (ins) ins.f.tags = MB.data.tags
+    .filter(t => t.have !== false && t.id !== target).map(t => t.id);
 }
 
 /* ----------------------------------------------------------------- chips */
@@ -1756,7 +1812,11 @@ function renderResults(r){
       <span class="stat"><div class="l">Final loss</div><div class="n">${r.loss[r.loss.length-1].toFixed(4)}</div>
         <div class="s">mean squared, standardised</div></span>
       <span class="stat"><div class="l">Residual sigma</div><div class="n">${fmtSmall(r.sigma)}</div>
-        <div class="s">on the training window</div></span>
+        <div class="s">${esc(r.yUnit || '')} on the training window</div></span>
+      <span class="stat"><div class="l">Of which noise</div><div class="n">${fmtSmall(r.noise)}</div>
+        <div class="s">${r.sigma > r.noise * 1.35
+          ? `the other ${fmtSmall(Math.sqrt(Math.max(0, r.sigma*r.sigma - r.noise*r.noise)))} is the model`
+          : 'the model is at the noise floor'}</div></span>
     </div>
   </div>
 
@@ -1793,7 +1853,15 @@ function renderResults(r){
     xTicks:xt });
 }
 
+/* A residual that broke the wrong way needs explaining whatever the timing
+   verdict was — including when nothing fired at all, which is the commonest
+   way to meet it. So the sign note is appended to every path, not just the
+   one where an advisory was raised. */
 function verdict(r, al, early){
+  return verdictTiming(r, al, early) + signNote(r, al);
+}
+
+function verdictTiming(r, al, early){
   const d = MB.data;
   const dl = x => d.source === 'built-in' ? ` (${dayLabel(Math.round(x))})` : '';
   if (al.firstDay === null)
@@ -1819,11 +1887,73 @@ function verdict(r, al, early){
       Nothing was raised only because the deviation comes and goes with the day, and the rule wants
       ${al.need} hours in a row. Drop the persistence to 24 hours and you will be paged through May.
       A training window that misses a season leaves a model that is wrong long before it is useful.</div>` : '';
+  const lag = d.onset != null ? al.firstDay - d.onset : null;
   return driftNote + `<div class="note ${drifty ? 'warn' : 'good'}"><b>Advisory raised on day ${Math.round(al.firstDay)}${dl(al.firstDay)}.</b>
     ${d.onset != null ? `The fault began on day ${d.onset}${dl(d.onset)}, so the model took
-    ${Math.round(al.firstDay - d.onset)} days to be sure of it.` : ''}
-    ${al.count} separate advisories over the year at ±${al.k}σ sustained for ${al.need} hours.
-    ${al.count > 6 ? ' That is a lot — in a real control room this many would be ignored within a month. Raise the sigma or the persistence.' : ''}</div>`;
+    ${Math.round(lag)} days to be sure of it.` : ''}
+    ${al.count === 1 ? 'One advisory' : al.count + ' separate advisories'} over the year at ±${al.k}σ
+    sustained for ${al.need} hours.
+    ${al.count > 6 ? ' That is a lot — in a real control room this many would be ignored within a month. Raise the sigma or the persistence.' : ''}</div>`
+    + whyThatLong(r, al, lag);
+}
+
+/* --------------------------------------------------- why it took that long
+   The most-asked question about this artefact, answered with its own numbers
+   rather than left for the presenter. Three things set the lag and only one
+   of them is the machine: how wide the band is, how much of the band is the
+   model's own ignorance, and how flat the start of a degradation curve is. */
+function whyThatLong(r, al, lag){
+  if (lag == null || lag < 25) return '';
+  const d = MB.data, u = r.yUnit ? ' ' + r.yUnit : '';
+  const struct = Math.sqrt(Math.max(0, r.sigma*r.sigma - r.noise*r.noise));
+  const modelShare = r.sigma > 0 ? struct / r.sigma : 0;
+  const sev = al.sevAt;
+
+  /* Where the fault had got to when it was finally caught, and what fraction
+     of the eventual signal that was — the P–F curve, measured not asserted. */
+  const lifePct = d.ttf ? Math.round(100 * lag / d.ttf) : null;
+  const sevBit = sev != null ? ` And a degradation curve is convex, so days are a poor measure of how late
+    this is: ${lifePct != null ? `${Math.round(lag)} days is ${lifePct}% of the ${d.ttf} days this failure mode
+    takes to run its course, but the fault had only reached <b>${(sev*100).toFixed(0)}% of its final
+    severity</b>` : `the fault had reached ${(sev*100).toFixed(0)}% of its final severity`}. The first third of
+    a fault produces almost none of the signal — which is why these are never caught by watching a trend, and
+    why ${Math.round(lag)} days of warning is still ${d.ttf ? d.ttf - Math.round(lag) : 'many'} days before
+    the machine would have failed.` : '';
+
+  return `<div class="note info" style="margin-top:9px">
+    <b>Why ${Math.round(lag)} days?</b> Not because the fault was hiding. The rule fires when the residual
+    leaves ±${al.k}σ, and here that band is <b>±${fmtSmall(al.thr)}${u}</b> — so the fault had to grow that
+    far before anything could be said, and then hold it for ${al.need} hours.
+    ${modelShare > 0.45
+      ? `Most of that width is not measurement. Hour to hour this signal only moves by ${fmtSmall(r.noise)}${u};
+         the remaining ${fmtSmall(struct)}${u} is the model failing to explain its own training window.
+         <b>The alarm band is a property of the model, not of the machine</b> — narrow the model's error and the
+         band closes with it. Tick the lube oil cooler outlet into the inputs and watch both numbers fall.`
+      : `The model is already close to the noise floor of ${fmtSmall(r.noise)}${u}, so this band is about as
+         tight as this signal honestly allows. To detect sooner you need a different signal, not a better fit —
+         vibration and the oil temperature move before the metal temperature does.`}
+    ${sevBit}</div>`;
+}
+
+/* ------------------------------------------------- which way it broke, and why
+   A negative residual is read as "the reading dropped" almost every time, and
+   almost every time that is wrong. Say so on screen, with the number. */
+function signNote(r, al){
+  const u = r.yUnit ? ' ' + r.yUnit : '';
+  if (al.faultMean >= 0 || Math.abs(al.faultMean) < r.sigma) return '';
+  const ins = MB.spec.find(b => b.type === 'inputs');
+  const tags = ins ? ins.f.tags.map(tagName) : [];
+  return `<div class="note warn" style="margin-top:9px">
+    <b>Note the sign: the residual went ${fmtSmall(al.faultMean)}${u} — negative.</b>
+    That does not mean ${esc(r.yName.toLowerCase())} fell. Residual is actual minus expected, so a negative
+    residual means <b>the expectation rose and the measurement did not follow</b>.
+    ${tags.length ? `At least one of your inputs (${esc(tags.join(', '))}) is itself moved by this fault.` : ''}
+    During the healthy window the only thing that moved those inputs was duty, so the model learnt that when
+    they rise the machine is working harder and the target should rise with them. After onset they rise from
+    the fault instead, the duty is unchanged, and the model's expectation runs away from a measurement that
+    never moved. It is the mirror image of target leakage: a fault-contaminated <i>input</i> rather than a
+    leaked target, and it will point the investigation at the wrong component. Predict the tag the fault
+    actually lives in, from tags the fault cannot touch.</div>`;
 }
 
 function panePy(){

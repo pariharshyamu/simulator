@@ -53,15 +53,34 @@ const SAMPLE = `(async () => {
     });
   };
 
+  /* Wait a fixed number of ANIMATION FRAMES, not a fixed number of
+     milliseconds.
+
+     This started as setTimeout(900) — "about 54 frames". On an idle machine
+     it is. Run the whole gate at once, with a Playwright suite and a build
+     competing for the same cores, and 900 ms buys a dozen frames instead:
+     the rim travel of a perfectly healthy fan fell from 0.46 to 0.159, under
+     a 0.2 threshold, and the gate closed on a machine that was turning
+     exactly as designed. A rotation test whose verdict depends on how busy
+     the host is will eventually fail in front of an audience. Frames are the
+     unit the animation actually advances in, so count those. */
+  const frames = n => new Promise(res => {
+    let k = 0, done = false;
+    const finish = () => { if (!done){ done = true; res(k); } };
+    const tick = () => { if (++k >= n) return finish(); requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    setTimeout(finish, 8000);          // rAF throttled: report what we got
+  });
+
   const before = read();
   const rootBefore = [P.root.position.x, P.root.position.y, P.root.position.z];
-  await new Promise(r => setTimeout(r, 900));      // ~54 animation frames
+  const nFrames = await frames(54);
   const after = read();
   const rootAfter = [P.root.position.x, P.root.position.y, P.root.position.z];
-  await new Promise(r => setTimeout(r, 400));
+  await frames(24);
   const rootAfter2 = [P.root.position.x, P.root.position.y, P.root.position.z];
 
-  return {before, after, rootBefore, rootAfter, rootAfter2,
+  return {before, after, rootBefore, rootAfter, rootAfter2, nFrames,
           staticScene: !!P.parts.staticScene};
 })()`;
 
@@ -95,6 +114,9 @@ const dist = (a,b) => Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]);
 
     const r = await page.evaluate(SAMPLE);
 
+    if (r.nFrames < 54)
+      note(`only ${r.nFrames} of 54 animation frames elapsed — rAF is throttled here, travel figures below are short`);
+
     if (!r.before.length) {
       note('no rotating parts in this scene');
     }
@@ -119,15 +141,22 @@ const dist = (a,b) => Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]);
                     r.rootBefore.every(v => Math.abs(v) < 1e-9);
       still ? ok('tank never moves: root stays exactly at the origin across frames')
             : bad(`transformer vibrates — root moved ${Math.max(m1, m2).toExponential(2)}`);
-      /* the degrading cooler fan must actually stop by end of life */
-      const pair = ['failing', 'sound'].map(k => {
+      /* The degrading cooler fan must actually stop by end of life, while its
+         neighbour keeps turning. Judge "keeps turning" against the left-bank
+         fans measured in the SAME sample rather than an absolute distance —
+         identical geometry, identical frame count, so the comparison holds
+         however fast or slow the frames came. */
+      const travel = k => {
         const b = r.before.find(x => x.name.includes(k)), a = r.after.find(x => x.name.includes(k));
         return b && a ? dist(b.rim, a.rim) : null;
-      });
-      if (pair[0] !== null && pair[1] !== null) {
-        pair[0] < 0.02 && pair[1] > 0.2
-          ? ok('right bank: one fan stopped, the other still running — a bank current that falls by a third, not to zero')
-          : bad(`right bank fans moved ${pair[0].toFixed(3)} and ${pair[1].toFixed(3)}; expected one stopped and one running`);
+      };
+      const stopped = travel('failing'), running = travel('sound');
+      const healthy = ['left bank 1', 'left bank 2'].map(travel).filter(v => v !== null);
+      const ref = healthy.length ? healthy.reduce((s, v) => s + v, 0) / healthy.length : null;
+      if (stopped !== null && running !== null && ref !== null) {
+        (stopped < 0.02 && running > 0.6 * ref)
+          ? ok(`right bank: one fan stopped (${stopped.toFixed(3)}), the other still turning at ${(running/ref*100).toFixed(0)}% of the left bank — a bank current that falls by a third, not to zero`)
+          : bad(`right bank fans moved ${stopped.toFixed(3)} and ${running.toFixed(3)} against a healthy ${ref.toFixed(3)}; expected one stopped and one running`);
       }
     } else {
       const amp = Math.max(Math.abs(r.rootAfter[0]), Math.abs(r.rootAfter[1]));

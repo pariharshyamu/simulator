@@ -102,6 +102,60 @@ const runWindow = (from, to) => `(async () => {
     ? ok(`contaminated window: ${contam.first === null ? 'never detected' : 'detected only on day ' + Math.round(contam.first)} — ${contam.first === null ? '' : Math.round(late) + ' days later than the clean model. '}Training on the fault taught it the fault is normal`)
     : bad(`contaminated window detected on day ${Math.round(contam.first)}, only ${Math.round(late)} days later than clean — contamination is not costing anything`);
 
+  console.log('\nIt explains itself when the answer is surprising');
+  /* Two questions this artefact actually got asked, which it should now
+     answer on screen rather than leaving to the presenter. */
+  const why = await page.evaluate(() => {
+    defaultSpec();
+    const r = mlpTrain(MB.spec); r.alert = applyAlert(r, MB.spec);
+    return { html: verdict(r, r.alert, false), sigma: r.sigma, noise: r.noise,
+             lag: r.alert.firstDay - MB.data.onset, sev: r.alert.sevAt };
+  });
+  /why is not a function|undefined/.test(String(why.html)) ? bad('verdict threw') : null;
+  /Why \d+ days\?/.test(why.html)
+    ? ok(`the "why so long" panel appears on a ${Math.round(why.lag)}-day lag and names the band in °C`)
+    : bad('no explanation of the detection lag');
+  why.html.includes('property of the model, not of the machine')
+    ? ok(`and attributes it: sigma ${why.sigma.toFixed(2)} against a noise floor of ${why.noise.toFixed(2)} — the band is the model's ignorance`)
+    : bad('the lag is not attributed to model error vs measurement noise');
+  (why.sev != null && why.sev < 0.45)
+    ? ok(`ground truth: the fault was only ${(why.sev*100).toFixed(0)}% of the way to failure when it fired — the convexity point, measured`)
+    : bad(`severity at detection reported as ${why.sev} — expected well under half`);
+
+  /* A fault-contaminated INPUT drives the residual negative on a tag the
+     fault never touches. Predicting fan current from bearing temperature and
+     vibration is the clean demonstration: motI has no fault term at all. */
+  const neg = await page.evaluate(() => {
+    defaultSpec();
+    MB.spec.find(b => b.type === 'target').f.tag = 'motI';
+    MB.spec.find(b => b.type === 'inputs').f.tags = ['brgT', 'vib', 'amb'];
+    const r = mlpTrain(MB.spec); r.alert = applyAlert(r, MB.spec);
+    return { html: verdict(r, r.alert, false), mean: r.alert.faultMean, sigma: r.sigma };
+  });
+  neg.mean < -2 * neg.sigma
+    ? ok(`fan current predicted from bearing temp and vibration runs ${neg.mean.toFixed(1)} A negative after onset — on a tag with no fault term`)
+    : bad(`expected a strongly negative residual, got ${neg.mean.toFixed(2)}`);
+  neg.html.includes('the expectation rose and the measurement did not follow')
+    ? ok('and the sign is explained rather than left to be misread as a drop in current')
+    : bad('negative residual is not explained');
+
+  console.log('\nSwitching the machine leaves a model that still runs');
+  const sw = await page.evaluate(() => {
+    const out = [];
+    for (const cs of Object.keys(CASES)){
+      defaultSpec();
+      MB.spec.find(b => b.type === 'dataset').f.case = cs;
+      loadCase(cs); resetTagFields(); afterChange();
+      out.push({ cs, errs: validate(MB.spec).length,
+                 tgt: MB.spec.find(b => b.type === 'target').f.tag,
+                 n: MB.spec.find(b => b.type === 'inputs').f.tags.length });
+    }
+    return out;
+  });
+  sw.every(s => s.errs === 0)
+    ? ok(`all ${sw.length} machines validate straight after switching: ${sw.map(s => s.cs + '→' + s.tgt).join(', ')}`)
+    : bad('switching machine leaves errors: ' + JSON.stringify(sw.filter(s => s.errs)));
+
   console.log('\nThe Python panel tracks the blocks');
   const py = await page.evaluate(() => {
     MB.spec.find(b => b.type === 'window').f.from = 0;
