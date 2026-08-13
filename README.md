@@ -19,7 +19,7 @@ Presenter and author: **S. H. Parihar** — 16 years in the power sector; author
 | | What it is | Open it |
 |---|---|---|
 | **Algorithm Anatomy Theatre** | Six 3-D animated modules that open up the machinery of k-NN, PCA, gradient descent, a neural network, retrieval and k-means. One real reading — an ID fan bearing at 74.2 °C — is followed through all six. | `dist/MAHAGENCO_Algorithm_Theatre.html` |
-| **Predictive Maintenance Simulator** | The full pipeline from sensor to signed work order, in eight stages across five equipment cases, with a 3-D model of the machine that degrades as you scrub through 200 days. | `dist/MAHAGENCO_PdM_Simulator.html` |
+| **Predictive Maintenance Simulator** | The full pipeline from sensor to signed work order, in eight stages across five equipment cases, with a 3-D model of the machine that degrades as you scrub through a full year. | `dist/MAHAGENCO_PdM_Simulator.html` |
 | **AI Simulation Lab** | Eight self-contained models built on the plant's own June 2026 figures — heat rate decomposition, auxiliary power, mill scheduling, anomaly detection and more. | `dist/MAHAGENCO_AI_Simulation_Lab.html` |
 | **Local RAG Bench** | A retrieval-augmented generation system with a **real** ONNX embedding model and an optional local language model, running entirely in the browser on WebGPU. Air-gapped after the first fetch. | `rag-bench/` — see its own README |
 | **Pocket RAG** | The same idea with no curated corpus and no server at all: **you** open a PDF or Word file on your phone, and it is parsed, chunked, embedded, searched and answered on the device. A static site for GitHub Pages or Vercel; installs as a PWA and works in flight mode. | `pocket-rag/` — see its own README |

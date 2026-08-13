@@ -19,7 +19,7 @@ ST_RENDER[0]=d=>{ const c=d.c, s=ST[c.station];
       <tr><td>Failure mechanism</td><td>${c.mode}</td></tr>
       <tr><td>What "failed" means</td><td>${c.failWhen}</td></tr>
       <tr><td>Signal we will watch</td><td><b>${c.healthName}</b> — alarm ${c.alarm} ${c.healthUnit}, trip ${c.trip} ${c.healthUnit}</td></tr>
-      <tr><td>Next planned outage</td><td>Day ${c.outageIn} of this 200-day window</td></tr>
+      <tr><td>Next planned outage</td><td>Day ${c.outageIn} of this one-year window</td></tr>
      </tbody></table></div>
    <div class="stats">
      <div class="stat"><div class="l">Forced outage</div><div class="n rd">${cr(fc)}</div><div class="s">${c.outageDays} days on a ${s.unitMW} MW unit</div></div>
@@ -172,7 +172,7 @@ ST_RENDER[3]=d=>{ const c=d.c;
   }).join('');
   return hd('Stage 4 of 8','Data quality',
    'Profile every tag before you model anything. This is the least glamorous stage and the one that decides the outcome.')
-  +`<div class="card"><h3>Tag profile over the 200-day window</h3>
+  +`<div class="card"><h3>Tag profile over the one-year window</h3>
      <div class="tw"><table><thead><tr><th>Signal</th><th class="num">Missing</th><th class="num">Longest frozen run</th>
        <th class="num">Min</th><th class="num">Max</th><th class="num">Std dev</th><th>Verdict</th></tr></thead>
        <tbody>${rows}</tbody></table></div></div>
@@ -278,7 +278,7 @@ ST_RENDER[5]=d=>{ const c=d.c, m=MODELS[S.model];
       </div>
       <div class="card"><h3>Training window</h3>
         <div class="ctl"><label>Train on the first <span class="v" id="v-tr">${S.trainDays} days</span></label>
-          <input type="range" id="i-tr" min="15" max="150" value="${S.trainDays}" step="5">
+          <input type="range" id="i-tr" min="20" max="340" value="${S.trainDays}" step="10">
           <div class="hint">The fault begins on day ${c.onset}</div></div>
         <div class="ctl"><label>Persistence before alerting <span class="v" id="v-pe">${Math.round(S.persistH/24)} days</span></label>
           <input type="range" id="i-pe" min="6" max="240" value="${S.persistH}" step="6"></div>
@@ -305,7 +305,57 @@ ST_RENDER[5]=d=>{ const c=d.c, m=MODELS[S.model];
     :`<div class="good"><b>The training window is clean.</b> It ends on day ${S.trainDays}, comfortably before the
      fault begins on day ${c.onset}. In a real project you establish that by asking the maintenance planner what
      was done to this machine and when — not by looking at the data.</div>`}
+   ${seasonNote(d)}
    `+navBtns(4,6,'Validate it'); };
+
+/* The second way a training window goes wrong, and the one nobody checks.
+   A window can be perfectly clean of any fault and still be useless, because
+   it never saw the weather the machine will meet. Day 0 is 1 January, so a
+   45-day window is January and half of February: cooling water 19 to 22 °C,
+   entirely below the lube oil cooler's design point. The model never learns
+   that the cooler has a knee, and the first hot week in June looks to it
+   exactly like a developing fault. */
+function seasonNote(d){
+  const td = S.trainDays, c = d.c, KNEE = 27.5;
+  const m0 = dayToMonth(0), m1 = dayToMonth(Math.min(364, td - 1));
+  const span = m1 > m0 ? `${MONTH_NAME[m0]} to ${MONTH_NAME[m1]}` : `${MONTH_NAME[m0]} only`;
+
+  /* The question is not "is the average different". It is "has the window
+     been in the regime the model will be asked to predict in". For this
+     machine that regime is cooling water above the cooler's design point,
+     because that is where the relationship stops being a straight line. */
+  const trainH = Math.min(N, td * 24);
+  let aboveKnee = 0, trainMax = -1e9, yearMax = -1e9;
+  for (let i = 0; i < N; i++) {
+    const cw = d.ctx.cw[i];
+    if (cw > yearMax) yearMax = cw;
+    if (i < trainH) { if (cw > KNEE) aboveKnee++; if (cw > trainMax) trainMax = cw; }
+  }
+  const pct = 100 * aboveKnee / Math.max(1, trainH);
+  const early = (d.ev && d.ev.detectDay !== null && d.ev.detectDay < c.onset)
+    ? Math.round(c.onset - d.ev.detectDay) : 0;
+  const covered = aboveKnee >= 200 && trainMax >= yearMax - 1.5;
+
+  if (covered)
+    return `<div class="good" style="margin-top:10px"><b>The window also covers the weather.</b>
+      ${span}, and ${fmt(pct,0)} per cent of those hours had cooling water above the cooler's
+      27.5 °C design point, reaching ${fmt(trainMax,1)} °C against ${fmt(yearMax,1)} °C for the year.
+      The model has been in the regime it will be asked to predict in, so it can tell a hot day
+      from a hot bearing.</div>`;
+
+  return `<div class="bad" style="margin-top:10px"><b>But it has not seen the weather.</b>
+    The window is ${span}. Cooling water reached ${fmt(trainMax,1)} °C in it, against ${fmt(yearMax,1)} °C
+    over the year, and only ${fmt(pct,0)} per cent of the training hours were above the lube oil cooler's
+    27.5 °C design point. Below that point the oil outlet tracks ambient almost linearly; above it the
+    cooler runs out of approach and climbs away. A window that never reaches the knee cannot learn
+    that it is there.
+    ${early ? `<b>It shows: the model raised an advisory on day ${Math.round(d.ev.detectDay)}
+      (${dayLabel(Math.round(d.ev.detectDay))}), ${early} days before this fault begins.
+      True severity that day was zero. That is not the bearing — that is summer.</b>`
+            : 'Drag the window down to 60 days and watch when the advisory appears.'}
+    </div>`;
+}
+
 ST_WIRE[5]=d=>{
   const c=d.c, step=12;
   if(d.M){
@@ -369,7 +419,7 @@ ST_RENDER[6]=d=>{ const c=d.c;
      time against the cost of investigating false alarms. Forced outage on this machine is ${cr(fc)};
      taking it in a planned window is ${cr(pc)}; each false alarm is costed at ₹40,000 of investigation time.</p></div>
    <div class="note"><b>Where the false-alarm number comes from.</b> The same model, with the same features and the
-   same threshold, is run against a second machine of the same type that never develops a fault — 200 days of it.
+   same threshold, is run against a second machine of the same type that never develops a fault — a full year of it.
    Counting nuisance alerts on the faulty machine's own healthy weeks gives you a handful of days and a meaningless
    rate. This is the step most pilots skip, and it is why the false-alarm rate always turns out worse in service
    than it looked in the report.</div>
@@ -408,7 +458,7 @@ ST_RENDER[7]=d=>{ const c=d.c, e=d.ev;
   return hd('Stage 8 of 8','Inference and value',
    'The model is live. Drag the day scrubber under the 3D view and watch the machine, the score and the money move together.')
   +`<div class="stats">
-     <div class="stat"><div class="l">Today</div><div class="n em">Day ${S.day}</div><div class="s">of the 200-day window</div></div>
+     <div class="stat"><div class="l">Today</div><div class="n em">Day ${S.day}</div><div class="s">of the 365-day window</div></div>
      <div class="stat"><div class="l">Machine state</div><div class="n ${d.fault[S.day*24]>0.6?'rd':(d.fault[S.day*24]>0.15?'':'gn')}">${fmt(clamp(d.fault[Math.min(N-1,S.day*24)],0,1)*100,0)} %</div><div class="s">true severity — hidden in reality</div></div>
      <div class="stat"><div class="l">Model status</div><div class="n ${e.detectDay!==null&&S.day>=e.detectDay?'em':'gn'}">${e.detectDay!==null&&S.day>=e.detectDay?'ADVISORY':'quiet'}</div><div class="s">${e.detectDay!==null?'raised day '+fmt(e.detectDay,0):'never raised'}</div></div>
      <div class="stat"><div class="l">DCS alarm</div><div class="n ${d.alarmDay!==null&&S.day>=d.alarmDay?'rd':'gn'}">${d.alarmDay!==null&&S.day>=d.alarmDay?'ALARM':'quiet'}</div><div class="s">${d.alarmDay!==null?'day '+fmt(d.alarmDay,0):'not in window'}</div></div>

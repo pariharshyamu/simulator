@@ -140,7 +140,7 @@ const S = {
   caseId:'idfan', stage:0, day:0, playing:false,
   sensors:{}, acq:{storeMin:5, dead:0.5, maxGapH:8, freezeDay:0, freezeLen:14, gapPct:0, seed:99},
   repair:'hold', noise:1.0, seed:7,
-  feats:{}, primary:'norm', model:'knn', trainDays:45, persistH:72, thrK:4.0,
+  feats:{}, primary:'norm', model:'knn', trainDays:180, persistH:72, thrK:4.0,
   cache:null, done:{}
 };
 const STAGES = [
@@ -215,7 +215,9 @@ function compute(){
     faRef.score = HM ? HM.score : null;
     sweep = sweepThresholds(M.score, c.onset, trainEnd, S.persistH, alarmDay, faRef.score);
     thr = thrFromTrain(M.score, trainEnd, S.thrK);
-    ev = evaluate(M.score, c.onset, trainEnd, thr, S.persistH, faRef.score);
+    const hthr = faRef.score ? thrFromTrain(faRef.score, trainEnd, S.thrK) : undefined;
+    ev = evaluate(M.score, c.onset, trainEnd, thr, S.persistH, faRef.score, hthr);
+    faRef.thr = hthr;
   }
   S.cache={c, ctx, fault, truth, acq, prof, trainEnd, feats, corr, avail, prim, sup, M, sweep, thr, ev, alarmDay, health:H, faRef};
   return S.cache;

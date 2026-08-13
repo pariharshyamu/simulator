@@ -3989,7 +3989,7 @@ The economics compare three decisions — run to the planned outage, take an opp
 #### What you should conclude
 
 - A point estimate of remaining life is the wrong output. The decision concerns a date that already exists in the outage plan, so the right output is the probability of reaching it.
-- Uncertainty must widen with horizon. A confident number 200 days out is either using information it does not have or hiding the band.
+- Uncertainty must widen with horizon. A confident number 365 days out is either using information it does not have or hiding the band.
 - The *usable* P–F interval decides whether condition monitoring pays. Detection arriving inside your spares lead time is detection you cannot act on.
 - The cost of unavailability here is not hypothetical: ₹100.87 crore disallowed, ₹32.93 crore of it adjusted in one month. Predictive maintenance competes against that number, not against a repair cost.
 - More data narrows the band, but data arrives in real time and the fault does not wait. Every day of confidence is a day of P–F interval spent.

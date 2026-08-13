@@ -82,7 +82,15 @@ const dist = (a,b) => Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]);
 
   for (const c of cases) {
     console.log('\n' + c.name);
-    await page.evaluate(id => { S.caseId = id; resetCase(); S.stage = 3; S.day = 150; render(); }, c.id);
+    /* Sample each case late in its own degradation rather than on a fixed
+       day — the onsets differ, and a fixed day silently tested a healthy
+       machine once the window was extended to a full year. */
+    await page.evaluate(id => {
+      S.caseId = id; resetCase(); S.stage = 3;
+      const c = CASES[id];
+      S.day = Math.min(DAYS - 1, Math.round(c.onset + 0.92 * c.ttf));
+      render();
+    }, c.id);
     await page.waitForTimeout(1200);
 
     const r = await page.evaluate(SAMPLE);
