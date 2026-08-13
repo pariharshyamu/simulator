@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAHAGENCO Model Builder — build a neural network without writing code</title>
+<style>
+:root{
+  --ink:#1C2530; --ink2:#2A3644; --ink3:#3B4A5A;
+  --paper:#fff; --soft:#F1F4F7; --soft2:#E3EAF0; --line:#D3DDE5;
+  --ember:#D96A16; --ember-bg:#FCEDE0; --teal:#0B8F86; --teal-bg:#E1F0EE;
+  --blue:#1E74C0; --blue-bg:#E4EFF9;
+  --red:#A8261E; --red-bg:#F9E7E5; --grn:#256B45; --grn-bg:#E4F0EA;
+  --amb:#9A6408; --amb-bg:#FBF0DC; --muted:#5C6B7A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{font:14px/1.5 Calibri,Carlito,"Segoe UI",system-ui,sans-serif;color:var(--ink);
+     background:#F7F9FB;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+h1,h2,h3,h4{font-family:Cambria,Georgia,serif;margin:0}
+button,input,select{font-family:inherit;font-size:inherit}
+
+/* ---------- top bar ---------- */
+header{background:var(--ink);color:#fff;padding:11px 20px;display:flex;align-items:center;gap:18px;flex:0 0 auto}
+header h1{font-size:17px;line-height:1.15}
+header .sub{color:#8FA2B5;font-size:11.5px;margin-top:2px}
+header .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#22303E;border:1px solid #35485B;
+  color:#C8D4DE;border-radius:20px;padding:5px 12px;font-size:12px}
+.chip b{color:#fff;font-weight:600}
+.chip.on{border-color:var(--teal);color:#BEE6E1}
+.chip.warn{border-color:var(--ember);color:#F3C79B}
+
+/* ---------- layout ---------- */
+#body{flex:1;display:flex;min-height:0}
+#palette{width:216px;flex:0 0 216px;background:var(--ink2);overflow-y:auto;padding:10px 10px 30px}
+#palette .grp{font:700 9.5px/1 inherit;letter-spacing:1.2px;text-transform:uppercase;
+  color:#7E8E9C;padding:14px 4px 7px}
+#canvasWrap{flex:0 0 372px;background:var(--soft);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;min-width:0}
+#canvasHd{padding:10px 14px;border-bottom:1px solid var(--line);background:var(--paper);flex:0 0 auto}
+#canvasHd h2{font-size:15px}
+#canvasHd p{margin:3px 0 0;font-size:11.5px;color:var(--muted)}
+#canvas{flex:1;overflow-y:auto;padding:12px;min-height:0}
+#right{flex:1;overflow-y:auto;min-width:0;padding:14px 18px 40px}
+
+/* ---------- blocks ---------- */
+.blk{position:relative;border-radius:8px;padding:8px 10px;margin:0 0 7px;cursor:grab;
+  border:1px solid rgba(0,0,0,.10);box-shadow:0 1px 2px rgba(28,37,48,.10);user-select:none}
+.blk .t{font-weight:700;font-size:12.5px;display:flex;align-items:center;gap:7px}
+.blk .t .ic{font:700 11px/1 ui-monospace,Consolas,monospace;opacity:.7}
+.blk .d{font-size:11px;opacity:.85;margin-top:2px}
+.blk.data{background:#DCEBF9;border-color:#A8C9E8}
+.blk.prep{background:#DFF1EE;border-color:#A5D5CE}
+.blk.model{background:#FBE4CE;border-color:#E7BC8E}
+.blk.train{background:#F3E5CB;border-color:#DFC894}
+.blk.out{background:#E7E3F5;border-color:#C4BAE4}
+#palette .blk{margin-bottom:6px;opacity:.96}
+#palette .blk:hover{opacity:1;transform:translateY(-1px);transition:transform .1s}
+#canvas .blk{cursor:grab}
+#canvas .blk.drag{opacity:.4}
+#canvas .blk .x{position:absolute;top:5px;right:6px;width:18px;height:18px;border-radius:4px;
+  border:0;background:rgba(0,0,0,.07);color:var(--ink);cursor:pointer;line-height:1;font-size:13px;padding:0}
+#canvas .blk .x:hover{background:var(--red);color:#fff}
+.flds{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.fld{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.72);
+  border:1px solid rgba(0,0,0,.10);border-radius:5px;padding:2px 5px;font-size:11px}
+.fld label{color:var(--ink3);white-space:nowrap}
+.fld input,.fld select{border:0;background:transparent;font-size:11px;font-weight:700;
+  color:var(--ink);max-width:112px;padding:1px 2px}
+.fld input[type=number]{width:52px}
+.drop{border:2px dashed var(--line);border-radius:8px;padding:16px 12px;text-align:center;
+  color:var(--muted);font-size:12px;background:rgba(255,255,255,.5)}
+.drop.over{border-color:var(--ember);background:var(--ember-bg);color:var(--ink)}
+.ghost{height:7px;border-radius:4px;background:var(--ember);margin:0 0 7px;opacity:.8}
+
+/* ---------- tag picker ---------- */
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tg{font-size:10.5px;padding:2px 7px;border-radius:20px;cursor:pointer;border:1px solid transparent;
+  background:rgba(255,255,255,.7);color:var(--ink3)}
+.tg.on{background:var(--ink);color:#fff}
+.tg.miss{opacity:.42;text-decoration:line-through}
+
+/* ---------- panels ---------- */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:13px}
+.card h3{font-size:15px;margin-bottom:3px}
+.card .sub{font-size:11.5px;color:var(--muted);margin-bottom:10px}
+.row{display:flex;gap:13px;flex-wrap:wrap}
+.row>.card{flex:1;min-width:290px}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:7px;padding:8px 15px;font-weight:700;
+  cursor:pointer;font-size:13px}
+.btn:hover{background:#2C3B4D}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.go{background:var(--ember)}.btn.go:hover{background:#C25E10}
+.btn.sm{padding:5px 11px;font-size:12px;font-weight:600}
+.btn.alt{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
+.btn.alt:hover{background:var(--soft)}
+.stat{display:inline-block;min-width:112px;margin:0 16px 6px 0}
+.stat .l{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.stat .n{font:700 21px/1.15 Cambria,Georgia,serif}
+.stat .n.gn{color:var(--grn)}.stat .n.rd{color:var(--red)}.stat .n.em{color:var(--ember)}
+.stat .s{font-size:11px;color:var(--muted)}
+.note{border-radius:8px;padding:10px 13px;font-size:12.5px;margin-top:10px}
+.note.good{background:var(--grn-bg);border:1px solid #BEDCCB}
+.note.bad{background:var(--red-bg);border:1px solid #EFC9C4}
+.note.info{background:var(--blue-bg);border:1px solid #BCD6EF}
+.note.warn{background:var(--amb-bg);border:1px solid #E8D3A6}
+pre.py{background:#182029;color:#D8E2EA;border-radius:8px;padding:13px 15px;overflow-x:auto;
+  font:12px/1.55 ui-monospace,Consolas,"Courier New",monospace;margin:0;max-height:520px}
+pre.py .k{color:#E8A45C}pre.py .s{color:#93D3A2}pre.py .c{color:#6B7F91;font-style:italic}
+pre.py .n{color:#8FC7E8}
+canvas.ch{width:100%;display:block}
+table.t{width:100%;border-collapse:collapse;font-size:12px}
+table.t th,table.t td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+table.t th{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+table.t td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:6px 13px;border-radius:7px;border:1px solid var(--line);background:var(--paper);
+  cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink3)}
+.tab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.hide{display:none!important}
+#drophint{position:fixed;inset:0;background:rgba(28,37,48,.72);color:#fff;display:none;
+  align-items:center;justify-content:center;font-size:20px;z-index:50;font-family:Cambria,Georgia,serif}
+#drophint.on{display:flex}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Model Builder</h1>
+    <div class="sub">Build a neural network by dragging blocks. It trains here, on this machine, in about a second.</div>
+  </div>
+  <div class="sp"></div>
+  <div class="chip" id="chDataset">no data</div>
+  <div class="chip" id="chParams">0 parameters</div>
+  <div class="chip" id="chState">not trained</div>
+</header>
+
+<div id="body">
+  <div id="palette"></div>
+
+  <div id="canvasWrap">
+    <div id="canvasHd">
+      <h2>Your model</h2>
+      <p>Drag blocks in from the left. Order matters, top to bottom.</p>
+    </div>
+    <div id="canvas"></div>
+  </div>
+
+  <div id="right">
+    <div class="tabs">
+      <div class="tab on" data-t="run">Train and see</div>
+      <div class="tab" data-t="py">The same thing in Python</div>
+      <div class="tab" data-t="data">The data</div>
+      <div class="tab" data-t="help">How to read this</div>
+    </div>
+    <div id="pane-run"></div>
+    <div id="pane-py" class="hide"></div>
+    <div id="pane-data" class="hide"></div>
+    <div id="pane-help" class="hide"></div>
+  </div>
+</div>
+
+<div id="drophint">Drop a CSV to use your own data</div>
+
+<script>/* =========================================================================
+   MAHAGENCO Predictive Maintenance End-to-End Simulator — core
+   Physics, 3D scenes and algorithms. Everything runs in the browser.
+   ========================================================================= */
+'use strict';
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const fmt = (x,d=2) => Number(x).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const cr  = x => '₹'+fmt(x,2)+' cr';
+const lakh= x => '₹'+fmt(x,1)+' lakh';
+function rng(seed){ let s=(seed>>>0)||1; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+function gauss(r){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+const mean = a => a.reduce((x,y)=>x+y,0)/(a.length||1);
+const sd   = a => { const m=mean(a); return Math.sqrt(a.reduce((x,y)=>x+(y-m)*(y-m),0)/(a.length||1))||1e-9; };
+
+/* ---------- June 2026 station economics (from the MAHAGENCO filing) ---------- */
+const ST = {
+  'Koradi Units 8-10':{unitMW:660, plf:66.62, vc:3.2840, hr:2442.18, afc:28.04},
+  'Nashik Units 3-5' :{unitMW:210, plf:58.40, vc:5.9800, hr:2803.80, afc:0},
+  'Chandrapur Units 3-7':{unitMW:500, plf:53.56, vc:4.1330, hr:2709.30, afc:23.94},
+  'Khaperkheda Units 1-4':{unitMW:210, plf:54.55, vc:3.6490, hr:2714.99, afc:21.75},
+  'Bhusawal Unit 6'  :{unitMW:660, plf:70.37, vc:3.4410, hr:2183.13, afc:7.88}
+};
+function outageCost(stName, days){
+  const s = ST[stName];
+  const mwh = s.unitMW*24*days*(s.plf/100);
+  return mwh*1000*s.vc/1e7 + (s.afc>0 ? s.afc*days/30 : 0.3*days);   // ₹ crore
+}
+
+/* =========================================================================
+   1. EQUIPMENT CASES
+   ========================================================================= */
+/* A FULL YEAR, and the reason is section 2.3.
+
+   "Typically 12 to 24 months, and it must span the full load range the unit
+   actually operates over; both seasons — a model trained on winter data
+   alarms all summer."
+
+   Over a 200-day window that sentence was untestable: the old ambient term
+   was 6.5*sin(day/60*PI), a decorative wiggle with no season in it. A model
+   trained on any part of it worked on any other part, so the single most
+   common way these projects fail could be taught only in prose.
+
+   Day 0 is 1 January. */
+const HOURS_PER_DAY = 24, DAYS = 365, N = DAYS*HOURS_PER_DAY;
+const MONTH_START = [0,31,59,90,120,151,181,212,243,273,304,334];
+const MONTH_NAME  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const dayToMonth = d => { let m=11; while(m>0 && d<MONTH_START[m]) m--; return m; };
+const dayLabel = d => `${Math.round(d-MONTH_START[dayToMonth(d)])+1} ${MONTH_NAME[dayToMonth(d)]}`;
+
+/* Nashik daily mean dry-bulb, by month. Not a sinusoid: it climbs to a May
+   peak, drops sharply when the monsoon arrives in June, stays suppressed
+   through September, lifts a little in October and then falls to a January
+   minimum. One sine wave cannot produce that shape, which is exactly why a
+   model fitted to one season mis-predicts another. */
+const AMB_MEAN  = [21.0, 23.5, 27.5, 31.0, 33.5, 29.0, 25.5, 24.5, 25.5, 26.5, 23.5, 21.0];
+/* Diurnal swing is widest in the dry pre-monsoon months and collapses under
+   monsoon cloud — so ambient variance itself is seasonal. */
+const AMB_SWING = [ 7.5,  8.0,  8.5,  9.0,  8.5,  5.0,  3.0,  3.0,  4.0,  6.5,  7.5,  7.5];
+
+function smoothMonthly(table, day){
+  /* interpolate between month mid-points so the year is continuous and wraps */
+  const mid = i => MONTH_START[i] + (( (MONTH_START[(i+1)%12] - MONTH_START[i] + 365) % 365 ) || 31)/2;
+  let a = 11;
+  for (let i = 0; i < 12; i++) if (day >= mid(i)) a = i;
+  const b = (a + 1) % 12;
+  let span = mid(b) - mid(a); if (span <= 0) span += 365;
+  let t = (day - mid(a)); if (t < 0) t += 365;
+  t = clamp(t / span, 0, 1);
+  const s = t * t * (3 - 2 * t);                       // smoothstep, no kinks
+  return table[a] * (1 - s) + table[b] * s;
+}
+
+/* shared plant context: load, ambient, cooling water */
+function context(seed){
+  const r = rng(seed), L=[], A=[], CW=[];
+  let load = 0.80;
+  for(let i=0;i<N;i++){
+    const day = i/24, hod = i%24, dow = Math.floor(day)%7;
+    const night = (hod<6||hod>22) ? -0.13 : 0;
+    const weekend = (dow===0) ? -0.10 : 0;
+    /* Demand follows the weather: a hot May afternoon and a cold January
+       night both pull the fleet up, and the monsoon pulls it down. */
+    const mo = dayToMonth(Math.floor(day));
+    const season = (mo>=3 && mo<=4) ? 0.06 : (mo>=5 && mo<=8) ? -0.05 : 0;
+    load += (0.80+night+weekend+season-load)*0.22 + gauss(r)*0.020;
+    load = clamp(load, 0.45, 1.0);
+    const mean  = smoothMonthly(AMB_MEAN,  day);
+    const swing = smoothMonthly(AMB_SWING, day);
+    /* peak at about 15:00, minimum about 05:00 */
+    const amb = mean - swing*Math.cos((hod-5)/24*2*Math.PI) + gauss(r)*0.9;
+    /* cooling water lags air temperature — a large basin has thermal inertia */
+    const cwLag = smoothMonthly(AMB_MEAN, day-9);
+    L.push(load); A.push(amb);
+    CW.push(cwLag - 1.5 + 0.35*(amb-mean) + gauss(r)*0.5);
+  }
+  return {load:L, amb:A, cw:CW};
+}
+
+/* fault severity 0..1, power-law growth after onset */
+function faultProfile(onsetDay, ttfDays, shape){
+  const f = new Float64Array(N);
+  const o = onsetDay*24, span = ttfDays*24;
+  for(let i=0;i<N;i++) f[i] = i<=o ? 0 : clamp(Math.pow((i-o)/span, shape), 0, 1.35);
+  return f;
+}
+
+const CASES = {
+
+/* ---------------------------------------------------------------- ID fan */
+idfan:{
+  id:'idfan', short:'ID fan bearing', name:'ID fan — drive-end bearing',
+  scene:'rotor', variant:'fan', station:'Koradi Units 8-10',
+  blurb:'Induced draught fan A, drive-end journal bearing. The failure that took Unit 9 out for 62 hours in 2023.',
+  mode:'Lube oil cooler fouls on the cooling-water side → oil temperature rises → oil film thins → babbitt wear',
+  onset:200, ttf:110, shape:1.7,
+  failWhen:'Bearing metal temperature reaches the 100 °C trip, or babbitt wipes',
+  outageDays:2.5, plannedDays:0.4, outageIn:300,
+  sensors:[
+    {id:'brgT',  n:'DE bearing metal temperature', u:'°C',   pos:[-1.15,0.62,0], key:1, have:1, rate:'1 min', why:'The signal the fault ends up in'},
+    {id:'brgT2', n:'NDE bearing metal temperature',u:'°C',   pos:[ 1.55,0.62,0], key:1, have:1, rate:'1 min', why:'The companion — a sensor fault moves alone, a machine fault does not'},
+    {id:'oilT',  n:'Lube oil cooler outlet temp',  u:'°C',   pos:[-0.2,-0.62,0.95], key:1, have:1, rate:'1 min', why:'Where this failure actually starts'},
+    {id:'cwF',   n:'Cooler cooling-water flow',    u:'%',    pos:[0.55,-0.62,0.95], key:1, have:0, rate:'1 min', why:'Confirms the mechanism; often not instrumented'},
+    {id:'vib',   n:'Bearing housing vibration',    u:'mm/s', pos:[-1.15,0.20,0.55], key:1, have:1, rate:'1 min', why:'Late but unambiguous'},
+    {id:'motI',  n:'Fan motor current',            u:'A',    pos:[2.75,0.25,0], key:0, have:1, rate:'1 min', why:'Load proxy; needed to normalise'},
+    {id:'gasF',  n:'Flue gas flow',                u:'%',    pos:[0,1.15,-1.0], key:0, have:1, rate:'1 min', why:'Duty — the biggest driver of bearing temperature'},
+    {id:'amb',   n:'Ambient temperature',          u:'°C',   pos:[2.2,1.35,1.1], key:0, have:1, rate:'5 min', why:'Without it, every summer afternoon looks like a fault'}
+  ],
+  gen(ctx, f, r, opt){
+    const d={}; ['brgT','brgT2','oilT','cwF','vib','motI','gasF','amb'].forEach(k=>d[k]=new Float64Array(N));
+    for(let i=0;i<N;i++){
+      const L=ctx.load[i], A=ctx.amb[i], CW=ctx.cw[i], F=f[i];
+      d.cwF[i]  = 100 - 16*F + gauss(r)*0.8;
+      /* THE KNEE, and it is the whole reason this dataset is a year long.
+         A lube oil cooler is sized for a design cooling-water temperature.
+         Below it the oil outlet tracks ambient almost linearly. Above it the
+         cooler runs out of approach and the oil temperature climbs far
+         faster than the water does.
+
+         Fit a straight line to January and February — cooling water 19 to
+         22 °C, entirely below the knee — and it extrapolates confidently
+         into May and is badly wrong, because it never saw the knee exist.
+         That is section 2.3's "a model trained on winter data alarms all
+         summer", and without a non-linearity somewhere in the physics it
+         cannot be demonstrated: a linear model of a linear plant
+         extrapolates perfectly and the warning looks like superstition. */
+      const CW_DESIGN = 27.5;
+      const knee = Math.max(0, CW - CW_DESIGN);
+      d.oilT[i] = 42 + 0.38*(A-31) + 3.2*L + 1.35*Math.pow(knee, 1.45) + 9.5*F + gauss(r)*0.45;
+      d.vib[i]  = 2.30 + 1.35*L + 5.4*Math.pow(F,1.5) + gauss(r)*0.09*opt.noise;
+      d.brgT[i] = 39 + 16.5*L + 0.42*(A-31) + 0.62*(d.oilT[i]-42) + 27*F + gauss(r)*0.42*opt.noise;
+      d.brgT2[i]= 39 + 15.8*L + 0.40*(A-31) + 0.55*(d.oilT[i]-42) + gauss(r)*0.42*opt.noise;
+      d.motI[i] = 148 + 96*Math.pow(L,2.4) + gauss(r)*1.1;
+      d.gasF[i] = 100*L + gauss(r)*0.7;
+      d.amb[i]  = A;
+    }
+    return d;
+  },
+  health: d => d.brgT, healthName:'DE bearing metal temperature', healthUnit:'°C',
+  trip:100, alarm:90, normalBand:[55,78],
+  features:[
+    {id:'raw',  n:'Raw bearing temperature',            desc:'The tag as it comes',                    good:0},
+    {id:'norm', n:'Load- and ambient-normalised temp',  desc:'Residual against expected for this duty', good:1},
+    {id:'delta',n:'DE minus NDE bearing temperature',   desc:'Kills common-mode drift and sensor bias', good:1},
+    {id:'oilD', n:'Oil temperature rise across cooler', desc:'Points at the actual mechanism',          good:1},
+    {id:'vibR', n:'Vibration normalised to speed/duty', desc:'Late but decisive',                       good:1},
+    {id:'roll', n:'7-day rolling mean and slope',       desc:'Suppresses shift-to-shift noise',         good:1},
+    {id:'hod',  n:'Hour of day',                        desc:'Correlates with everything and means nothing', good:0},
+    {id:'dayn', n:'Day number',                         desc:'A leakage trap — it encodes the answer',  good:-1}
+  ]
+},
+
+/* ------------------------------------------------------------- HT motor */
+motor:{
+  id:'motor', short:'HT motor rotor bar', name:'HT motor — broken rotor bar',
+  scene:'rotor', variant:'motor', station:'Khaperkheda Units 1-4',
+  blurb:'6.6 kV induced draught fan motor. A cracked rotor bar, invisible to every temperature sensor on the machine.',
+  mode:'Thermal cycling cracks a rotor bar → current sidebands at ±2sf appear → adjacent bars overload and crack in turn',
+  onset:210, ttf:100, shape:2.1,
+  failWhen:'Sufficient bars crack to trip on overload, or the bar lifts and destroys the stator',
+  outageDays:3.5, plannedDays:0.8, outageIn:310,
+  sensors:[
+    {id:'sb',    n:'Current sideband at ±2sf',    u:'dB',  pos:[2.55,0.30,0.35], key:1, have:0, rate:'waveform, 5 kHz', why:'The only early indicator. Needs a waveform, not a one-minute average'},
+    {id:'statI', n:'Stator current, RMS',         u:'A',   pos:[2.55,-0.10,0.35], key:1, have:1, rate:'1 min', why:'What the historian actually stores'},
+    {id:'windT', n:'Stator winding RTD',          u:'°C',  pos:[0.35,0.70,0.30], key:1, have:1, rate:'1 min', why:'Rises late, and only a little'},
+    {id:'slip',  n:'Slip',                        u:'%',   pos:[-0.75,0.66,0], key:0, have:0, rate:'1 min', why:'Needed to compute where the sidebands should be'},
+    {id:'vib',   n:'Bearing housing vibration',   u:'mm/s',pos:[-1.15,0.20,0.55], key:1, have:1, rate:'1 min', why:'Shows a 2sf beat once it is severe'},
+    {id:'brgT',  n:'DE bearing temperature',      u:'°C',  pos:[-1.15,0.62,0], key:0, have:1, rate:'1 min', why:'Largely blind to this fault — a useful negative'},
+    {id:'volt',  n:'Supply voltage',              u:'V',   pos:[2.9,0.75,0], key:0, have:1, rate:'1 min', why:'Unbalance alone can mimic a rotor fault'},
+    {id:'amb',   n:'Ambient temperature',         u:'°C',  pos:[2.2,1.35,1.1], key:0, have:1, rate:'5 min', why:'Normalisation'}
+  ],
+  gen(ctx, f, r, opt){
+    const d={}; ['sb','statI','windT','slip','vib','brgT','volt','amb'].forEach(k=>d[k]=new Float64Array(N));
+    for(let i=0;i<N;i++){
+      const L=ctx.load[i], A=ctx.amb[i], F=f[i];
+      d.sb[i]    = -54 + 26*Math.pow(F,0.75) + gauss(r)*0.9*opt.noise;
+      d.slip[i]  = 0.85 + 0.55*L + 0.22*F + gauss(r)*0.02;
+      d.statI[i] = 146 + 92*Math.pow(L,2.4) + 3.5*F + gauss(r)*1.3*opt.noise;
+      d.windT[i] = 62 + 34*L + 0.35*(A-31) + 7*F*F + gauss(r)*0.6*opt.noise;
+      d.vib[i]   = 2.1 + 1.1*L + 2.4*Math.pow(F,2.2) + gauss(r)*0.08*opt.noise;
+      d.brgT[i]  = 44 + 14*L + 0.40*(A-31) + 1.4*F + gauss(r)*0.45*opt.noise;
+      d.volt[i]  = 6600 + gauss(r)*22;
+      d.amb[i]   = A;
+    }
+    return d;
+  },
+  health: d => d.sb, healthName:'±2sf sideband amplitude', healthUnit:'dB',
+  trip:-26, alarm:-34, normalBand:[-56,-48], inverted:true,
+  features:[
+    {id:'raw',  n:'Raw stator current',                  desc:'One-minute RMS — the sidebands are already gone', good:0},
+    {id:'sbAmp',n:'Sideband amplitude at ±2sf',          desc:'Requires waveform capture at the machine',        good:1},
+    {id:'norm', n:'Current normalised to load',          desc:'Removes duty; leaves a small real rise',          good:1},
+    {id:'vibR', n:'Vibration 2sf beat component',        desc:'Confirms, late',                                  good:1},
+    {id:'wTres',n:'Winding temperature residual',        desc:'Weak but independent',                            good:1},
+    {id:'unbal',n:'Voltage unbalance',                   desc:'Rules out the supply as the cause',               good:1},
+    {id:'hod',  n:'Hour of day',                         desc:'Spurious',                                        good:0},
+    {id:'dayn', n:'Day number',                          desc:'A leakage trap',                                  good:-1}
+  ]
+},
+
+/* ------------------------------------------------------------- coal mill */
+mill:{
+  id:'mill', short:'Coal mill wear', name:'Coal mill — grinding element wear',
+  scene:'mill', variant:'bowl', station:'Nashik Units 3-5',
+  blurb:'Bowl mill C. Grinding elements wearing towards end of life, with choking risk rising as they go.',
+  mode:'Roller and bull-ring wear → grinding pressure spreads → fineness falls, differential pressure rises, choking risk climbs',
+  onset:195, ttf:130, shape:1.35,
+  failWhen:'Mill chokes and trips the feeder, or fineness falls far enough to force a load reduction',
+  outageDays:0.8, plannedDays:0.3, outageIn:315,
+  sensors:[
+    {id:'dp',    n:'Mill differential pressure', u:'mbar', pos:[0,1.35,0.85], key:1, have:1, rate:'1 min', why:'Rises as the grinding bed thickens and the classifier loads'},
+    {id:'milI',  n:'Mill motor current',         u:'A',    pos:[0,-1.45,1.05], key:1, have:1, rate:'1 min', why:'Grinding work; falls suddenly when the mill chokes'},
+    {id:'outT',  n:'Mill outlet temperature',    u:'°C',   pos:[0.95,1.75,0], key:1, have:1, rate:'1 min', why:'Drying duty; falls before a choke'},
+    {id:'feed',  n:'Feeder speed',               u:'%',    pos:[-1.25,2.05,0], key:1, have:1, rate:'1 min', why:'The denominator for everything else'},
+    {id:'paF',   n:'Primary air flow',           u:'t/h',  pos:[-1.55,-0.35,0.7], key:1, have:1, rate:'1 min', why:'Carries the fines out; sets the classifier load'},
+    {id:'rej',   n:'Mill reject rate',           u:'kg/h', pos:[0,-1.85,0], key:1, have:0, rate:'batch',why:'Direct wear indicator, rarely instrumented'},
+    {id:'vib',   n:'Mill body vibration',        u:'mm/s', pos:[1.35,0.15,0.55], key:0, have:1, rate:'1 min', why:'Uneven bed, roller skidding'},
+    {id:'gcv',   n:'As-fired GCV from lab',      u:'kcal/kg', pos:[-1.55,2.35,0.6], key:0, have:1, rate:'1 day', why:'Coal changes look exactly like wear if you ignore this'}
+  ],
+  gen(ctx, f, r, opt){
+    const d={}; ['dp','milI','outT','feed','paF','rej','vib','gcv'].forEach(k=>d[k]=new Float64Array(N));
+    let gcvBase = 3000;
+    for(let i=0;i<N;i++){
+      const L=ctx.load[i], F=f[i];
+      if(i%(24*11)===0) gcvBase = 2915 + gauss(r)*130;               // a new coal source arrives
+      const gcv = gcvBase + 40*Math.sin(i/300) + gauss(r)*25;
+      const coal = 46*L*(3000/gcv);
+      const choke = Math.max(0, F-0.55) * (0.5+0.5*Math.sin(i/91));   // choking episodes late in life
+      d.gcv[i]  = gcv;
+      d.feed[i] = coal/46*100 + gauss(r)*0.8;
+      d.paF[i]  = 62 + 24*L + 4*F + gauss(r)*0.7;
+      d.dp[i]   = 38 + 26*L + 19*F + 22*choke + gauss(r)*0.9*opt.noise;
+      d.milI[i] = 42 + 26*L + 7.5*F - 16*choke + gauss(r)*0.6*opt.noise;
+      d.outT[i] = 78 + 3*L - 5.5*F - 11*choke + gauss(r)*0.55*opt.noise;
+      d.rej[i]  = 180 + 90*L + 520*F + gauss(r)*22;
+      d.vib[i]  = 3.0 + 1.2*L + 3.4*Math.pow(F,1.6) + 4*choke + gauss(r)*0.14*opt.noise;
+    }
+    return d;
+  },
+  health: d => d.dp, healthName:'Mill differential pressure', healthUnit:'mbar',
+  trip:105, alarm:92, normalBand:[52,78],
+  features:[
+    {id:'raw',  n:'Raw differential pressure',        desc:'Moves with load more than with wear',        good:0},
+    {id:'dpF',  n:'Differential pressure per t/h fed',desc:'The classic wear indicator',                 good:1},
+    {id:'iF',   n:'Motor current per t/h fed',        desc:'Specific grinding power',                    good:1},
+    {id:'dTout',n:'Outlet temperature residual',      desc:'Early warning of a choke, hours ahead',      good:1},
+    {id:'paR',  n:'PA flow to coal flow ratio',       desc:'Classifier loading',                         good:1},
+    {id:'gcvN', n:'Correction for as-fired GCV',      desc:'Without it, a coal change reads as wear',    good:1},
+    {id:'hod',  n:'Hour of day',                      desc:'Spurious',                                   good:0},
+    {id:'dayn', n:'Day number',                       desc:'A leakage trap',                             good:-1}
+  ]
+},
+
+/* -------------------------------------------------------------------- BFP */
+bfp:{
+  id:'bfp', short:'BFP seal & cavitation', name:'Boiler feed pump — seal wear and cavitation',
+  scene:'rotor', variant:'pump', station:'Chandrapur Units 3-7',
+  blurb:'Motor-driven boiler feed pump B. Mechanical seal wearing, with NPSH margin eroding at low load.',
+  mode:'Seal faces wear → leak-off rises and bearing runs hot; separately, deaerator level and low-load running erode NPSH margin → intermittent cavitation',
+  onset:205, ttf:105, shape:1.55,
+  failWhen:'Seal fails and the pump must be taken out, or cavitation damages the first-stage impeller',
+  outageDays:1.8, plannedDays:0.5, outageIn:300,
+  sensors:[
+    {id:'leak', n:'Seal leak-off flow',        u:'l/min', pos:[-0.95,-0.30,0.75], key:1, have:1, rate:'1 min', why:'Direct seal condition'},
+    {id:'brgT', n:'Thrust bearing temperature',u:'°C',    pos:[-1.15,0.62,0], key:1, have:1, rate:'1 min', why:'Rises with seal and thrust load'},
+    {id:'vib',  n:'Pump vibration, broadband', u:'mm/s',  pos:[0.35,0.55,0.60], key:1, have:1, rate:'1 min', why:'Cavitation shows as raised broadband noise'},
+    {id:'dP',   n:'Developed head',            u:'bar',   pos:[1.15,0.80,0], key:1, have:1, rate:'1 min', why:'Hydraulic performance drift'},
+    {id:'flow', n:'Feedwater flow',            u:'t/h',   pos:[1.75,0.10,0.55], key:1, have:1, rate:'1 min', why:'The operating point'},
+    {id:'npsh', n:'NPSH margin',               u:'m',     pos:[-1.85,0.10,0.55], key:1, have:0, rate:'derived', why:'Rarely computed online, and it is the whole cavitation story'},
+    {id:'motI', n:'Motor current',             u:'A',     pos:[2.55,0.25,0], key:0, have:1, rate:'1 min', why:'Power drawn'},
+    {id:'sucT', n:'Suction temperature',       u:'°C',    pos:[-1.85,-0.30,0.55], key:0, have:1, rate:'1 min', why:'Sets the vapour pressure in the NPSH calculation'}
+  ],
+  gen(ctx, f, r, opt){
+    const d={}; ['leak','brgT','vib','dP','flow','npsh','motI','sucT'].forEach(k=>d[k]=new Float64Array(N));
+    for(let i=0;i<N;i++){
+      const L=ctx.load[i], A=ctx.amb[i], F=f[i];
+      const cav = L<0.58 ? (0.58-L)*3.1 : 0;
+      d.sucT[i] = 158 + 6*L + gauss(r)*0.4;
+      d.npsh[i] = 12.5 - 5.5*cav - 1.2*F + gauss(r)*0.25;
+      d.flow[i] = 720*L + gauss(r)*4;
+      d.dP[i]   = 178 - 26*L*L - 6*F + gauss(r)*0.6*opt.noise;
+      d.leak[i] = 0.9 + 0.35*L + 3.6*Math.pow(F,1.4) + gauss(r)*0.06*opt.noise;
+      d.brgT[i] = 58 + 15*L + 0.30*(A-31) + 14*F + gauss(r)*0.45*opt.noise;
+      d.vib[i]  = 2.0 + 1.0*L + 2.6*Math.pow(F,1.5) + 5.2*cav + gauss(r)*0.10*opt.noise;
+      d.motI[i] = 210 + 160*Math.pow(L,2.1) + gauss(r)*1.6;
+    }
+    return d;
+  },
+  health: d => d.leak, healthName:'Seal leak-off flow', healthUnit:'l/min',
+  trip:5.2, alarm:4.0, normalBand:[1.0,1.9],
+  features:[
+    {id:'raw',  n:'Raw leak-off flow',            desc:'Moves with load and pressure too',        good:0},
+    {id:'norm', n:'Leak-off normalised to head',  desc:'The seal condition on its own',           good:1},
+    {id:'bres', n:'Bearing temperature residual', desc:'Independent confirmation',                good:1},
+    {id:'vibHF',n:'Vibration high-frequency band',desc:'Separates cavitation from seal wear',     good:1},
+    {id:'headD',n:'Head deviation from the curve',desc:'Hydraulic degradation',                   good:1},
+    {id:'npshM',n:'Computed NPSH margin',         desc:'Explains the cavitation episodes entirely',good:1},
+    {id:'hod',  n:'Hour of day',                  desc:'Spurious',                                good:0},
+    {id:'dayn', n:'Day number',                   desc:'A leakage trap',                          good:-1}
+  ]
+},
+
+/* ------------------------------------------------------------ transformer */
+xfmr:{
+  id:'xfmr', short:'Transformer hotspot', name:'Generator transformer — cooling degradation',
+  scene:'xfmr', variant:'gt', station:'Bhusawal Unit 6',
+  blurb:'Generator transformer. Radiator fouling and one cooler bank underperforming, with the winding running hotter than the thermal model says it should.',
+  mode:'Radiator fouling and a failing cooler fan → oil and winding temperature rise above the thermal model → paper ageing accelerates and gassing begins',
+  onset:190, ttf:140, shape:1.45,
+  failWhen:'Hotspot exceeds the insulation limit; gassing crosses the action level and the unit must be derated',
+  outageDays:5.0, plannedDays:1.0, outageIn:320,
+  sensors:[
+    {id:'topOil',n:'Top oil temperature',      u:'°C',   pos:[0,1.30,0.95], key:1, have:1, rate:'1 min', why:'The workhorse measurement'},
+    {id:'wti',   n:'Winding temperature (WTI)',u:'°C',   pos:[0.55,1.30,0.95], key:1, have:1, rate:'1 min', why:'A thermal image, not a real measurement — know the difference'},
+    {id:'loadI', n:'Load current',             u:'A',    pos:[-1.35,1.85,0], key:1, have:1, rate:'1 min', why:'Drives the whole thermal model'},
+    {id:'ambT',  n:'Ambient temperature',      u:'°C',   pos:[2.05,1.05,1.15], key:1, have:1, rate:'5 min', why:'The other half of the thermal model'},
+    {id:'h2',    n:'Dissolved hydrogen',       u:'ppm',  pos:[-1.25,0.10,1.05], key:1, have:0, rate:'online or 3-monthly', why:'The earliest chemical evidence of overheating'},
+    {id:'c2h4',  n:'Dissolved ethylene',       u:'ppm',  pos:[-1.25,-0.35,1.05], key:1, have:0, rate:'3-monthly', why:'Marks thermal fault severity in the Duval triangle'},
+    {id:'coolI', n:'Cooler bank motor current',u:'A',    pos:[1.75,0.35,0], key:1, have:0, rate:'1 min', why:'Tells you the cooling is failing before the oil does'},
+    {id:'oilLvl',n:'Oil level',                u:'%',    pos:[0,1.60,0], key:0, have:1, rate:'1 min', why:'Rules out a leak as the cause'}
+  ],
+  gen(ctx, f, r, opt){
+    const d={}; ['topOil','wti','loadI','ambT','h2','c2h4','coolI','oilLvl'].forEach(k=>d[k]=new Float64Array(N));
+    for(let i=0;i<N;i++){
+      const L=ctx.load[i], A=ctx.amb[i], F=f[i];
+      d.loadI[i]  = 620*L + gauss(r)*4;
+      d.ambT[i]   = A;
+      d.coolI[i]  = 46 - 15*F + gauss(r)*0.5;
+      d.topOil[i] = A + 22*Math.pow(L,1.8) + 44*F + gauss(r)*0.5*opt.noise;
+      d.wti[i]    = d.topOil[i] + 13*Math.pow(L,1.6) + 20*F + gauss(r)*0.55*opt.noise;
+      d.h2[i]     = 18 + 210*Math.pow(F,2.3) + gauss(r)*3.5*opt.noise;
+      d.c2h4[i]   = 6 + 150*Math.pow(F,2.8) + gauss(r)*2.2*opt.noise;
+      d.oilLvl[i] = 71 + 6*(d.topOil[i]-60)/40 + gauss(r)*0.3;
+    }
+    return d;
+  },
+  health: d => d.wti, healthName:'Winding temperature indication', healthUnit:'°C',
+  trip:115, alarm:105, normalBand:[62,88],
+  features:[
+    {id:'raw',   n:'Raw winding temperature',        desc:'Load and ambient dominate it',            good:0},
+    {id:'thm',   n:'Deviation from IEC thermal model',desc:'Exactly the residual you want',          good:1},
+    {id:'topRes',n:'Top oil residual',               desc:'Independent of the WTI image',            good:1},
+    {id:'coolR', n:'Cooler current versus demand',   desc:'Finds the cause, not the symptom',        good:1},
+    {id:'gasR',  n:'Hydrogen rate of change',        desc:'Rate matters far more than absolute level',good:1},
+    {id:'duval', n:'Ethylene to hydrogen ratio',     desc:'Distinguishes thermal from electrical fault',good:1},
+    {id:'hod',   n:'Hour of day',                    desc:'Spurious',                                good:0},
+    {id:'dayn',  n:'Day number',                     desc:'A leakage trap',                          good:-1}
+  ]
+}
+};
+const CASE_ORDER = ['idfan','motor','mill','bfp','xfmr'];
+
+/* =========================================================================
+   2. ACQUISITION — what the historian actually keeps
+   ========================================================================= */
+function acquire(series, opt){
+  // scanSec: DCS scan; storeMin: historian store interval; dead: exception deviation %; freeze/gap injection
+  const step = Math.max(1, Math.round(opt.storeMin/60));           // in hours
+  const r = rng(opt.seed||99);
+  const span = Math.max(1e-9, Math.max(...series) - Math.min(...series));
+  const out = new Float64Array(N); const kept = new Uint8Array(N);
+  let last = series[0], lastT = 0;
+  for(let i=0;i<N;i++){
+    if(i % step === 0){
+      const dev = Math.abs(series[i]-last)/span*100;
+      if(dev >= opt.dead || (i-lastT) >= opt.maxGapH){ last = series[i]; lastT = i; kept[i]=1; }
+    }
+    out[i] = last;                                                  // held value, exactly as a historian returns it
+  }
+  // frozen transmitter
+  if(opt.freezeDay>0){
+    const a = opt.freezeDay*24, b = Math.min(N, a + opt.freezeLen*24), v = out[a]||series[a];
+    for(let i=a;i<b;i++){ out[i]=v; kept[i]=0; }
+  }
+  // communication gaps
+  if(opt.gapPct>0){
+    let i=0;
+    while(i<N){
+      if(r() < opt.gapPct/100/24){
+        const len = Math.round(2 + r()*22);
+        for(let j=i;j<Math.min(N,i+len);j++){ out[j]=NaN; kept[j]=0; }
+        i += len;
+      } else i++;
+    }
+  }
+  return {v:out, kept};
+}
+function profileData(v){
+  let nan=0, frozenMax=0, run=0, prev=NaN;
+  for(let i=0;i<v.length;i++){
+    if(isNaN(v[i])){ nan++; run=0; prev=NaN; continue; }
+    if(v[i]===prev){ run++; frozenMax=Math.max(frozenMax,run); } else run=0;
+    prev=v[i];
+  }
+  const clean=[...v].filter(x=>!isNaN(x));
+  return {missingPct:nan/v.length*100, frozenH:frozenMax, n:clean.length,
+          min:Math.min(...clean), max:Math.max(...clean), mean:mean(clean), sd:sd(clean)};
+}
+function repair(v, mode){
+  const out=Float64Array.from(v);
+  if(mode==='none') return out;
+  for(let i=0;i<out.length;i++){
+    if(isNaN(out[i])){
+      if(mode==='hold'){ let j=i-1; while(j>=0 && isNaN(out[j])) j--; out[i] = j>=0?out[j]:0; }
+      else { let a=i-1; while(a>=0&&isNaN(out[a]))a--; let b=i+1; while(b<out.length&&isNaN(out[b]))b++;
+             const va=a>=0?out[a]:out[b], vb=b<out.length?out[b]:out[a];
+             out[i] = (va+vb)/2; }
+    }
+  }
+  return out;
+}
+
+/* =========================================================================
+   3. FEATURES
+   ========================================================================= */
+function dailyMean(v){
+  const out=new Float64Array(DAYS);
+  for(let d=0;d<DAYS;d++){ let s=0,c=0; for(let h=0;h<24;h++){ const x=v[d*24+h]; if(!isNaN(x)){s+=x;c++;} } out[d]=c?s/c:NaN; }
+  return out;
+}
+function rollSlope(v,w){
+  const out=new Float64Array(v.length);
+  for(let i=0;i<v.length;i++){
+    const a=Math.max(0,i-w+1); let sx=0,sy=0,sxy=0,sxx=0,n=0;
+    for(let j=a;j<=i;j++){ if(isNaN(v[j]))continue; sx+=j; sy+=v[j]; sxy+=j*v[j]; sxx+=j*j; n++; }
+    out[i] = n>2 ? (n*sxy-sx*sy)/(n*sxx-sx*sx||1) : 0;
+  }
+  return out;
+}
+/* expected-value regression on drivers → residual */
+function residualise(target, drivers, trainEnd){
+  const p=drivers.length;
+  const X=[], y=[];
+  for(let i=0;i<trainEnd;i++){
+    if(isNaN(target[i])) continue;
+    const row=drivers.map(d=>d[i]); if(row.some(isNaN)) continue;
+    X.push(row); y.push(target[i]);
+  }
+  if(X.length<20) return {res:Float64Array.from(target), pred:Float64Array.from(target), w:[]};
+  const mu=[],sg=[];
+  for(let j=0;j<p;j++){ const c=X.map(r=>r[j]); mu.push(mean(c)); sg.push(sd(c)); }
+  const Z=X.map(r=>r.map((v,j)=>(v-mu[j])/sg[j]));
+  const ym=mean(y), ys=sd(y), t=y.map(v=>(v-ym)/ys);
+  let w=new Array(p).fill(0), b=0;
+  for(let it=0; it<700; it++){
+    const g=new Array(p).fill(0); let gb=0;
+    for(let i=0;i<Z.length;i++){ let pr=b; for(let j=0;j<p;j++) pr+=w[j]*Z[i][j];
+      const e=pr-t[i]; gb+=e; for(let j=0;j<p;j++) g[j]+=e*Z[i][j]; }
+    for(let j=0;j<p;j++) w[j]-=0.08*(g[j]/Z.length + 0.02*w[j]);
+    b-=0.08*gb/Z.length;
+  }
+  const pred=new Float64Array(target.length), res=new Float64Array(target.length);
+  for(let i=0;i<target.length;i++){
+    let pr=b; let ok=true;
+    for(let j=0;j<p;j++){ const v=drivers[j][i]; if(isNaN(v)){ok=false;break;} pr+=w[j]*((v-mu[j])/sg[j]); }
+    pred[i]= ok ? pr*ys+ym : NaN;
+    res[i] = ok ? target[i]-pred[i] : NaN;
+  }
+  return {res, pred, w, mu, sg};
+}
+
+/* =========================================================================
+   4. MODELS
+   ========================================================================= */
+const MODELS = {
+  thresh:{ n:'Fixed threshold', fam:'Rule', desc:'One tag against one constant. What the DCS already does.',
+    needs:'Nothing — it is already running', cost:'Zero' },
+  cusum:{ n:'CUSUM change detection', fam:'Statistical', desc:'Accumulates small deviations from a reference until they add up. Two parameters, runs on a PLC.',
+    needs:'A stable reference period', cost:'Very low' },
+  knn:{ n:'k-NN similarity residual', fam:'Memory-based', desc:'Stores healthy states and predicts the expected value from the closest matches. The family most commercial systems run.',
+    needs:'A curated healthy history across the full operating range', cost:'Low' },
+  pca:{ n:'PCA reconstruction error', fam:'Multivariate', desc:'Collapses many tags to a few components, reconstructs, and watches the reconstruction error.',
+    needs:'Several correlated tags on the same machine', cost:'Low' },
+  ridge:{ n:'Regression residual', fam:'Supervised', desc:'Learns the expected value from the drivers and flags the deviation. Interpretable coefficients.',
+    needs:'Good driver tags — load, ambient, duty', cost:'Low' }
+};
+function trainModel(kind, feats, trainEnd, opt){
+  const T = feats[0].length;
+  const score = new Float64Array(T).fill(NaN);
+  if(kind==='thresh'){
+    for(let i=0;i<T;i++) score[i]=feats[0][i];
+    return {score, kind, note:'The raw signal itself is the score.'};
+  }
+  if(kind==='cusum'){
+    const tr=[...feats[0].slice(0,trainEnd)].filter(x=>!isNaN(x));
+    const mu=mean(tr), s=sd(tr), k=0.5*s*(opt.cusumK||1);
+    let c=0;
+    for(let i=0;i<T;i++){ const x=feats[0][i]; if(isNaN(x)){score[i]=c;continue;}
+      c = Math.max(0, c + (x-mu) - k); score[i]=c; }
+    return {score, kind, mu, s, note:`Reference mean ${fmt(mu,2)}, slack k = ${fmt(k,3)}.`};
+  }
+  if(kind==='ridge'){
+    const tgt=feats[0], drv=feats.slice(1);
+    if(!drv.length) return trainModel('cusum',feats,trainEnd,opt);
+    const R=residualise(tgt,drv,trainEnd);
+    return {score:R.res, kind, w:R.w, pred:R.pred, note:`Expected value learned from ${drv.length} driver tags.`};
+  }
+  if(kind==='knn'){
+    const tgt=feats[0], drv=feats.slice(1);
+    if(!drv.length) return trainModel('cusum',feats,trainEnd,opt);
+    const mem=[];
+    for(let i=0;i<trainEnd;i+=Math.max(1,Math.floor(trainEnd/900))){
+      const f=drv.map(d=>d[i]); if(f.some(isNaN)||isNaN(tgt[i])) continue;
+      mem.push({f, y:tgt[i]});
+    }
+    if(mem.length<10) return trainModel('cusum',feats,trainEnd,opt);
+    const p=drv.length, sg=[];
+    for(let j=0;j<p;j++) sg.push(sd(mem.map(m=>m.f[j])));
+    const k=opt.k||12;
+    const pred=new Float64Array(T).fill(NaN);
+    for(let i=0;i<T;i++){
+      const f=drv.map(d=>d[i]); if(f.some(isNaN)||isNaN(tgt[i])) continue;
+      const arr=mem.map(m=>{ let s=0; for(let j=0;j<p;j++){ const z=(f[j]-m.f[j])/sg[j]; s+=z*z; } return {d:Math.sqrt(s), y:m.y}; });
+      arr.sort((a,b)=>a.d-b.d);
+      let wn=0,ws=0; for(let q=0;q<Math.min(k,arr.length);q++){ const w=1/(arr[q].d+0.05); wn+=w*arr[q].y; ws+=w; }
+      pred[i]=wn/ws; score[i]=tgt[i]-pred[i];
+    }
+    return {score, kind, pred, memN:mem.length, note:`Memory of ${mem.length} healthy states, k = ${k}.`};
+  }
+  if(kind==='pca'){
+    const rows=[];
+    for(let i=0;i<trainEnd;i++){ const r=feats.map(f=>f[i]); if(!r.some(isNaN)) rows.push(r); }
+    const p=feats.length;
+    if(rows.length<30||p<3) return trainModel('cusum',feats,trainEnd,opt);
+    const mu=[],sg=[];
+    for(let j=0;j<p;j++){ const c=rows.map(r=>r[j]); mu.push(mean(c)); sg.push(sd(c)); }
+    const Z=rows.map(r=>r.map((v,j)=>(v-mu[j])/sg[j]));
+    const C=Array.from({length:p},()=>new Array(p).fill(0));
+    Z.forEach(r=>{ for(let a=0;a<p;a++) for(let b=0;b<p;b++) C[a][b]+=r[a]*r[b]/Z.length; });
+    const nc = Math.min(opt.nComp||2, p-1);
+    const V=[];
+    for(let c=0;c<nc;c++){
+      let v=new Array(p).fill(0).map((_,i)=>Math.sin(i+1+c));
+      for(let it=0;it<220;it++){
+        let nv=new Array(p).fill(0);
+        for(let a=0;a<p;a++) for(let b=0;b<p;b++) nv[a]+=C[a][b]*v[b];
+        V.forEach(u=>{ const d=nv.reduce((s,x,i)=>s+x*u[i],0); for(let a=0;a<p;a++) nv[a]-=d*u[a]; });
+        const nm=Math.sqrt(nv.reduce((s,x)=>s+x*x,0))||1; v=nv.map(x=>x/nm);
+      }
+      V.push(v);
+    }
+    for(let i=0;i<T;i++){
+      const r=feats.map(f=>f[i]); if(r.some(isNaN)) continue;
+      const z=r.map((v,j)=>(v-mu[j])/sg[j]);
+      const rec=new Array(p).fill(0);
+      V.forEach(u=>{ const t=z.reduce((s,x,k2)=>s+x*u[k2],0); for(let a=0;a<p;a++) rec[a]+=t*u[a]; });
+      let q=0; for(let a=0;a<p;a++){ const e=z[a]-rec[a]; q+=e*e; }
+      score[i]=Math.sqrt(q);
+    }
+    return {score, kind, nc, note:`${p} signals reduced to ${nc} components; the score is the Q statistic (reconstruction error).`};
+  }
+}
+
+/* ---------- evaluation ---------- */
+function thrFromTrain(score, trainEnd, k){
+  const tr=[...score.slice(0,trainEnd)].filter(x=>!isNaN(x));
+  if(!tr.length) return 0;
+  return mean(tr) + k*sd(tr);
+}
+function countAlerts(score, from, to, thr, persistH){
+  let run=0, n=0, cool=0;
+  for(let i=from;i<to;i++){
+    const s=score[i]; if(isNaN(s)) continue;
+    if(s>thr){ run++; if(run>=persistH && cool<=0){ n++; cool=persistH; } } else run=0;
+    if(cool>0) cool--;
+  }
+  return n;
+}
+/* healthyScore: the same model run on a sister machine that never develops a fault.
+   That is where the nuisance-alert rate actually comes from — a full year of it, not seven. */
+function evaluate(score, faultDay, trainEnd, thr, persistH, healthyScore, healthyThr){
+  const T=score.length; const onsetH=faultDay*24;
+  let run=0, detectH=null;
+  for(let i=trainEnd;i<T;i++){
+    const s=score[i]; if(isNaN(s)) continue;
+    if(s>thr){ run++; if(run>=persistH && detectH===null) detectH=i; } else run=0;
+  }
+  let fa, hours;
+  /* The sister machine carries its OWN model, so it carries its own baseline
+     and its own threshold. Judging its score against this machine's threshold
+     compares two independently fitted models on different scales, and it
+     silently reported zero nuisance alerts while the sister was sitting at
+     thirty times its own limit every afternoon in May. In practice every
+     machine gets a threshold from its own quiet period; so does this one. */
+  if(healthyScore){
+    fa=countAlerts(healthyScore, trainEnd, T,
+                   healthyThr===undefined?thr:healthyThr, persistH);
+    hours=T-trainEnd;
+  }
+  else { fa=countAlerts(score, trainEnd, onsetH, thr, persistH); hours=Math.max(1,onsetH-trainEnd); }
+  return {detectDay: detectH===null?null:detectH/24,
+          leadDays: detectH===null?null:(T/24 - detectH/24),
+          faPerMonth: fa/hours*24*30, fa};
+}
+/* sweep BOTH levers — threshold and persistence — because that is the real design space */
+function sweepThresholds(score, faultDay, trainEnd, persistH, alarmDay, healthyScore){
+  const out=[]; const PERS=[6,12,24,48,72,120,168];
+  for(const ph of PERS){
+    for(let k=0.25;k<=12.01;k+=0.25){
+      const thr=thrFromTrain(score, trainEnd, k);
+      const hthr=healthyScore?thrFromTrain(healthyScore, trainEnd, k):undefined;
+      const e=evaluate(score, faultDay, trainEnd, thr, ph, healthyScore, hthr);
+      out.push({thr, k, ph, ...e, gain:(e.detectDay!==null && alarmDay!==null) ? alarmDay-e.detectDay : null});
+    }
+  }
+  return out;
+}
+
+/* =========================================================================
+   Model Builder — blocks, data, training, code generation.
+
+   The network is written out longhand rather than pulled from a library.
+   Not for purity: the minimum TensorFlow.js build that can train a dense
+   net is 832 KB, and this whole artefact is a single file you open by
+   double-clicking. Measured on the data it actually runs on — a year of
+   hourly readings, ten tags, six hidden units, 200 epochs — the arithmetic
+   below takes about a quarter of a second. A megabyte of library to save
+   250 ms of a computation nobody is waiting for is a bad trade, and it
+   would put the interesting part behind an import somebody has to trust.
+   ========================================================================= */
+'use strict';
+
+const MB = {
+  /* live state */
+  spec: [],            // the blocks on the canvas, in order
+  data: null,          // {name, rows, tags:[{id,name,unit,v:Float64Array}], hours, source}
+  model: null,         // trained network
+  result: null,        // residuals, alerts, timings
+  csvProfile: null,
+};
+
+/* ---------------------------------------------------------------- blocks */
+const CATS = [
+  ['data',  'Data'],
+  ['prep',  'Prepare'],
+  ['model', 'Network'],
+  ['train', 'Training'],
+  ['out',   'Output'],
+];
+
+const BLOCKS = {
+  dataset: { cat:'data', ic:'DB', label:'Machine data',
+    desc:'A year of hourly readings from one machine',
+    fields:[{k:'case', t:'select', label:'', opts:()=>Object.keys(CASES).map(k=>[k, CASES[k].short])}],
+    def:{case:'idfan'}, unique:true },
+
+  csv: { cat:'data', ic:'CSV', label:'My own data',
+    desc:'Drop a historian export anywhere on this page',
+    fields:[], def:{}, unique:true },
+
+  window: { cat:'data', ic:'[ ]', label:'Training window',
+    desc:'Which days the model is allowed to learn from',
+    fields:[{k:'from', t:'num', label:'from day', min:0, max:364},
+            {k:'to',   t:'num', label:'to day',   min:5, max:365}],
+    def:{from:0, to:180}, unique:true },
+
+  inputs: { cat:'data', ic:'IN', label:'Input tags',
+    desc:'What the model is allowed to look at',
+    fields:[{k:'tags', t:'tags'}], def:{tags:null}, unique:true },
+
+  target: { cat:'data', ic:'Y', label:'Predict this tag',
+    desc:'The model learns what this should be, from the others',
+    fields:[{k:'tag', t:'select', opts:()=>tagOpts()}], def:{tag:null}, unique:true },
+
+  normalise: { cat:'prep', ic:'~', label:'Normalise',
+    desc:'Put every tag on the same scale. Almost always wanted.',
+    fields:[], def:{}, unique:true },
+
+  lag: { cat:'prep', ic:'←', label:'Add a lagged copy',
+    desc:'Let the model see what each input was doing N hours ago',
+    fields:[{k:'h', t:'num', label:'hours', min:1, max:48}], def:{h:6} },
+
+  roll: { cat:'prep', ic:'≈', label:'Rolling mean',
+    desc:'Smooth each input over a window — kills minute-to-minute noise',
+    fields:[{k:'h', t:'num', label:'hours', min:2, max:72}], def:{h:12} },
+
+  dense: { cat:'model', ic:'▤', label:'Hidden layer',
+    desc:'Neurons, each combining everything from the layer above',
+    fields:[{k:'n', t:'num', label:'neurons', min:1, max:32},
+            {k:'act', t:'select', label:'', opts:()=>[['tanh','tanh'],['relu','ReLU'],['linear','linear']]}],
+    def:{n:6, act:'tanh'} },
+
+  train: { cat:'train', ic:'▶', label:'Train',
+    desc:'Gradient descent on the training window',
+    fields:[{k:'epochs', t:'num', label:'epochs', min:10, max:1200},
+            {k:'lr', t:'num', label:'rate', min:0.001, max:0.5, step:0.005}],
+    def:{epochs:220, lr:0.03}, unique:true },
+
+  residual: { cat:'out', ic:'−', label:'Residual',
+    desc:'Actual minus expected, every hour of the year',
+    fields:[], def:{}, unique:true },
+
+  alert: { cat:'out', ic:'!', label:'Alert rule',
+    desc:'Raise an advisory when the residual stays out of band',
+    fields:[{k:'k', t:'num', label:'× sigma', min:1, max:12, step:0.5},
+            {k:'hours', t:'num', label:'for hours', min:1, max:336}],
+    def:{k:4, hours:72}, unique:true },
+};
+
+/* A model that will actually run. Order is enforced by category, so a
+   participant cannot put the training block above the data. */
+const CAT_ORDER = {data:0, prep:1, model:2, train:3, out:4};
+
+function validate(spec){
+  const has = t => spec.some(b => b.type === t);
+  const errs = [];
+  if (!has('dataset') && !has('csv')) errs.push('Add a data block — either the built-in machine data or your own CSV.');
+  if (!has('target')) errs.push('Add “Predict this tag”, so the model knows what it is learning.');
+  if (!has('inputs')) errs.push('Add “Input tags”, so the model knows what it may look at.');
+  if (!has('train')) errs.push('Add a “Train” block.');
+  const ins = spec.find(b => b.type === 'inputs');
+  const tg  = spec.find(b => b.type === 'target');
+  if (ins && tg && ins.f.tags && tg.f.tag && ins.f.tags.includes(tg.f.tag))
+    errs.push(`“${tagName(tg.f.tag)}” is both an input and the target. The model would just copy it across and score a perfect result that means nothing. Untick it from the inputs.`);
+  if (ins && ins.f.tags && ins.f.tags.length === 0)
+    errs.push('No input tags are ticked.');
+  const w = spec.find(b => b.type === 'window');
+  if (w && w.f.to - w.f.from < 5) errs.push('The training window is shorter than five days.');
+  return errs;
+}
+
+/* ------------------------------------------------------------------ data */
+function loadCase(caseId){
+  const c = CASES[caseId];
+  const ctx = context(4242);
+  const fault = faultProfile(c.onset, c.ttf, c.shape);
+  const truth = c.gen(ctx, fault, rng(4253), {noise:1});
+  const tags = c.sensors.map(s => ({
+    id:s.id, name:s.n, unit:s.u, have:!!s.have, v:truth[s.id]
+  })).filter(t => t.v);
+  MB.data = {
+    name: c.name, short: c.short, station: c.station, rows: N, hours: N,
+    tags, source:'built-in', caseId, onset: c.onset, alarm: c.alarm,
+    health: c.health(truth), healthName: c.healthName,
+    blurb: c.blurb, mode: c.mode
+  };
+  return MB.data;
+}
+
+function tagOpts(){
+  if (!MB.data) return [['','— load data first —']];
+  return MB.data.tags.map(t => [t.id, `${t.name} (${t.unit})`]);
+}
+function tagName(id){
+  const t = MB.data && MB.data.tags.find(x => x.id === id);
+  return t ? t.name : id;
+}
+
+/* --------------------------------------------------------------- feature */
+/* Build the design matrix the blocks describe. Returns column names too, so
+   the Python panel and the network are guaranteed to describe the same thing. */
+function buildMatrix(spec){
+  const d = MB.data;
+  const ins = spec.find(b => b.type === 'inputs');
+  const tgt = spec.find(b => b.type === 'target');
+  const wanted = (ins.f.tags || []).filter(id => id !== tgt.f.tag);
+  const cols = [], names = [];
+
+  const push = (name, arr) => { names.push(name); cols.push(arr); };
+  for (const id of wanted){
+    const t = d.tags.find(x => x.id === id); if (!t) continue;
+    push(t.name, t.v);
+  }
+  /* prepare blocks apply to every input column that existed when they ran,
+     which is the same left-to-right reading a pandas pipeline has */
+  for (const b of spec.filter(b => b.cat === 'prep')){
+    if (b.type === 'lag'){
+      const base = cols.slice(0, wanted.length), bn = names.slice(0, wanted.length);
+      base.forEach((a, i) => {
+        const h = Math.round(b.f.h), out = new Float64Array(a.length);
+        for (let j = 0; j < a.length; j++) out[j] = a[Math.max(0, j - h)];
+        push(bn[i] + ` (${h} h ago)`, out);
+      });
+    } else if (b.type === 'roll'){
+      const base = cols.slice(0, wanted.length), bn = names.slice(0, wanted.length);
+      base.forEach((a, i) => {
+        const h = Math.round(b.f.h), out = new Float64Array(a.length);
+        let s = 0;
+        for (let j = 0; j < a.length; j++){
+          s += a[j]; if (j >= h) s -= a[j - h];
+          out[j] = s / Math.min(j + 1, h);
+        }
+        push(bn[i] + ` (mean ${h} h)`, out);
+      });
+    }
+  }
+  const y = d.tags.find(x => x.id === tgt.f.tag).v;
+  return { X: cols, names, y, yName: tagName(tgt.f.tag) };
+}
+
+/* -------------------------------------------------------------- training */
+function mlpTrain(spec, onEpoch){
+  const t0 = performance.now();
+  const { X, names, y, yName } = buildMatrix(spec);
+  const w = spec.find(b => b.type === 'window') || {f:{from:0, to:180}};
+  const a = Math.max(0, Math.round(w.f.from) * 24);
+  const b = Math.min(X[0].length, Math.round(w.f.to) * 24);
+  const doNorm = spec.some(s => s.type === 'normalise');
+  const layers = spec.filter(s => s.type === 'dense').map(s => ({n:Math.round(s.f.n), act:s.f.act}));
+  const tr = spec.find(s => s.type === 'train');
+  const epochs = Math.round(tr.f.epochs), lr = +tr.f.lr;
+
+  const NI = X.length, T = X[0].length;
+  /* standardise on the TRAINING window only — using the whole year would leak
+     the future into the fit, which is the quiet way benchmark numbers become
+     fiction */
+  const mu = [], sg = [];
+  for (let i = 0; i < NI; i++){
+    let s = 0, n = 0;
+    for (let j = a; j < b; j++){ s += X[i][j]; n++; }
+    const m = s / n; let v = 0;
+    for (let j = a; j < b; j++) v += (X[i][j] - m) ** 2;
+    mu.push(doNorm ? m : 0); sg.push(doNorm ? Math.sqrt(v / n) || 1 : 1);
+  }
+  let ym = 0, ys = 1;
+  { let s = 0, n = 0; for (let j = a; j < b; j++){ s += y[j]; n++; }
+    ym = s / n; let v = 0; for (let j = a; j < b; j++) v += (y[j] - ym) ** 2;
+    ys = Math.sqrt(v / n) || 1; }
+
+  const xs = j => { const r = new Float64Array(NI);
+    for (let i = 0; i < NI; i++) r[i] = (X[i][j] - mu[i]) / sg[i]; return r; };
+
+  /* weights */
+  const r = rng(12345);
+  const sizes = [NI, ...layers.map(l => l.n), 1];
+  const W = [], B = [];
+  for (let L = 0; L < sizes.length - 1; L++){
+    const sc = Math.sqrt(2 / sizes[L]);
+    W.push(Array.from({length:sizes[L]}, () =>
+      Array.from({length:sizes[L+1]}, () => (r() * 2 - 1) * sc)));
+    B.push(new Float64Array(sizes[L+1]));
+  }
+  const actOf = L => (L < layers.length ? layers[L].act : 'linear');
+  const f  = (v, k) => k === 'tanh' ? Math.tanh(v) : k === 'relu' ? Math.max(0, v) : v;
+  const df = (o, k) => k === 'tanh' ? 1 - o * o : k === 'relu' ? (o > 0 ? 1 : 0) : 1;
+
+  const fwd = x => {
+    const A = [x];
+    for (let L = 0; L < W.length; L++){
+      const o = new Float64Array(sizes[L+1]), k = actOf(L);
+      for (let j = 0; j < sizes[L+1]; j++){
+        let s = B[L][j];
+        for (let i = 0; i < sizes[L]; i++) s += A[L][i] * W[L][i][j];
+        o[j] = f(s, k);
+      }
+      A.push(o);
+    }
+    return A;
+  };
+
+  const idx = []; for (let j = a; j < b; j++) idx.push(j);
+  const loss = [];
+  for (let e = 0; e < epochs; e++){
+    /* shuffle, deterministically */
+    for (let i = idx.length - 1; i > 0; i--){ const k = Math.floor(r() * (i + 1)); [idx[i], idx[k]] = [idx[k], idx[i]]; }
+    let se = 0;
+    for (const j of idx){
+      const A = fwd(xs(j));
+      const pred = A[A.length - 1][0];
+      const tgtv = (y[j] - ym) / ys;
+      const err = pred - tgtv; se += err * err;
+      let delta = new Float64Array([2 * err]);
+      for (let L = W.length - 1; L >= 0; L--){
+        const nd = new Float64Array(sizes[L]);
+        for (let i = 0; i < sizes[L]; i++){
+          let s = 0;
+          for (let j2 = 0; j2 < sizes[L+1]; j2++) s += delta[j2] * W[L][i][j2];
+          nd[i] = s * (L > 0 ? df(A[L][i], actOf(L - 1)) : 1);
+        }
+        for (let i = 0; i < sizes[L]; i++)
+          for (let j2 = 0; j2 < sizes[L+1]; j2++) W[L][i][j2] -= lr * delta[j2] * A[L][i];
+        for (let j2 = 0; j2 < sizes[L+1]; j2++) B[L][j2] -= lr * delta[j2];
+        delta = nd;
+      }
+    }
+    loss.push(se / idx.length);
+    if (onEpoch && (e % 10 === 0 || e === epochs - 1)) onEpoch(e + 1, epochs, loss[loss.length - 1]);
+  }
+
+  /* predict the whole year */
+  const pred = new Float64Array(T), resid = new Float64Array(T);
+  for (let j = 0; j < T; j++){
+    const A = fwd(xs(j));
+    pred[j] = A[A.length - 1][0] * ys + ym;
+    resid[j] = y[j] - pred[j];
+  }
+  let rs = 0, rn = 0;
+  for (let j = a; j < b; j++){ rs += resid[j] * resid[j]; rn++; }
+  const sigma = Math.sqrt(rs / rn) || 1e-9;
+
+  const params = W.reduce((s, m) => s + m.length * m[0].length, 0) +
+                 B.reduce((s, v) => s + v.length, 0);
+
+  MB.model = { W, B, sizes, layers, mu, sg, ym, ys, names, yName, params, doNorm };
+  return { pred, resid, sigma, loss, trainFrom:a, trainTo:b, y, names, yName,
+           params, ms: performance.now() - t0 };
+}
+
+/* the alert rule, applied outside the training window */
+function applyAlert(res, spec){
+  const al = spec.find(b => b.type === 'alert');
+  if (!al) return null;
+  const k = +al.f.k, need = Math.round(al.f.hours);
+  const thr = k * res.sigma;
+  /* Count EPISODES, not re-firings. A control room opens one advisory when
+     the residual leaves the band and closes it when it comes back; counting
+     every `need` hours instead turned one four-month degradation into
+     forty-four alerts and made the nuisance rate meaningless. */
+  let run = 0, first = null, count = 0, open = false;
+  for (let j = res.trainTo; j < res.resid.length; j++){
+    if (Math.abs(res.resid[j]) > thr){
+      run++;
+      if (run >= need && !open){ open = true; count++; if (first === null) first = j - need + 1; }
+    } else { run = 0; open = false; }
+  }
+  const onset = MB.data.onset;
+
+  /* Whether an advisory fired is only half the story, and on this machine it
+     is the less interesting half. A model trained on winter runs several
+     degrees wrong all through May, but diurnally — the cooling water crosses
+     the cooler's design point in the afternoon and falls back at night — so
+     a 72-hour persistence rule filters it out and nothing is raised. The
+     model is plainly wrong and the alert rule is quietly covering for it.
+     So measure the drift itself, over the months before any fault exists. */
+  let dsum = 0, dn = 0, dmax = 0;
+  const preEnd = onset != null ? Math.min(res.resid.length, onset * 24) : res.resid.length;
+  for (let j = res.trainTo; j < preEnd; j++){
+    dsum += res.resid[j]; dn++;
+    if (Math.abs(res.resid[j]) > dmax) dmax = Math.abs(res.resid[j]);
+  }
+  const drift = dn ? dsum / dn : 0;
+
+  return { thr, k, need, firstDay: first === null ? null : first / 24, count,
+           drift, driftMax: dmax, driftSigmas: dn ? Math.abs(drift) / res.sigma : 0,
+           preDays: dn / 24,
+           beforeFault: (first !== null && onset != null) ? (onset - first / 24) : null };
+}
+
+/* =========================================================================
+   The same model, written out as Python.
+
+   This panel is the point of the whole artefact for an engineer who will
+   one day sit across a table from a supplier. The blocks are not a toy
+   language that happens to resemble machine learning — they are a picture
+   of about forty lines of pandas and Keras, and here are the forty lines.
+   Every number in the code comes from a field on a block, so changing a
+   block changes the code in front of you.
+   ========================================================================= */
+'use strict';
+
+const PY = {
+  esc: s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
+  /* a deliberately small highlighter — comments, strings, keywords, numbers */
+  hl(src){
+    const KW = /\b(import|from|as|def|return|for|in|if|else|elif|None|True|False|with|print|lambda)\b/g;
+    return this.esc(src)
+      .replace(/(#[^\n]*)/g, '<span class="c">$1</span>')
+      .replace(/('[^'\n]*'|"[^"\n]*")/g, '<span class="s">$1</span>')
+      .replace(KW, '<span class="k">$1</span>')
+      .replace(/\b(\d+\.?\d*)\b/g, '<span class="n">$1</span>');
+  }
+};
+
+function pyName(s){
+  return String(s).toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'tag';
+}
+
+function generatePython(spec){
+  const errs = validate(spec);
+  if (errs.length) return '# Finish the model first:\n' + errs.map(e => '#   - ' + e).join('\n');
+
+  const d = MB.data;
+  const ds  = spec.find(b => b.type === 'dataset');
+  const csv = spec.find(b => b.type === 'csv');
+  const ins = spec.find(b => b.type === 'inputs');
+  const tgt = spec.find(b => b.type === 'target');
+  const win = spec.find(b => b.type === 'window') || {f:{from:0, to:180}};
+  const tr  = spec.find(b => b.type === 'train');
+  const al  = spec.find(b => b.type === 'alert');
+  const layers = spec.filter(b => b.type === 'dense');
+  const norm = spec.some(b => b.type === 'normalise');
+  const lags = spec.filter(b => b.type === 'lag');
+  const rolls = spec.filter(b => b.type === 'roll');
+
+  const feats = (ins.f.tags || []).filter(t => t !== tgt.f.tag);
+  const fcols = feats.map(id => pyName(tagName(id)));
+  const ycol  = pyName(tagName(tgt.f.tag));
+
+  const L = [];
+  L.push('# ' + (d ? d.name : 'plant machine') + ' — expected-versus-actual model');
+  L.push('# Generated by the Model Builder from the blocks on your canvas.');
+  L.push('# Every number below came from a field you set.');
+  L.push('');
+  L.push('import pandas as pd');
+  L.push('import numpy as np');
+  L.push('from tensorflow import keras');
+  L.push('from tensorflow.keras import layers');
+  L.push('');
+  if (csv) {
+    L.push('# 1. Your export. One row per timestamp, one column per tag.');
+    L.push("df = pd.read_csv('export.csv', parse_dates=['timestamp'])");
+    L.push("df = df.set_index('timestamp').sort_index()");
+  } else {
+    L.push('# 1. One year of hourly readings, ' + (d ? d.tags.length : 0) + ' tags.');
+    L.push('#    From your historian this is a tag-by-tag export at 1 h interval.');
+    L.push("df = pd.read_csv('" + (ds ? ds.f.case : 'machine') + "_year.csv', parse_dates=['timestamp'])");
+    L.push("df = df.set_index('timestamp').sort_index()");
+  }
+  L.push('');
+  L.push('FEATURES = [' + fcols.map(c => `'${c}'`).join(', ') + ']');
+  L.push(`TARGET   = '${ycol}'`);
+  L.push('');
+
+  if (lags.length || rolls.length){
+    L.push('# 2. Engineered inputs — exactly the Prepare blocks, in order.');
+    for (const b of lags){
+      const h = Math.round(b.f.h);
+      L.push(`for c in list(FEATURES):`);
+      L.push(`    df[f'{c}_lag${h}'] = df[c].shift(${h})        # what it was doing ${h} h ago`);
+      L.push(`FEATURES += [f'{c}_lag${h}' for c in ` + JSON.stringify(fcols).replace(/"/g, "'") + ']');
+    }
+    for (const b of rolls){
+      const h = Math.round(b.f.h);
+      L.push(`for c in list(FEATURES):`);
+      L.push(`    df[f'{c}_roll${h}'] = df[c].rolling(${h}, min_periods=1).mean()`);
+      L.push(`FEATURES += [f'{c}_roll${h}' for c in ` + JSON.stringify(fcols).replace(/"/g, "'") + ']');
+    }
+    L.push('df = df.dropna()');
+    L.push('');
+  }
+
+  const a = Math.round(win.f.from), b2 = Math.round(win.f.to);
+  L.push('# 3. The training window. This is the single most consequential line');
+  L.push('#    in the file: the model can only learn what happened inside it.');
+  L.push(`train = df.iloc[${a * 24}:${b2 * 24}]        # day ${a} to day ${b2}`);
+  L.push('');
+  L.push('X_train, y_train = train[FEATURES].values, train[TARGET].values');
+  L.push('X_all,   y_all   = df[FEATURES].values,    df[TARGET].values');
+  L.push('');
+
+  if (norm){
+    L.push('# 4. Standardise on the TRAINING window only. Fitting the scaler on');
+    L.push('#    the whole file leaks the future into the model and every');
+    L.push('#    validation number after it becomes fiction.');
+    L.push('mu, sigma = X_train.mean(0), X_train.std(0) + 1e-9');
+    L.push('ym, ys    = y_train.mean(),  y_train.std() + 1e-9');
+    L.push('X_train, X_all = (X_train - mu) / sigma, (X_all - mu) / sigma');
+    L.push('y_train_s = (y_train - ym) / ys');
+    L.push('');
+  } else {
+    L.push('# 4. No Normalise block, so the raw units go straight in. With tags');
+    L.push('#    in °C, %, A and mm/s at once this usually trains badly.');
+    L.push('ym, ys, y_train_s = 0.0, 1.0, y_train');
+    L.push('');
+  }
+
+  L.push('# 5. The network — one line per Hidden layer block.');
+  L.push('model = keras.Sequential([');
+  L.push('    layers.Input(shape=(len(FEATURES),)),');
+  for (const l of layers) L.push(`    layers.Dense(${Math.round(l.f.n)}, activation='${l.f.act}'),`);
+  L.push("    layers.Dense(1),                       # the expected value");
+  L.push('])');
+  L.push(`model.compile(optimizer=keras.optimizers.SGD(learning_rate=${(+tr.f.lr).toFixed(3)}), loss='mse')`);
+  L.push(`model.fit(X_train, y_train_s, epochs=${Math.round(tr.f.epochs)}, batch_size=1, verbose=0)`);
+  L.push('');
+  L.push('# 6. Expected versus actual, for every hour of the year.');
+  L.push('expected = model.predict(X_all, verbose=0).ravel() * ys + ym');
+  L.push("df['expected'] = expected");
+  L.push("df['residual'] = y_all - expected");
+  L.push('');
+
+  if (al){
+    const k = +al.f.k, h = Math.round(al.f.hours);
+    L.push('# 7. The alert rule. The band comes from the residual inside the');
+    L.push('#    training window — the machine when it was known to be well.');
+    L.push(`resid_sigma = df['residual'].iloc[${a * 24}:${b2 * 24}].std()`);
+    L.push(`over = df['residual'].abs() > ${k} * resid_sigma`);
+    L.push(`sustained = over.rolling(${h}).sum() == ${h}     # ${h} hours in a row, not one spike`);
+    L.push("alerts = df.index[sustained & ~sustained.shift(1, fill_value=False)]");
+    L.push("print(f'{len(alerts)} advisories; first at {alerts[0] if len(alerts) else None}')");
+  }
+  return L.join('\n');
+}
+
+/* =========================================================================
+   Reading a real historian export.
+
+   The network in this artefact is 150 lines. This file is here because the
+   part that actually decides whether an engineer gets anywhere with their
+   own data is not the network — it is this. A PI or DCS export arrives wide
+   or long, with timestamps in whichever format the exporting machine's
+   locale produced, decimal commas, thousands separators, and the words
+   Bad, Shutdown, I/O Timeout, Pt Created, Over Range and Arc Off-line
+   sitting in columns that are otherwise numeric.
+
+   Nothing here leaves the browser. The file is read by FileReader and the
+   text never crosses the network — same rule as Pocket RAG, and for the
+   same reason: this is plant data.
+   ========================================================================= */
+'use strict';
+
+/* Strings a historian writes into a numeric column when it has no number.
+   They are not missing data in the "sensor was offline" sense — each one
+   means something different, and a model that silently coerces them to zero
+   will learn that a shutdown is a very cold bearing. */
+const BAD_VALUES = /^(bad|bad ?input|no ?data|shutdown|shut ?down|off|offline|off-line|arc ?off-?line|i\/?o ?timeout|timeout|comm ?fail|failed|pt ?created|configure|over ?range|under ?range|calc ?failed|scan ?off|manual|nan|null|n\/?a|-{1,3}|\?+)$/i;
+
+function splitCSV(line, sep){
+  const out = []; let cur = '', q = false;
+  for (let i = 0; i < line.length; i++){
+    const ch = line[i];
+    if (q){
+      if (ch === '"'){ if (line[i+1] === '"'){ cur += '"'; i++; } else q = false; }
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === sep){ out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map(s => s.trim());
+}
+
+function sniffSep(head){
+  const cands = [',', ';', '\t', '|'];
+  let best = ',', bestN = 0;
+  for (const s of cands){
+    const counts = head.slice(0, 5).map(l => splitCSV(l, s).length);
+    const n = Math.min(...counts);
+    if (n > bestN && counts.every(c => c === counts[0])) { bestN = n; best = s; }
+  }
+  return { sep: best, cols: bestN };
+}
+
+/* Numbers, allowing 1 234,56 and 1,234.56 and 1.234,56 */
+function toNum(raw){
+  if (raw == null) return NaN;
+  let s = String(raw).trim();
+  if (!s || BAD_VALUES.test(s)) return NaN;
+  s = s.replace(/\s|'/g, '');
+  const lastC = s.lastIndexOf(','), lastD = s.lastIndexOf('.');
+  if (lastC > -1 && lastD > -1){
+    if (lastC > lastD) s = s.replace(/\./g, '').replace(',', '.');   // 1.234,56
+    else s = s.replace(/,/g, '');                                     // 1,234.56
+  } else if (lastC > -1){
+    s = (s.length - lastC - 1) === 3 && /^\d{1,3}(,\d{3})+$/.test(s)
+        ? s.replace(/,/g, '') : s.replace(',', '.');
+  }
+  const v = parseFloat(s);
+  return isFinite(v) ? v : NaN;
+}
+
+/* Timestamps: ISO, dd/mm/yyyy, mm/dd/yyyy, dd-mmm-yy, with or without seconds.
+   Ambiguous day/month is resolved by looking at the whole column — if any
+   first field exceeds 12 the format is day-first. */
+function parseTimeColumn(vals){
+  const iso = v => { const t = Date.parse(v); return isFinite(t) ? t : NaN; };
+  let dayFirst = false;
+  for (const v of vals){
+    const m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/.exec(v || '');
+    if (m && +m[1] > 12){ dayFirst = true; break; }
+  }
+  const out = new Float64Array(vals.length);
+  let ok = 0;
+  for (let i = 0; i < vals.length; i++){
+    const v = (vals[i] || '').trim();
+    let t = NaN;
+    const m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})[ T]?(\d{1,2})?:?(\d{2})?:?(\d{2})?/.exec(v);
+    if (m){
+      let dd = +m[1], mm = +m[2];
+      if (!dayFirst){ const s = dd; dd = mm; mm = s; }
+      let yy = +m[3]; if (yy < 100) yy += yy < 70 ? 2000 : 1900;
+      t = Date.UTC(yy, mm - 1, dd, +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+    } else t = iso(v);
+    out[i] = t; if (isFinite(t)) ok++;
+  }
+  return { t: out, ok: ok / Math.max(1, vals.length), dayFirst };
+}
+
+function parseHistorianCSV(text){
+  const lines = text.split(/\r?\n/).filter(l => l.trim().length);
+  if (lines.length < 3) throw new Error('That file has fewer than three lines.');
+  const { sep } = sniffSep(lines);
+  let rows = lines.map(l => splitCSV(l, sep));
+
+  /* Some exports put a title line or a units line above the header. Take the
+     first row whose cells are mostly non-numeric and mostly distinct. */
+  let hdrIx = 0;
+  for (let i = 0; i < Math.min(6, rows.length); i++){
+    const r = rows[i], nonNum = r.filter(c => c && isNaN(toNum(c))).length;
+    if (nonNum >= Math.max(2, r.length * 0.6) && new Set(r).size === r.length){ hdrIx = i; break; }
+  }
+  const header = rows[hdrIx].map((h, i) => h || `column ${i+1}`);
+  rows = rows.slice(hdrIx + 1).filter(r => r.length === header.length);
+  if (!rows.length) throw new Error('No data rows under the header.');
+
+  /* which column is time? the one that parses best */
+  let tCol = -1, tBest = 0, tInfo = null;
+  for (let c = 0; c < header.length; c++){
+    const info = parseTimeColumn(rows.slice(0, Math.min(300, rows.length)).map(r => r[c]));
+    if (info.ok > tBest && info.ok > 0.8){ tBest = info.ok; tCol = c; tInfo = info; }
+  }
+
+  /* long format: timestamp, tagname, value */
+  const nameCol = header.findIndex(h => /^(tag|tagname|point|pointname|name|descriptor)$/i.test(h));
+  const valCol  = header.findIndex(h => /^(value|val|reading|data)$/i.test(h));
+  let tags = [], stamps = null, layout = 'wide';
+
+  if (tCol > -1 && nameCol > -1 && valCol > -1){
+    layout = 'long';
+    const byTag = new Map();
+    for (const r of rows){
+      const nm = r[nameCol]; if (!nm) continue;
+      if (!byTag.has(nm)) byTag.set(nm, []);
+      byTag.get(nm).push(toNum(r[valCol]));
+    }
+    const len = Math.max(...[...byTag.values()].map(a => a.length));
+    tags = [...byTag.entries()].map(([nm, a]) => ({
+      id: nm, name: nm, unit: '', have: true,
+      v: Float64Array.from({length: len}, (_, i) => a[i] ?? NaN)
+    }));
+    stamps = null;
+  } else {
+    const info = tCol > -1 ? parseTimeColumn(rows.map(r => r[tCol])) : null;
+    stamps = info ? info.t : null;
+    for (let c = 0; c < header.length; c++){
+      if (c === tCol) continue;
+      const v = new Float64Array(rows.length);
+      let numeric = 0, bad = 0;
+      for (let i = 0; i < rows.length; i++){
+        const raw = rows[i][c];
+        const n = toNum(raw);
+        v[i] = n;
+        if (isFinite(n)) numeric++; else if (raw && BAD_VALUES.test(raw.trim())) bad++;
+      }
+      /* a column that is under half numbers is a comment or a status column */
+      if (numeric < rows.length * 0.5) continue;
+      const um = /[\(\[]\s*([^\)\]]{1,12})\s*[\)\]]\s*$/.exec(header[c]);
+      tags.push({ id:`c${c}`, name: header[c].replace(/[\(\[][^\)\]]*[\)\]]\s*$/, '').trim() || header[c],
+                  unit: um ? um[1] : '', have:true, v, badCount:bad });
+    }
+  }
+  if (!tags.length) throw new Error('No column in that file is mostly numeric.');
+  return { tags, stamps, layout, sep, rows: rows.length, tCol, header };
+}
+
+/* Profile before offering to train. This is the screen most people will get
+   the most out of, and often the answer is "your data cannot support a
+   model yet" — which is a finding, not a failure. */
+function profileTags(parsed){
+  const out = [];
+  for (const t of parsed.tags){
+    const v = t.v, n = v.length;
+    let miss = 0, run = 0, maxRun = 0, prev = NaN, lo = Infinity, hi = -Infinity, s = 0, c = 0;
+    for (let i = 0; i < n; i++){
+      const x = v[i];
+      if (!isFinite(x)){ miss++; run = 0; prev = NaN; continue; }
+      if (x === prev) { run++; if (run > maxRun) maxRun = run; } else run = 0;
+      prev = x;
+      if (x < lo) lo = x; if (x > hi) hi = x; s += x; c++;
+    }
+    const m = c ? s / c : 0; let vv = 0;
+    for (let i = 0; i < n; i++) if (isFinite(v[i])) vv += (v[i] - m) ** 2;
+    const sd = c ? Math.sqrt(vv / c) : 0;
+    let verdict = 'usable', why = '';
+    if (miss / n > 0.25){ verdict = 'unusable'; why = 'more than a quarter of it is missing'; }
+    else if (sd === 0){ verdict = 'unusable'; why = 'the value never changes'; }
+    else if (maxRun > n * 0.1){ verdict = 'suspect'; why = `frozen for ${maxRun} readings in a row`; }
+    else if (miss / n > 0.05){ verdict = 'suspect'; why = `${(100*miss/n).toFixed(0)} per cent missing`; }
+    else if ((t.badCount || 0) > n * 0.02){ verdict = 'suspect'; why = `${t.badCount} status strings such as Bad or Shutdown`; }
+    out.push({ ...t, n, miss, maxRun, lo, hi, mean:m, sd, verdict, why });
+  }
+  return out;
+}
+
+function adoptCSV(parsed, prof, fileName){
+  const good = prof.filter(p => p.verdict !== 'unusable');
+  MB.data = {
+    name: fileName, short: fileName, station: 'your own export',
+    rows: parsed.rows, hours: parsed.rows, source:'csv',
+    tags: good.map(p => ({ id:p.id, name:p.name, unit:p.unit, have:true, v:p.v })),
+    onset: null, alarm: null, health: null, healthName: null,
+    layout: parsed.layout, profile: prof,
+    blurb: `${parsed.rows.toLocaleString('en-IN')} rows, ${parsed.tags.length} numeric columns, read as a ${parsed.layout} export.`,
+    mode: null
+  };
+  MB.csvProfile = prof;
+  return MB.data;
+}
+
+/* =========================================================================
+   Model Builder — the canvas, the charts and the wiring.
+   ========================================================================= */
+'use strict';
+
+const C = { ink:'#1C2530', mut:'#6B7A8C', line:'#D3DDE5', grid:'#E9EEF3',
+            blue:'#1E74C0', ember:'#D96A16', teal:'#0B8F86', red:'#A8261E', grn:'#256B45' };
+
+/* ------------------------------------------------------------- charting */
+function chart(el, o){
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const w = el.clientWidth || 640, h = o.height || 190;
+  el.width = w * dpr; el.height = h * dpr; el.style.height = h + 'px';
+  const g = el.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  const L = 52, R = 12, T = 12, B = 26;
+  const series = o.series.filter(s => s.data && s.data.length);
+  if (!series.length) return;
+  let lo = o.min, hi = o.max;
+  if (lo == null || hi == null){
+    lo = Infinity; hi = -Infinity;
+    for (const s of series) for (const v of s.data) if (v != null && isFinite(v)){ if (v < lo) lo = v; if (v > hi) hi = v; }
+    if (!isFinite(lo)) { lo = 0; hi = 1; }
+    const pad = (hi - lo) * 0.12 || 1; lo -= pad; hi += pad;
+  }
+  const n = Math.max(...series.map(s => s.data.length));
+  const px = i => L + i * (w - L - R) / Math.max(1, n - 1);
+  const py = v => T + (hi - v) * (h - T - B) / (hi - lo || 1);
+
+  g.strokeStyle = C.grid; g.lineWidth = 1; g.font = '10px Calibri,system-ui'; g.fillStyle = C.mut;
+  for (let k = 0; k <= 4; k++){
+    const v = lo + (hi - lo) * k / 4, y = py(v);
+    g.beginPath(); g.moveTo(L, y); g.lineTo(w - R, y); g.stroke();
+    g.textAlign = 'right'; g.fillText(fmtSmall(v), L - 6, y + 3);
+  }
+  (o.bands || []).forEach(b => {
+    g.fillStyle = b.c; g.fillRect(px(b.from), T, px(b.to) - px(b.from), h - T - B);
+  });
+  (o.rules || []).forEach(r => {
+    g.strokeStyle = r.c; g.lineWidth = 1.2; g.setLineDash([5, 4]);
+    g.beginPath(); g.moveTo(L, py(r.v)); g.lineTo(w - R, py(r.v)); g.stroke(); g.setLineDash([]);
+  });
+  (o.marks || []).forEach(m => {
+    g.strokeStyle = m.c; g.lineWidth = 1.4; g.setLineDash([3, 3]);
+    g.beginPath(); g.moveTo(px(m.i), T); g.lineTo(px(m.i), h - B); g.stroke(); g.setLineDash([]);
+    g.fillStyle = m.c; g.textAlign = 'left'; g.font = '600 10px Calibri,system-ui';
+    g.fillText(m.label, px(m.i) + 4, T + 10);
+  });
+  for (const s of series){
+    g.strokeStyle = s.c; g.lineWidth = s.w || 1.6; g.beginPath();
+    let started = false;
+    for (let i = 0; i < s.data.length; i++){
+      const v = s.data[i]; if (v == null || !isFinite(v)) { started = false; continue; }
+      const X = px(i), Y = py(v);
+      if (!started){ g.moveTo(X, Y); started = true; } else g.lineTo(X, Y);
+    }
+    g.stroke();
+  }
+  g.strokeStyle = C.line; g.beginPath(); g.moveTo(L, h - B); g.lineTo(w - R, h - B); g.stroke();
+  g.fillStyle = C.mut; g.font = '10px Calibri,system-ui'; g.textAlign = 'center';
+  (o.xTicks || []).forEach(t => g.fillText(t.label, px(t.i), h - B + 14));
+}
+const fmtSmall = v => Math.abs(v) >= 1000 ? (v/1000).toFixed(1)+'k'
+                    : Math.abs(v) >= 10 ? v.toFixed(0)
+                    : Math.abs(v) >= 1 ? v.toFixed(1) : v.toFixed(2);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* --------------------------------------------------------------- palette */
+function blockHTML(type, b, inCanvas, i){
+  const B = BLOCKS[type];
+  let f = '';
+  if (inCanvas && B.fields.length){
+    f = '<div class="flds">' + B.fields.map(fd => {
+      if (fd.t === 'tags') return '';
+      if (fd.t === 'select'){
+        const opts = fd.opts().map(([v, l]) =>
+          `<option value="${esc(v)}" ${b.f[fd.k] === v ? 'selected' : ''}>${esc(l)}</option>`).join('');
+        return `<span class="fld">${fd.label ? `<label>${fd.label}</label>` : ''}
+          <select data-i="${i}" data-k="${fd.k}">${opts}</select></span>`;
+      }
+      return `<span class="fld"><label>${fd.label}</label>
+        <input type="number" data-i="${i}" data-k="${fd.k}" value="${b.f[fd.k]}"
+        min="${fd.min ?? 0}" max="${fd.max ?? 9999}" step="${fd.step ?? 1}"></span>`;
+    }).join('') + '</div>';
+    const tagsField = B.fields.find(fd => fd.t === 'tags');
+    if (tagsField && MB.data){
+      const sel = b.f.tags || [];
+      f += '<div class="tags">' + MB.data.tags.map(t =>
+        `<span class="tg ${sel.includes(t.id) ? 'on' : ''} ${t.have === false ? 'miss' : ''}"
+          data-i="${i}" data-tag="${t.id}" title="${esc(t.name)}${t.have===false?' — not instrumented on this machine':''}"
+          >${esc(t.name.length > 22 ? t.name.slice(0, 21) + '…' : t.name)}</span>`).join('') + '</div>';
+    }
+  }
+  return `<div class="blk ${B.cat}" draggable="true" data-type="${type}" ${inCanvas ? `data-i="${i}"` : ''}>
+    ${inCanvas ? '<button class="x" title="remove">×</button>' : ''}
+    <div class="t"><span class="ic">${B.ic}</span>${B.label}</div>
+    <div class="d">${B.desc}</div>${f}</div>`;
+}
+
+function renderPalette(){
+  const el = document.getElementById('palette');
+  el.innerHTML = CATS.map(([cat, name]) =>
+    `<div class="grp">${name}</div>` +
+    Object.entries(BLOCKS).filter(([, b]) => b.cat === cat)
+      .map(([k]) => blockHTML(k, {f:{}}, false)).join('')
+  ).join('');
+  el.querySelectorAll('.blk').forEach(n => {
+    n.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/new', n.dataset.type); e.dataTransfer.effectAllowed = 'copy';
+    });
+  });
+}
+
+function addBlock(type, at){
+  const B = BLOCKS[type];
+  if (B.unique && MB.spec.some(b => b.type === type)) return;
+  const blk = { type, cat:B.cat, f: JSON.parse(JSON.stringify(B.def)) };
+  if (type === 'inputs' && MB.data) blk.f.tags = MB.data.tags.filter(t => t.have !== false).map(t => t.id);
+  if (type === 'target' && MB.data) blk.f.tag = MB.data.tags[0].id;
+  MB.spec.splice(at == null ? MB.spec.length : at, 0, blk);
+  sortSpec(); afterChange();
+}
+function sortSpec(){
+  MB.spec.sort((a, b) => CAT_ORDER[a.cat] - CAT_ORDER[b.cat]);
+}
+
+function renderCanvas(){
+  const el = document.getElementById('canvas');
+  if (!MB.spec.length){
+    el.innerHTML = `<div class="drop" id="dz">Drag a block here.<br><br>
+      Start with <b>Machine data</b>, then <b>Predict this tag</b>.</div>`;
+  } else {
+    el.innerHTML = MB.spec.map((b, i) => blockHTML(b.type, b, true, i)).join('') +
+      `<div class="drop" id="dz" style="margin-top:4px">drop here to add at the end</div>`;
+  }
+  /* field edits */
+  el.querySelectorAll('input,select').forEach(n => {
+    n.addEventListener('change', () => {
+      const b = MB.spec[+n.dataset.i]; if (!b) return;
+      b.f[n.dataset.k] = n.type === 'number' ? +n.value : n.value;
+      if (b.type === 'dataset'){ loadCase(b.f.case); resetTagFields(); }
+      afterChange();
+    });
+  });
+  el.querySelectorAll('.tg').forEach(n => n.addEventListener('click', () => {
+    const b = MB.spec[+n.dataset.i]; const id = n.dataset.tag;
+    b.f.tags = b.f.tags || [];
+    const k = b.f.tags.indexOf(id);
+    if (k > -1) b.f.tags.splice(k, 1); else b.f.tags.push(id);
+    afterChange();
+  }));
+  el.querySelectorAll('.x').forEach(n => n.addEventListener('click', e => {
+    e.stopPropagation();
+    MB.spec.splice(+n.parentNode.dataset.i, 1); afterChange();
+  }));
+  /* reorder within the canvas */
+  el.querySelectorAll('.blk').forEach(n => {
+    n.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/move', n.dataset.i); n.classList.add('drag');
+    });
+    n.addEventListener('dragend', () => n.classList.remove('drag'));
+  });
+  const dz = document.getElementById('dz');
+  [el, dz].forEach(z => {
+    z.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+    z.addEventListener('dragleave', () => dz.classList.remove('over'));
+    z.addEventListener('drop', e => {
+      e.preventDefault(); dz.classList.remove('over');
+      const nw = e.dataTransfer.getData('text/new');
+      const mv = e.dataTransfer.getData('text/move');
+      if (nw) addBlock(nw);
+      else if (mv !== ''){ const [b] = MB.spec.splice(+mv, 1); MB.spec.push(b); sortSpec(); afterChange(); }
+    });
+  });
+}
+
+function resetTagFields(){
+  const ins = MB.spec.find(b => b.type === 'inputs');
+  if (ins) ins.f.tags = MB.data.tags.filter(t => t.have !== false).map(t => t.id);
+  const tg = MB.spec.find(b => b.type === 'target');
+  if (tg) tg.f.tag = MB.data.tags[0].id;
+}
+
+/* ----------------------------------------------------------------- chips */
+function chips(){
+  const d = MB.data;
+  document.getElementById('chDataset').innerHTML = d
+    ? `<b>${esc(d.short)}</b> · ${d.rows.toLocaleString('en-IN')} rows · ${d.tags.length} tags`
+    : 'no data';
+  const layers = MB.spec.filter(b => b.type === 'dense');
+  const ins = MB.spec.find(b => b.type === 'inputs');
+  let ni = ins && ins.f.tags ? ins.f.tags.length : 0;
+  MB.spec.filter(b => b.cat === 'prep' && b.type !== 'normalise').forEach(() => ni += (ins && ins.f.tags ? ins.f.tags.length : 0));
+  const sizes = [ni, ...layers.map(l => Math.round(l.f.n)), 1];
+  let p = 0; for (let i = 0; i < sizes.length - 1; i++) p += sizes[i] * sizes[i+1] + sizes[i+1];
+  document.getElementById('chParams').innerHTML = `<b>${p.toLocaleString('en-IN')}</b> parameters`;
+  const st = document.getElementById('chState');
+  st.className = 'chip ' + (MB.result ? 'on' : 'warn');
+  st.innerHTML = MB.result ? `trained in <b>${(MB.result.ms/1000).toFixed(2)} s</b>` : 'not trained';
+}
+
+/* ------------------------------------------------------------------ panes */
+let TAB = 'run';
+function afterChange(){ renderCanvas(); chips(); renderPane(); }
+
+function renderPane(){
+  ['run','py','data','help'].forEach(t =>
+    document.getElementById('pane-' + t).classList.toggle('hide', t !== TAB));
+  if (TAB === 'run')  paneRun();
+  if (TAB === 'py')   panePy();
+  if (TAB === 'data') paneData();
+  if (TAB === 'help') paneHelp();
+}
+
+function paneRun(){
+  const el = document.getElementById('pane-run');
+  const errs = validate(MB.spec);
+  if (errs.length){
+    el.innerHTML = `<div class="card"><h3>Not runnable yet</h3>
+      <div class="sub">The blocks describe a model that cannot be trained. Fix these:</div>
+      ${errs.map(e => `<div class="note bad" style="margin-top:7px">${esc(e)}</div>`).join('')}</div>`;
+    return;
+  }
+  const r = MB.result;
+  el.innerHTML = `
+    <div class="card">
+      <h3>Train it</h3>
+      <div class="sub">Everything runs on this machine. Nothing is uploaded, and there is no server to upload to.</div>
+      <button class="btn go" id="btnTrain">▶ Train the network</button>
+      <button class="btn alt sm" id="btnReset" style="margin-left:8px">Start over</button>
+      <span id="prog" style="margin-left:12px;color:var(--muted);font-size:12.5px"></span>
+    </div>
+    <div id="results"></div>`;
+  document.getElementById('btnTrain').onclick = doTrain;
+  document.getElementById('btnReset').onclick = () => { MB.spec = []; MB.result = null; defaultSpec(); };
+  if (r) renderResults(r);
+}
+
+function doTrain(){
+  const p = document.getElementById('prog');
+  const btn = document.getElementById('btnTrain'); btn.disabled = true;
+  p.textContent = 'training…';
+  setTimeout(() => {
+    try {
+      const res = mlpTrain(MB.spec, (e, tot) => { if (e % 40 === 0) p.textContent = `epoch ${e} of ${tot}`; });
+      res.alert = applyAlert(res, MB.spec);
+      MB.result = res; p.textContent = '';
+      chips(); renderResults(res);
+    } catch (err){
+      p.innerHTML = `<span style="color:var(--red)">${esc(err.message)}</span>`;
+      console.error(err);
+    }
+    btn.disabled = false;
+  }, 30);
+}
+
+function renderResults(r){
+  const d = MB.data, host = document.getElementById('results');
+  const step = Math.max(1, Math.round(r.resid.length / 720));
+  const dsz = a => { const o = []; for (let i = 0; i < a.length; i += step) o.push(a[i]); return o; };
+  const xt = [];
+  if (d.source === 'built-in')
+    for (let m = 0; m < 12; m += 2) xt.push({ i: MONTH_START[m] * 24 / step, label: MONTH_NAME[m] });
+
+  const inWin = (r.trainTo - r.trainFrom) / 24;
+  const al = r.alert;
+  const early = al && al.beforeFault != null && al.beforeFault > 0;
+
+  host.innerHTML = `
+  <div class="card">
+    <h3>Did it learn?</h3>
+    <div class="sub">Training loss, epoch by epoch. It should fall fast and then flatten.
+      If it is still falling at the end, add epochs; if it never falls, the inputs cannot explain the target.</div>
+    <canvas class="ch" id="chLoss"></canvas>
+    <div style="margin-top:10px">
+      <span class="stat"><div class="l">Parameters</div><div class="n">${r.params.toLocaleString('en-IN')}</div>
+        <div class="s">weights and biases</div></span>
+      <span class="stat"><div class="l">Trained in</div><div class="n em">${(r.ms/1000).toFixed(2)} s</div>
+        <div class="s">in this browser tab</div></span>
+      <span class="stat"><div class="l">Final loss</div><div class="n">${r.loss[r.loss.length-1].toFixed(4)}</div>
+        <div class="s">mean squared, standardised</div></span>
+      <span class="stat"><div class="l">Residual sigma</div><div class="n">${fmtSmall(r.sigma)}</div>
+        <div class="s">on the training window</div></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Expected against actual — ${esc(r.yName)}</h3>
+    <div class="sub">The shaded band is what the model was allowed to learn from (${inWin.toFixed(0)} days).
+      Everywhere else it is predicting.</div>
+    <canvas class="ch" id="chFit"></canvas>
+  </div>
+
+  <div class="card">
+    <h3>The residual</h3>
+    <div class="sub">Actual minus expected. This is the only line that matters — a flat one means the machine is
+      behaving as it always did, whatever the weather is doing.</div>
+    <canvas class="ch" id="chRes"></canvas>
+    ${al ? verdict(r, al, early) : `<div class="note info">Add an <b>Alert rule</b> block to turn this line into a decision.</div>`}
+  </div>`;
+
+  chart(document.getElementById('chLoss'), { height:150,
+    series:[{ data:r.loss, c:C.blue, w:1.8 }],
+    xTicks:[{i:0,label:'epoch 1'},{i:r.loss.length-1,label:'epoch '+r.loss.length}] });
+
+  chart(document.getElementById('chFit'), { height:200,
+    bands:[{from:r.trainFrom/step, to:r.trainTo/step, c:'rgba(11,143,134,.09)'}],
+    series:[{ data:dsz(r.y), c:C.ember, w:1.5 }, { data:dsz(r.pred), c:C.blue, w:1.5 }],
+    marks: d.onset != null ? [{ i:d.onset*24/step, label:'fault begins', c:C.red }] : [],
+    xTicks:xt });
+
+  chart(document.getElementById('chRes'), { height:170,
+    bands:[{from:r.trainFrom/step, to:r.trainTo/step, c:'rgba(11,143,134,.09)'}],
+    rules: al ? [{v:al.thr, c:C.red},{v:-al.thr, c:C.red}] : [],
+    series:[{ data:dsz(r.resid), c:C.ink, w:1.3 }],
+    marks: d.onset != null ? [{ i:d.onset*24/step, label:'fault begins', c:C.red }] : [],
+    xTicks:xt });
+}
+
+function verdict(r, al, early){
+  const d = MB.data;
+  const dl = x => d.source === 'built-in' ? ` (${dayLabel(Math.round(x))})` : '';
+  if (al.firstDay === null)
+    return `<div class="note ${d.onset != null ? 'bad' : 'info'}">
+      <b>No advisory was ever raised.</b> The residual never stayed outside ±${al.k}σ for ${al.need} hours.
+      ${d.onset != null ? `This machine does develop a fault, on day ${d.onset}${dl(d.onset)} — so the model
+      missed it. Either the inputs cannot see this failure mode, or the band is too wide.`
+      : 'On your own data that may simply mean nothing went wrong in this period.'}</div>`;
+  if (early)
+    return `<div class="note bad"><b>The model cried wolf.</b> It raised an advisory on day
+      ${Math.round(al.firstDay)}${dl(al.firstDay)} — ${Math.round(al.beforeFault)} days
+      <i>before</i> this machine's fault begins on day ${d.onset}${dl(d.onset)}. True severity that day was zero.
+      Look at where the training band sits on the chart above: if it covers only part of the year, the model has
+      never seen the conditions it is now being asked to judge, and it is reporting the weather as a fault.
+      Widen the training window and train again.</div>`;
+  /* Even when the timing is right, say whether the model was quietly wrong
+     for months first. */
+  const drifty = al.driftSigmas > 1.5 && al.preDays > 20;
+  const driftNote = drifty ? `<div class="note bad" style="margin-top:9px">
+      <b>But look at the residual before the fault.</b> Between the end of the training window and the day the
+      fault begins, the model runs an average of ${al.drift > 0 ? '+' : ''}${fmtSmall(al.drift)} out —
+      ${al.driftSigmas.toFixed(1)}× its own alert band — with excursions to ${fmtSmall(al.driftMax)}.
+      Nothing was raised only because the deviation comes and goes with the day, and the rule wants
+      ${al.need} hours in a row. Drop the persistence to 24 hours and you will be paged through May.
+      A training window that misses a season leaves a model that is wrong long before it is useful.</div>` : '';
+  return driftNote + `<div class="note ${drifty ? 'warn' : 'good'}"><b>Advisory raised on day ${Math.round(al.firstDay)}${dl(al.firstDay)}.</b>
+    ${d.onset != null ? `The fault began on day ${d.onset}${dl(d.onset)}, so the model took
+    ${Math.round(al.firstDay - d.onset)} days to be sure of it.` : ''}
+    ${al.count} separate advisories over the year at ±${al.k}σ sustained for ${al.need} hours.
+    ${al.count > 6 ? ' That is a lot — in a real control room this many would be ignored within a month. Raise the sigma or the persistence.' : ''}</div>`;
+}
+
+function panePy(){
+  document.getElementById('pane-py').innerHTML = `
+    <div class="card">
+      <h3>The same model, in Python</h3>
+      <div class="sub">This is not a translation of a toy. It is what your vendor's data scientist would write,
+        and every number in it came from a field on one of your blocks. Take it to the next supplier meeting.</div>
+      <button class="btn alt sm" id="btnCopy">Copy</button>
+      <span id="copied" style="margin-left:9px;color:var(--grn);font-size:12px"></span>
+    </div>
+    <pre class="py">${PY.hl(generatePython(MB.spec))}</pre>`;
+  document.getElementById('btnCopy').onclick = async () => {
+    try { await navigator.clipboard.writeText(generatePython(MB.spec));
+          document.getElementById('copied').textContent = 'copied'; }
+    catch (e) { document.getElementById('copied').textContent = 'select the text and copy it'; }
+  };
+}
+
+function paneData(){
+  const d = MB.data, el = document.getElementById('pane-data');
+  if (!d){ el.innerHTML = '<div class="card"><h3>No data yet</h3></div>'; return; }
+  const prof = d.profile;
+  el.innerHTML = `
+  <div class="card">
+    <h3>${esc(d.name)}</h3>
+    <div class="sub">${esc(d.blurb || '')}</div>
+    ${d.mode ? `<div class="note info"><b>Failure mode.</b> ${esc(d.mode)}</div>` : ''}
+    ${d.source === 'built-in' ? `<div class="note warn" style="margin-top:8px">
+      <b>This is synthetic data</b>, generated from a physical model of the machine with a fault injected on a
+      known day. It is synthetic on purpose: a teaching dataset needs a fault whose true onset you can check the
+      model against. The plant economics, tag names and limits around it are drawn from real practice.</div>` : ''}
+  </div>
+  <div class="card">
+    <h3>Tag profile</h3>
+    <div class="sub">${d.source === 'csv'
+      ? 'Every column, before you model anything. This screen is usually worth more than the model.'
+      : 'What the historian would give you for this machine.'}</div>
+    <table class="t"><thead><tr><th>Tag</th><th>Unit</th><th class="num">Min</th><th class="num">Max</th>
+      <th class="num">Mean</th><th class="num">Std dev</th>${prof ? '<th>Verdict</th>' : '<th>Instrumented</th>'}</tr></thead><tbody>
+    ${(prof || d.tags.map(t => {
+        let lo = Infinity, hi = -Infinity, s = 0, n = 0;
+        for (const v of t.v){ if (!isFinite(v)) continue; if (v<lo) lo=v; if (v>hi) hi=v; s+=v; n++; }
+        const m = s/n; let vv = 0; for (const v of t.v) if (isFinite(v)) vv += (v-m)**2;
+        return {...t, lo, hi, mean:m, sd:Math.sqrt(vv/n)};
+      })).map(p => `<tr>
+      <td>${esc(p.name)}</td><td>${esc(p.unit || '')}</td>
+      <td class="num">${fmtSmall(p.lo)}</td><td class="num">${fmtSmall(p.hi)}</td>
+      <td class="num">${fmtSmall(p.mean)}</td><td class="num">${fmtSmall(p.sd)}</td>
+      <td>${prof
+        ? `<span style="color:${p.verdict==='usable'?'var(--grn)':p.verdict==='suspect'?'var(--amb)':'var(--red)'}">
+             ${p.verdict}</span>${p.why ? ` <span style="color:var(--muted)">— ${esc(p.why)}</span>` : ''}`
+        : (p.have === false ? '<span style="color:var(--red)">not instrumented</span>' : 'yes')}</td>
+    </tr>`).join('')}
+    </tbody></table>
+  </div>
+  <div class="card">
+    <h3>Use your own data</h3>
+    <div class="sub">Drop a CSV anywhere on this page. It is read in this tab and never sent anywhere.</div>
+    <div class="note info">Wide exports (a timestamp column and one column per tag) and long exports
+      (timestamp, tag, value) both work. Decimal commas, thousands separators, dd/mm/yyyy and mm/dd/yyyy are
+      handled, and the words <i>Bad</i>, <i>Shutdown</i>, <i>I/O Timeout</i>, <i>Pt Created</i> and
+      <i>Over Range</i> are read as missing rather than as numbers.</div>
+    ${d.source === 'csv' ? '' : `<div class="note warn" style="margin-top:8px">
+      <b>Expect the profile above to be the finding.</b> On real exports the commonest outcome is that a tag is
+      frozen for days, or the stored interval is not the interval you asked for. That is not a failure of the
+      exercise — it is the reason section 2.7 of the handout exists.</div>`}
+  </div>`;
+}
+
+function paneHelp(){
+  document.getElementById('pane-help').innerHTML = `
+  <div class="card">
+    <h3>What this actually builds</h3>
+    <div class="sub">Three paragraphs, then go and drag something.</div>
+    <p>Every block you drop becomes a line of Python you can read on the next tab. There is no hidden cleverness:
+    the network is a few hundred multiply-and-adds, written out longhand in this file, and it trains in about a
+    second on a year of hourly readings. Machine learning at this scale is arithmetic, not magic, and the point
+    of this screen is that you can see all of it.</p>
+    <p>The model is not learning to predict a failure. It is learning what one tag <i>should</i> read, given
+    every other tag, when the machine is well. Then it subtracts. What is left over — the residual — is the only
+    part that carries information about the machine, because load and weather have been taken out of it.</p>
+    <p>So the two decisions that matter are not the number of neurons. They are <b>which tags the model may
+    look at</b> and <b>which days it may learn from</b>. Change the layer sizes and the answer barely moves.
+    Change the training window from a year to a month and the model will report every hot afternoon as a fault.
+    Try it.</p>
+  </div>
+  <div class="card">
+    <h3>Three things to try</h3>
+    <table class="t"><tbody>
+      <tr><td><b>Shrink the training window</b></td><td>Set it to day 0–45 and train again. The advisory will
+        arrive months before the fault. The model has only seen January, and June looks abnormal to it.</td></tr>
+      <tr><td><b>Include the fault in training</b></td><td>Set the window to end past the fault onset. The
+        residual goes flat and the model never flags anything: it has been taught that a degrading machine is
+        normal. Nothing in the loss curve reveals this.</td></tr>
+      <tr><td><b>Remove the ambient tag</b></td><td>Untick it from the inputs. The model loses its only way to
+        explain summer, and starts blaming the machine for the season.</td></tr>
+      <tr><td><b>Add the lube oil cooler outlet</b></td><td>Tick it as an input and retrain on a
+        <i>winter-only</i> window. The false alarms vanish. That tag sits downstream of the cooler, so it already
+        contains the non-linearity the model was failing to learn from ambient alone — you handed the model the
+        answer instead of making it infer one. This is why the choice of inputs decides more than the choice of
+        layers, and why an engineer who knows the plant beats a data scientist who does not.</td></tr>
+    </tbody></table>
+  </div>`;
+}
+
+/* ------------------------------------------------------------------- CSV */
+function wireDrop(){
+  const hint = document.getElementById('drophint');
+  let depth = 0;
+  window.addEventListener('dragenter', e => {
+    if (![...(e.dataTransfer.types||[])].includes('Files')) return;
+    depth++; hint.classList.add('on');
+  });
+  window.addEventListener('dragleave', () => { if (--depth <= 0) hint.classList.remove('on'); });
+  window.addEventListener('dragover', e => { if ([...(e.dataTransfer.types||[])].includes('Files')) e.preventDefault(); });
+  window.addEventListener('drop', e => {
+    if (!e.dataTransfer.files || !e.dataTransfer.files.length) return;
+    e.preventDefault(); depth = 0; hint.classList.remove('on');
+    const f = e.dataTransfer.files[0];
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const parsed = parseHistorianCSV(String(rd.result));
+        const prof = profileTags(parsed);
+        adoptCSV(parsed, prof, f.name);
+        const i = MB.spec.findIndex(b => b.type === 'dataset');
+        if (i > -1) MB.spec.splice(i, 1);
+        if (!MB.spec.some(b => b.type === 'csv')) MB.spec.unshift({type:'csv', cat:'data', f:{}});
+        resetTagFields(); MB.result = null; sortSpec();
+        TAB = 'data'; syncTabs(); afterChange();
+      } catch (err){
+        alert('That file could not be read as a historian export.\n\n' + err.message);
+      }
+    };
+    rd.readAsText(f);
+  });
+}
+
+/* ------------------------------------------------------------------ boot */
+function defaultSpec(){
+  MB.spec = [];
+  loadCase('idfan');
+  ['dataset','window','inputs','target','normalise','dense','train','residual','alert']
+    .forEach(t => addBlock(t));
+  const tg = MB.spec.find(b => b.type === 'target');
+  if (tg) tg.f.tag = 'brgT';
+  /* The default is the honest residual model: predict bearing temperature
+     from DUTY and WEATHER only — fan current, gas flow, ambient.
+
+     Deliberately NOT the lube oil cooler outlet, even though it is available
+     and it helps. That tag already contains the cooler's non-linearity, so a
+     model given it never has to learn that the cooler has a knee, and a
+     winter-only training window then works perfectly. Which is a real and
+     useful thing to discover — it is the third row of "three things to try"
+     — but it makes the wrong thing the default. Choosing inputs matters more
+     than choosing layers, and the default should be the one that shows it.
+
+     Also not the NDE bearing: it tracks the DE bearing almost exactly, so the
+     model would copy it across and look excellent while learning nothing. */
+  const ins = MB.spec.find(b => b.type === 'inputs');
+  if (ins) ins.f.tags = ['motI', 'gasF', 'amb'].filter(id => MB.data.tags.some(t => t.id === id));
+  if (ins && !ins.f.tags.length)
+    ins.f.tags = MB.data.tags.filter(t => t.have !== false && t.id !== 'brgT').map(t => t.id);
+  afterChange();
+}
+function syncTabs(){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.t === TAB));
+}
+function boot(){
+  renderPalette();
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    TAB = t.dataset.t; syncTabs(); renderPane();
+  }));
+  wireDrop();
+  defaultSpec();
+  window.addEventListener('resize', () => { if (MB.result && TAB === 'run') renderResults(MB.result); });
+}
+boot();
+</script>
+</body>
+</html>

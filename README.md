@@ -14,7 +14,7 @@ Presenter and author: **S. H. Parihar** — 16 years in the power sector; author
 
 ---
 
-## The four artefacts
+## The artefacts
 
 | | What it is | Open it |
 |---|---|---|
@@ -22,6 +22,7 @@ Presenter and author: **S. H. Parihar** — 16 years in the power sector; author
 | **Predictive Maintenance Simulator** | The full pipeline from sensor to signed work order, in eight stages across five equipment cases, with a 3-D model of the machine that degrades as you scrub through a full year. | `dist/MAHAGENCO_PdM_Simulator.html` |
 | **AI Simulation Lab** | Eight self-contained models built on the plant's own June 2026 figures — heat rate decomposition, auxiliary power, mill scheduling, anomaly detection and more. | `dist/MAHAGENCO_AI_Simulation_Lab.html` |
 | **Local RAG Bench** | A retrieval-augmented generation system with a **real** ONNX embedding model and an optional local language model, running entirely in the browser on WebGPU. Air-gapped after the first fetch. | `rag-bench/` — see its own README |
+| **Model Builder** | Drag-and-drop blocks that build and train a real neural network, in the browser, in about a second — on the same year of synthetic data the simulator uses, or on a historian export you drop in. A live panel writes the same model out as pandas and Keras. | `dist/MAHAGENCO_Model_Builder.html` |
 | **Pocket RAG** | The same idea with no curated corpus and no server at all: **you** open a PDF or Word file on your phone, and it is parsed, chunked, embedded, searched and answered on the device. A static site for GitHub Pages or Vercel; installs as a PWA and works in flight mode. | `pocket-rag/` — see its own README |
 
 The first three are single HTML files. Double-click and they run — no server, no
@@ -63,7 +64,8 @@ THIRD-PARTY.md        every library, version and licence
 ## Building
 
 ```
-node tools/build.js              # all three HTML artefacts
+node tools/build.js              # all four HTML artefacts
+node tools/build.js builder      # just the Model Builder
 node tools/build.js theatre      # just one
 ```
 
@@ -77,6 +79,13 @@ For the deck: `node deck/build_deck.js` (needs `npm i pptxgenjs`).
 QA scripts live beside each artefact — `node theatre/qa-screenshots.js` and friends
 drive the built file through Playwright, capture every state, and fail on any console
 error. They expect the built file in the working directory.
+
+`node builder/qa-builder.js` checks that the Model Builder still teaches what the
+handout says. It trains three models and asserts the behaviour, not the pixels: a
+season-spanning window must stay honest before the fault, a winter-only window must
+run several times its own alert band wrong in summer, and a window containing the
+fault must detect it far later than a clean one. It also drives a semicolon-separated
+export with decimal commas and `I/O Timeout` strings through the CSV reader.
 
 `node pdm-simulator/qa-geometry.js` is a different kind of test: it checks the
 **mechanics**, in world space, rather than the picture. For every rotating part it

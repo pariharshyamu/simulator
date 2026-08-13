@@ -58,6 +58,18 @@ const TARGETS = {
                         { __THREE__: THREE, __APP__: () => app }) };
   },
 
+  builder: () => {
+    /* Reuses pdm_core.js so the builder trains on exactly the same year of
+       data, the same five machines and the same fault definitions as the
+       simulator. Two copies of that generator would drift apart within a
+       week. No three.js — this artefact has no 3-D. */
+    const app = [read('pdm-simulator/pdm_core.js'),
+                 ...['mb_core.js', 'mb_python.js', 'mb_csv.js', 'mb_ui.js']
+                   .map(f => read('builder/' + f))].join('\n');
+    return { out: 'dist/MAHAGENCO_Model_Builder.html',
+             html: fill(read('builder/mb_shell.html'), { __APP__: () => app }) };
+  },
+
   lab: () => {
     const mods    = read('lab/lab_mods_a.html') + '\n' + read('lab/lab_mods_b.html');
     const scripts = read('lab/lab_js_a.js') + '\n' + read('lab/lab_js_b.js');

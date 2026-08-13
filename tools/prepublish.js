@@ -327,7 +327,7 @@ group('9. Build reproducibility');
 
 try {
   const before = ['dist/MAHAGENCO_Algorithm_Theatre.html', 'dist/MAHAGENCO_PdM_Simulator.html',
-                  'dist/MAHAGENCO_AI_Simulation_Lab.html']
+                  'dist/MAHAGENCO_AI_Simulation_Lab.html', 'dist/MAHAGENCO_Model_Builder.html']
     .filter(f => fs.existsSync(p(f)))
     .map(f => [f, cp.execSync(`sha256sum ${JSON.stringify(p(f))}`).toString().slice(0, 16)]);
   cp.execSync('node tools/build.js', { cwd: ROOT, stdio: 'pipe' });
@@ -367,6 +367,30 @@ try {
       if (!fs.existsSync(p('course/figures', g2 + ext))) miss.push(g2 + ext);
   miss.length ? miss.forEach(m => fail(`course/figures/${m} is referenced but missing`))
               : pass(`${figs.size} figures present as both SVG and PNG`);
+}
+
+/* ==================================================================== 9c */
+group('9c. Behaviour, not appearance');
+
+/* Two artefacts whose deliverable is what they DO. A screenshot test passes on
+   a simulator whose shaft is tumbling and on a builder that teaches the
+   opposite of the handout; these do not. Only run under --full: together they
+   drive four browsers and train nine networks. */
+if (!process.argv.includes('--full')) {
+  note('skipped — pass --full to run the PdM mechanics and Model Builder suites');
+} else {
+  for (const [script, what] of [['pdm-simulator/qa-geometry.js', 'PdM mechanics'],
+                                ['builder/qa-builder.js', 'Model Builder behaviour']]) {
+    try {
+      const out = cp.execSync(`node ${script}`, { cwd: ROOT, stdio: 'pipe', timeout: 1800000 })
+        .toString().replace(/\x1b\[[0-9;]*m/g, '');
+      pass(`${what}: ${(out.match(/^ {2}ok {4}/gm) || []).length} assertions passed`);
+    } catch (e) {
+      fail(`${what} suite failed — run: node ${script}`);
+      ((e.stdout || '').toString().replace(/\x1b\[[0-9;]*m/g, '')
+        .split('\n').filter(l => /FAIL/.test(l)).slice(0, 4)).forEach(l => note(l.trim()));
+    }
+  }
 }
 
 /* ==================================================================== 10 */
